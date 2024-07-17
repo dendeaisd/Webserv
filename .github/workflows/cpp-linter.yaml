@@ -1,6 +1,6 @@
 name: C++ Linter
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   build:
@@ -17,12 +17,3 @@ jobs:
         extensions: 'hpp,cpp,tpp,ipp'
         clangFormatVersion: 16 
         style: 'Google'
-  # - name: reviewdog
-  #    uses: reviewdog/action-setup@v1
-  #    with:
-  #     github_token: ${{ secrets.TOKEN }}
-  #     workdir: '.'
-  #      clang_format_flags: '--style=Google'
-  #      fail_on_error: true
-  #      reporter: github-pr-review
-  #      errorformat: '%f:%l:%c: %m'  
