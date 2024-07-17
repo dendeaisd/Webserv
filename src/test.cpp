@@ -7,3 +7,10 @@ int main() {
   sayHello();
   return 0;
 }
+
+int maiin()
+
+{
+  sayHello();
+  return 0;
+}
