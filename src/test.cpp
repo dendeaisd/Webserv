@@ -1,16 +1,10 @@
 #include <iostream>
 using namespace std;
 
-void sayHello() { cout << "Hello, World!" << endl; }
+void sayHello() {                                                                                                                       cout << "Hello,                    World!" << endl; }
 
-int main() {
-  sayHello();
-  return 0;
-}
-
-int maiin()
-
+int main() 
 {
-  sayHello();
+  sayHello    ();
   return 0;
 }
