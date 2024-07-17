@@ -1,0 +1,19 @@
+name: C++ Linter
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v2
+
+    - name: run clang-format linter
+      uses: DoozyX/clang-format-lint-action@v0.16.2
+      with:
+        source: '.'
+        extensions: 'hpp,cpp,tpp,ipp'
+        clangFormatVersion: 16 
+        style: 'Google'
