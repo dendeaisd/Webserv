@@ -6,5 +6,6 @@ void sayHello() {                                                               
 int main() 
 {
   sayHello    ();
-  return 0;
+  return (0);
 }
+
