@@ -11,18 +11,24 @@ public:
   SocketException(const std::string &message) : std::runtime_error(message) {}
 };
 
-class InvalidAddressException : public SocketException {
+class InvalidAddress : public SocketException {
 public:
-  InvalidAddressException(const std::string &address)
+  InvalidAddress(const std::string &address)
       : SocketException("Invalid address: " + address) {}
 };
 
-class BindFailedException : public SocketException {
+class BindFailed : public SocketException {
 public:
-  BindFailedException(const std::string &message)
+  BindFailed(const std::string &message)
       : SocketException("Bind failed: " + message) {}
+};
+
+class ListenFailed : public SocketException {
+public:
+  ListenFailed(const std::string &message)
+      : SocketException("Listen failed: " + message) {}
 };
 
 } // namespace net
 
-#endif // SOCKET_EXCEPTIONS_H
+#endif
