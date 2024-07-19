@@ -17,6 +17,8 @@ public:
   bool Bind(int port, const std::string &address);
   bool Listen(int backlog);
 
+  int getFd() const;
+
 private:
   int fd_;
   struct sockaddr_in address_;

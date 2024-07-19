@@ -48,3 +48,5 @@ bool Socket::Listen(int backlog) {
 
   return true;
 }
+
+int Socket::getFd() const { return fd_; }

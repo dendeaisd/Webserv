@@ -1,4 +1,4 @@
-NAME        :=  out
+NAME        :=  server_test
 CC          :=  c++
 FLAGS       :=  -Wall -Wextra -Werror -std=c++98
 
