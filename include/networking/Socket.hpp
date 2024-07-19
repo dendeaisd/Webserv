@@ -1,6 +1,7 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
+#include <netinet/in.h>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -18,6 +19,7 @@ public:
 
 private:
   int fd_;
+  struct sockaddr_in address_;
 };
 
 } // namespace net
