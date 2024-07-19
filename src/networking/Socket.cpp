@@ -6,7 +6,10 @@
 #include <iostream>
 #include <unistd.h>
 
-net::Socket::Socket(int domain, int type, int protocol) : fd_(-1), address_{} {
+net::Socket::Socket(int domain, int type, int protocol) : fd_(-1), address_() {
+  //(void)domain;
+  //(void)type;
+  //(void)protocol;
   fd_ = socket(domain, type, protocol);
   if (fd_ == -1) {
     std::cerr << "Error creating socket: " << std::strerror(errno) << std::endl;
