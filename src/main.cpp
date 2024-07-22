@@ -2,42 +2,46 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <cstring>
 #include <iostream>
+#include <string>
 
 #include "../include/networking/Socket.hpp"
 #include "../include/networking/SocketExceptions.hpp"
 
+
 int main() {
-  try {
-    net::Socket serverSocket(AF_INET, SOCK_STREAM, 0);
+    try {
+        net::Socket serverSocket(AF_INET, SOCK_STREAM, 0);
+        serverSocket.Bind(8080, "127.0.0.1");
+        serverSocket.Listen(10);
 
-    serverSocket.Bind(8080, "0.0.0.0");
+        std::cout << "Server is listening on port 8080..." << std::endl;
 
-    serverSocket.Listen(5);
+        while (true) {
+            net::Socket clientSocket = serverSocket.Accept();
+            std::cout << "Accepted a new connection..." << std::endl;
 
-    std::cout << "Server is listening on port 8080..." << std::endl;
+            // Simple HTTP response
+            std::string httpResponse = 
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: text/plain\r\n"
+                "Content-Length: 13\r\n"
+                "\r\n"
+                "Hello, World!";
 
-    // Accept a single client connection (for testing purposes)
-    struct sockaddr_in clientAddress;
-    socklen_t clientAddressLen = sizeof(clientAddress);
-    int clientSocketFd =
-        accept(serverSocket.getFd(), (struct sockaddr *)&clientAddress,
-               &clientAddressLen);
+            // Send HTTP response to the client
+            send(clientSocket.getFd(), httpResponse.c_str(), httpResponse.size(), 0);
 
-    if (clientSocketFd < 0) {
-      std::cerr << "Error accepting connection: " << std::strerror(errno)
-                << std::endl;
-    } else {
-      std::cout << "Client connected!" << std::endl;
-      close(clientSocketFd);  // Close the client socket
+            // Close the client socket
+            clientSocket.~Socket();
+        }
+
+    } catch (const net::socketException &e) {
+        std::cerr << "Socket exception: " << e.what() << std::endl;
+    } catch (const std::exception &e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
     }
 
-  } catch (const net::SocketException &e) {
-    std::cerr << "Socket exception: " << e.what() << std::endl;
-  } catch (const std::exception &e) {
-    std::cerr << "General exception: " << e.what() << std::endl;
-  }
-
-  return 0;
+    return 0;
 }
+

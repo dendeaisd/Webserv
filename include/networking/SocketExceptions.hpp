@@ -6,27 +6,33 @@
 
 namespace net {
 
-class SocketException : public std::runtime_error {
+class socketException : public std::runtime_error {
  public:
-  SocketException(const std::string &message) : std::runtime_error(message) {}
+  socketException(const std::string &message) : std::runtime_error(message) {}
 };
 
-class InvalidAddress : public SocketException {
+class invalidAddress : public socketException {
  public:
-  InvalidAddress(const std::string &address)
-      : SocketException("Invalid address: " + address) {}
+  invalidAddress(const std::string &address)
+      : socketException("Invalid address: " + address) {}
 };
 
-class BindFailed : public SocketException {
+class bindFailed : public socketException {
  public:
-  BindFailed(const std::string &message)
-      : SocketException("Bind failed: " + message) {}
+  bindFailed(const std::string &message)
+      : socketException("Bind failed: " + message) {}
 };
 
-class ListenFailed : public SocketException {
+class listenFailed : public socketException {
  public:
-  ListenFailed(const std::string &message)
-      : SocketException("Listen failed: " + message) {}
+  listenFailed(const std::string &message)
+      : socketException("Listen failed: " + message) {}
+};
+
+class acceptFailed : public socketException {
+ public:
+  acceptFailed(const std::string &message)
+      : socketException("Accept failed: " + message) {}
 };
 
 }  // namespace net
