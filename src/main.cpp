@@ -1,14 +1,10 @@
-
-#include "../include/networking/Socket.hpp"
-#include "../include/networking/SocketExceptions.hpp"
-
-#include "../include/networking/Socket.hpp"
-#include "../include/networking/SocketExceptions.hpp"
 #include <arpa/inet.h>
-#include <cstring>
-#include <iostream>
 #include <sys/types.h>
 #include <unistd.h>
+#include <cstring>
+#include <iostream>
+#include "../include/networking/Socket.hpp"
+#include "../include/networking/SocketExceptions.hpp"
 
 int main() {
   try {
@@ -32,7 +28,7 @@ int main() {
                 << std::endl;
     } else {
       std::cout << "Client connected!" << std::endl;
-      close(clientSocketFd); // Close the client socket
+      close(clientSocketFd);  // Close the client socket
     }
 
   } catch (const net::SocketException &e) {

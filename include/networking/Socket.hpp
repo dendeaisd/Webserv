@@ -2,14 +2,14 @@
 #define SOCKET_H
 
 #include <netinet/in.h>
-#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <string>
 
 namespace net {
 
 class Socket {
-public:
+ public:
   explicit Socket(int domain = AF_INET, int type = SOCK_STREAM,
                   int protocol = 0);
   ~Socket();
@@ -20,12 +20,12 @@ public:
 
   int getFd() const;
 
-private:
+ private:
   int fd_;
   struct sockaddr_in address_;       // Server addess
-  struct sockaddr_in clientAddress_; // Client address
+  struct sockaddr_in clientAddress_;  // Client address
 };
 
-} // namespace net
+}  // namespace net
 
 #endif
