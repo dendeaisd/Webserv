@@ -49,12 +49,12 @@ bool Socket::Listen(int backlog) {
   return true;
 }
 
-Socket Socket::Accept() {
+/*Socket Socket::Accept() {
   int newFd = accept(fd_, reinterpret_cast<struct sockaddr *>(&clientAddress_),
                      sizeof(clientAddress_));
   if (newFd < 0)
     throw SomeError;
   return Socket(newFd);
-}
+}*/
 
 int Socket::getFd() const { return fd_; }
