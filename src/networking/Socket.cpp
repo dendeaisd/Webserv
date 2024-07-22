@@ -23,12 +23,7 @@ Socket::Socket(int domain, int type, int protocol) : fd_(-1), address_() {
   }
   address_.sin_family = domain;
 }
-
-Socket::Socket(int fd) : fd_(fd), address_(), clientAddress_() {}
-
-Socket::~Socket() {
-  if (fd_ != -1) {
-    close(fd_);
+Socket::Socket(int fd) : fd_(fd), address_(), clientAddress_() {} Socket::~Socket() { if (fd_ != -1) { close(fd_);
   }
 }
 
@@ -76,9 +71,9 @@ Socket Socket::Accept() {
 
 int Socket::getFd() const { return fd_; }
 
-/*const sockaddr_in& Socket::getClientAddress() const {
+const sockaddr_in& Socket::getClientAddress() const {
     return clientAddress_;
-}*/
+}
 
 Socket Socket::fromFd(int fd) {
     return Socket(fd);
