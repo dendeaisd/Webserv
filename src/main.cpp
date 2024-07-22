@@ -21,6 +21,15 @@ int main() {
             net::Socket clientSocket = serverSocket.Accept();
             std::cout << "Accepted a new connection..." << std::endl;
 
+            // Test if the client socket is in non-blocking mode
+            char buffer[1];
+            int result = recv(clientSocket.getFd(), buffer, sizeof(buffer), 0);
+            if (result == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+                std::cout << "Client socket is in non-blocking mode." << std::endl;
+            } else {
+                std::cerr << "Client socket is not in non-blocking mode or another error occurred." << std::endl;
+            }
+
             // Simple HTTP response
             std::string httpResponse = 
                 "HTTP/1.1 200 OK\r\n"

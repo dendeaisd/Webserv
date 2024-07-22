@@ -3,9 +3,8 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>
-
 #include <cerrno>
-
+#include <fcntl.h>
 #include "../../include/networking/SocketExceptions.hpp"
 
 using namespace net;
@@ -62,6 +61,16 @@ Socket Socket::Accept() {
                     &addrLen);
   if (newFd < 0)
     throw acceptFailed(std::strerror(errno));
+
+  int flag = fcntl(newFd, F_GETFL, 0);
+  if (flag == -1){
+    close(newFd);
+    throw getFlagsFailed(std::strerror(errno)); 
+  }
+  if (fcntl(newFd, F_SETFL, flag | O_NONBLOCK) == -1) {
+    close(newFd);
+    throw setNonBlockingModeFailed(std::strerror(errno));
+  }
   return Socket(newFd);
 }
 
@@ -72,6 +81,6 @@ int Socket::getFd() const { return fd_; }
 }*/
 
 Socket Socket::fromFd(int fd) {
-    return Socket(fd);  // This call is now unambiguous due to explicit constructor
+    return Socket(fd);
 }
 

@@ -35,6 +35,18 @@ class acceptFailed : public socketException {
       : socketException("Accept failed: " + message) {}
 };
 
+class getFlagsFailed : public socketException {
+ public:
+  getFlagsFailed(const std::string &message)
+      : socketException("Failed to get falgs for socket: " + message) {}
+};
+
+class setNonBlockingModeFailed : public socketException {
+ public:
+  setNonBlockingModeFailed(const std::string &message)
+      : socketException("Failed to set non-blocking mode: " + message) {}
+};
+
 }  // namespace net
 
 #endif
