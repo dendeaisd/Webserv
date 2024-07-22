@@ -1,6 +1,7 @@
 #include "../../include/networking/Socket.hpp"
 
 #include <arpa/inet.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include <cerrno>
@@ -16,6 +17,11 @@ Socket::Socket(int domain, int type, int protocol) : fd_(-1), address_() {
     throw socketException(std::strerror(errno));
   }
 
+  int opt = 1;
+  if (setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+    close(fd_);
+    throw socketException(std::strerror(errno));
+  }
   address_.sin_family = domain;
 }
 
