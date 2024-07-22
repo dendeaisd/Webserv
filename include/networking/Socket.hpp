@@ -22,7 +22,7 @@ class Socket {
 
  private:
   int fd_;
-  struct sockaddr_in address_;       // Server addess
+  struct sockaddr_in address_;
   struct sockaddr_in clientAddress_;  // Client address
 };
 

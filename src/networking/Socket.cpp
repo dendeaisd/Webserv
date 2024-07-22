@@ -1,9 +1,9 @@
-#include "../../include/networking/Socket.hpp"
-#include "../../include/networking/SocketExceptions.hpp"
 #include <arpa/inet.h>
+#include <unistd.h>
 #include <cstring>
 #include <iostream>
-#include <unistd.h>
+#include "../../include/networking/Socket.hpp"
+#include "../../include/networking/SocketExceptions.hpp"
 
 using namespace net;
 
