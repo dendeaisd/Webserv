@@ -2,6 +2,6 @@
 
 int main()
 {
-    TestRequest testRequest;
-    return 0;
+  TestRequest testRequest;
+  return 0;
 }

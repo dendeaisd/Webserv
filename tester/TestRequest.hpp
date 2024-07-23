@@ -2,10 +2,10 @@
 
 class TestRequest : public TestCase {
  private:
-    void testHeader();
-    void testBody() {}
-    void testMethod() {}
-    void testUrl() {}
+  void testHeader();
+  void testBody() {}
+  void testMethod() {}
+  void testUrl() {}
  public:
-    TestRequest();
+  TestRequest();
 };
