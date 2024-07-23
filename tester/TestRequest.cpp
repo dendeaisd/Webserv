@@ -1,8 +1,6 @@
 #include "TestRequest.hpp"
 
-TestRequest::TestRequest() {
-  testHeader();
-}
+TestRequest::TestRequest() { testHeader(); }
 
 void TestRequest::testHeader() {
   assertEqual<int>(1, 2);

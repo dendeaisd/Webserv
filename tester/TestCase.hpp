@@ -21,10 +21,11 @@ class TestCase {
       std::cerr << ", Actual: " << actual << ")" << std::endl;
       TestCase::_failed++;
     }
-}
+  }
  protected:
   static int _passed;
   static int _failed;
+
  private:
   void printSuccess(std::string msg);
   void printFailure(std::string msg);
