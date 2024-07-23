@@ -22,6 +22,7 @@ class TestCase {
       TestCase::_failed++;
     }
   }
+
  protected:
   static int _passed;
   static int _failed;

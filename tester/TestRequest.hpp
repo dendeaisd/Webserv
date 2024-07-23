@@ -6,6 +6,7 @@ class TestRequest : public TestCase {
   void testBody() {}
   void testMethod() {}
   void testUrl() {}
+
  public:
   TestRequest();
 };
