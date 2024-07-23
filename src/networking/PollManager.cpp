@@ -32,7 +32,14 @@ void PollManager::removeSocket(int fd) {
 }
 
 int PollManager::pollSockets(int timeout) {
+  if (fds_.empty()) {
+    throw pollManagerException("fds_ vector is empty");
+  }
   int returnVal = poll(&fds_[0], fds_.size(), timeout);
+
+  if (returnVal == 0) {
+    return 0; // timeout happend
+  }
 
   if (returnVal == -1) {
     throw pollFailed(std::strerror(errno)); 

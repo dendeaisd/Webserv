@@ -5,6 +5,7 @@
 #include <poll.h>
 
 namespace net {
+
 class PollManager {
  public:
   void addSocket(int fd);
