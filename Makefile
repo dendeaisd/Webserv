@@ -1,6 +1,6 @@
 NAME        :=  server_test
 CC          :=  c++
-FLAGS       :=  -Wall -Wextra -Werror -std=c++98
+FLAGS       :=  -Wall -Wextra -Werror -std=c++11
 
 SRC         :=  $(wildcard src/*.cpp) $(wildcard src/networking/*.cpp)
 OBJ         :=  $(SRC:.cpp=.o)

@@ -7,11 +7,16 @@
 
 using namespace net;
 
-void PollManager::addSocket(int fd) {
+void PollManager::addSocket(int fd, short events) {
   if (fd < 0)
     throw invalidFd(fd);
-  
-  struct pollfd poll = {fd, POLLIN, 0};
+
+  for(std::vector<struct pollfd>::iterator it = fds_.begin(); it !=fds_.end(); ++it) {
+    if (it->fd == fd && it->events == events)
+      throw duplicateSocket();
+  }
+
+  struct pollfd poll = {fd, events, 0};
   fds_.push_back(poll);
 }
 

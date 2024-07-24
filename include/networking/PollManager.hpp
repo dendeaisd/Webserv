@@ -8,7 +8,7 @@ namespace net {
 
 class PollManager {
  public:
-  void addSocket(int fd);
+  void addSocket(int fd, short events = POLLIN);
   void removeSocket(int fd);
   int pollSockets(int timeout);
   
