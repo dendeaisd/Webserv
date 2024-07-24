@@ -20,7 +20,8 @@ class Socket {
   Socket Accept();
 
   int getFd() const;
-  const sockaddr_in& getClientAddress() const; 
+  const sockaddr_in& getClientAddress() const;
+  const sockaddr_in& getServerAddress() const; 
 
  private:
   explicit Socket(int fd);

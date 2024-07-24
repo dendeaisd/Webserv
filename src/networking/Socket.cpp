@@ -75,6 +75,10 @@ const sockaddr_in& Socket::getClientAddress() const {
     return clientAddress_;
 }
 
+const sockaddr_in& Socket::getServerAddress() const {
+    return address_;
+}
+
 Socket Socket::fromFd(int fd) {
     return Socket(fd);
 }

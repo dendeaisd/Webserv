@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <algorithm>
 #include <cstddef>
+#include <iostream>
 #include <vector>
 
 using namespace net;
@@ -36,21 +37,35 @@ void PollManager::removeSocket(int fd) {
   throw pollManagerException("File descriptor not found in poll list"); 
 }
 
+
 int PollManager::pollSockets(int timeout) {
-  if (fds_.empty()) {
-    throw pollManagerException("fds_ vector is empty");
-  }
-  int returnVal = poll(&fds_[0], fds_.size(), timeout);
+    if (fds_.empty()) {
+        throw pollManagerException("fds_ vector is empty");
+    }
+    std::cout << "Fds size: " << fds_.size() << std::endl;
+   int numEvents = poll(fds_.data(), fds_.size(), timeout);
 
-  if (returnVal == 0) {
-    return 0; // timeout happend
-  }
-
-  if (returnVal == -1) {
-    throw pollFailed(std::strerror(errno)); 
-  }
-  return returnVal;
+    if (numEvents == -1) {
+        throw pollFailed(std::strerror(errno)); // Throw a pollFailed exception
+    } else if (numEvents == 0) {
+ std::cout << "here1\n" <<std::endl;
+        return 0; // Return 0 to indicate timeout
+    }
+  std::cout << "here\n" <<std::endl;
+    //Check for the actual events that have happened
+    for(pollfd& pfd : fds_) {
+      std::cout << "pollfd: fd=" << pfd.fd << ", revents=" << pfd.revents << std::endl;
+        if(pfd.revents & POLLIN) {
+            std::cout << "POLLIN event ready on fd " << pfd.fd << std::endl;
+        } else if (pfd.revents & POLLOUT) {
+            std::cout << "POLLOUT event ready on fd " << pfd.fd << std::endl;
+        } else if (pfd.revents & POLLERR) {
+            std::cout << "POLLERR event (error) on fd " << pfd.fd << std::endl;
+        }
+    }
+    return numEvents;
 }
+
 
 struct pollfd& PollManager::getPollFd(int idx) {
   if (idx < 0 || static_cast<size_t>(idx) >= fds_.size()) {
