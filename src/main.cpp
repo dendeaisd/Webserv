@@ -296,71 +296,88 @@ bool testPollMultipleSockets() {
   }
 }
 
+// int main() {
+//   bool allTestsPassed = true;
+
+//   if (!testAddValidSocket()) {
+//     std::cout << "testAddValidSocket failed" << std::endl;
+//     allTestsPassed = false;
+//   }
+//   if (!testAddValidSocketWithEvents()) {
+//     std::cout << "testAddValidSocketWithEvents failed" << std::endl;
+//   }
+
+//   if (!testAddInvalidSocket()) {
+//     std::cout << "testAddInvalidSocket failed" << std::endl;
+//     allTestsPassed = false;
+//   }
+
+//   if (!testRemoveValidSocket()) {
+//     std::cout << "testRemoveValidSocket failed" << std::endl;
+//     allTestsPassed = false;
+//   }
+//   if (!testRemoveInvalidSocket()) {
+//     std::cout << "testRemoveInvalidSocket failed" << std::endl;
+//     allTestsPassed = false;
+//   }
+
+//   if (!testPollEmptySockets()) {
+//     std::cout << "testPollEmptySockets failed" << std::endl;
+//     allTestsPassed = false;
+//   }
+
+//   if (!testPollTimeout()) {
+//     std::cout << "testPollTimeout failed" << std::endl;
+//     allTestsPassed = false;
+//   }
+
+//   if (!testGetValidPollFd()) {
+//     std::cout << "testGetValidPollFd failed" << std::endl;
+//     allTestsPassed = false;
+//   }
+//   if (!testGetInvalidPollFd()) {
+//     std::cout << "testGetInvalidPollFd failed" << std::endl;
+//     allTestsPassed = false;
+//   }
+
+//   if (!testAddDuplicateSocket()) {
+//     std::cout << "testAddDuplicateSocket failed" << std::endl;
+//     allTestsPassed = false;
+//   }
+
+//   if (!testAddDuplicateSocketWithDifferentEvents()) {
+//     std::cout << "testAddDuplicateSocketWithDifferentEvents failed"
+//               << std::endl;
+//     allTestsPassed = false;
+//   }
+
+//   if (!testPollMultipleSockets()) {
+//     std::cout << "testPollMultipleSockets failed" << std::endl;
+//     allTestsPassed = false;
+//   }
+
+//   if (allTestsPassed) {
+//     std::cout << "All tests passed!" << std::endl;
+//     return 0;
+//   } else {
+//     std::cout << "Some tests failed." << std::endl;
+//     return 1;
+//   }
+// }
+#include <iostream>
+#include <stdexcept>
+#include "../include/networking/Server.hpp"
+
 int main() {
-  bool allTestsPassed = true;
+    try {
+        Server server(8080);
 
-  if (!testAddValidSocket()) {
-    std::cout << "testAddValidSocket failed" << std::endl;
-    allTestsPassed = false;
-  }
-  if (!testAddValidSocketWithEvents()) {
-    std::cout << "testAddValidSocketWithEvents failed" << std::endl;
-  }
+        // Start the server loop
+        server.run();
+    } catch (const std::exception &e) {
+        std::cerr << "Server error: " << e.what() << std::endl;
+        return 1;
+    }
 
-  if (!testAddInvalidSocket()) {
-    std::cout << "testAddInvalidSocket failed" << std::endl;
-    allTestsPassed = false;
-  }
-
-  if (!testRemoveValidSocket()) {
-    std::cout << "testRemoveValidSocket failed" << std::endl;
-    allTestsPassed = false;
-  }
-  if (!testRemoveInvalidSocket()) {
-    std::cout << "testRemoveInvalidSocket failed" << std::endl;
-    allTestsPassed = false;
-  }
-
-  if (!testPollEmptySockets()) {
-    std::cout << "testPollEmptySockets failed" << std::endl;
-    allTestsPassed = false;
-  }
-
-  if (!testPollTimeout()) {
-    std::cout << "testPollTimeout failed" << std::endl;
-    allTestsPassed = false;
-  }
-
-  if (!testGetValidPollFd()) {
-    std::cout << "testGetValidPollFd failed" << std::endl;
-    allTestsPassed = false;
-  }
-  if (!testGetInvalidPollFd()) {
-    std::cout << "testGetInvalidPollFd failed" << std::endl;
-    allTestsPassed = false;
-  }
-
-  if (!testAddDuplicateSocket()) {
-    std::cout << "testAddDuplicateSocket failed" << std::endl;
-    allTestsPassed = false;
-  }
-
-  if (!testAddDuplicateSocketWithDifferentEvents()) {
-    std::cout << "testAddDuplicateSocketWithDifferentEvents failed"
-              << std::endl;
-    allTestsPassed = false;
-  }
-
-  if (!testPollMultipleSockets()) {
-    std::cout << "testPollMultipleSockets failed" << std::endl;
-    allTestsPassed = false;
-  }
-
-  if (allTestsPassed) {
-    std::cout << "All tests passed!" << std::endl;
     return 0;
-  } else {
-    std::cout << "Some tests failed." << std::endl;
-    return 1;
-  }
 }

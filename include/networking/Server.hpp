@@ -3,6 +3,7 @@
 
 #include <map>
 
+#include "Client.hpp"
 #include "PollManager.hpp"
 #include "Socket.hpp"
 
@@ -10,18 +11,17 @@ namespace net {
 
 class Server {
  public:
-  Server(int port, const std::string& address);
+  Server(int port);
   void run();
 
  private:
-  Socket serverSocket_;
-  PollManager pollManager_;
-  std::map<int, bool> clientConnections_;
-
-  void handleNewConnection();
+  void acceptNewClient();
   void handleClientData(int clientFd);
-  void handlePollError(int fd, const std::string& errorMessage);
-};
 
+  int port_;
+  Socket serverSocket_;
+  net::PollManager pollManager_;
+  std::map<int, Client> clients_;
+};
 }  // namespace net
 #endif
