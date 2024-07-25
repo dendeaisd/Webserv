@@ -99,10 +99,11 @@ bool testPollEmptySockets() {
 bool testPollTimeout() {
   PollManager manager;
   int sockets[2];
-  
+
   // Create a pair of connected sockets
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) == -1) {
-    std::cerr << "Error creating socket pair: " << std::strerror(errno) << std::endl;
+    std::cerr << "Error creating socket pair: " << std::strerror(errno)
+              << std::endl;
     return false;
   }
 
@@ -113,13 +114,13 @@ bool testPollTimeout() {
     close(sockets[1]);
     return numReady == 0;
   } catch (const pollFailed& e) {
-    std::cerr << "Error polling sockets with timeout: " << e.what() << std::endl;
+    std::cerr << "Error polling sockets with timeout: " << e.what()
+              << std::endl;
     close(sockets[0]);
     close(sockets[1]);
     return false;
   }
 }
-
 
 // Test getting a valid pollfd
 bool testGetValidPollFd() {
@@ -205,34 +206,41 @@ bool testPollMultipleSockets() {
   // Create server socket
   Socket server(AF_INET, SOCK_STREAM, 0);
   if (!server.Bind(8080, "127.0.0.1")) {
-    std::cerr << "Error binding server socket: " << strerror(errno) << std::endl;
+    std::cerr << "Error binding server socket: " << strerror(errno)
+              << std::endl;
     return false;
   }
   if (!server.Listen(1)) {
-    std::cerr << "Error listening on server socket: " << strerror(errno) << std::endl;
+    std::cerr << "Error listening on server socket: " << strerror(errno)
+              << std::endl;
     return false;
   }
 
   // Connect the first client socket
   Socket client(AF_INET, SOCK_STREAM, 0);
   sockaddr_in serverAddress = server.getServerAddress();
-  if (connect(client.getFd(), (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
-    std::cerr << "Error connecting client socket: " << strerror(errno) << std::endl;
+  if (connect(client.getFd(), (struct sockaddr*)&serverAddress,
+              sizeof(serverAddress)) == -1) {
+    std::cerr << "Error connecting client socket: " << strerror(errno)
+              << std::endl;
     return false;
   }
 
   // Accept the connection on the server side
   Socket acceptedClient = server.Accept();
   if (acceptedClient.getFd() == -1) {
-    std::cerr << "Error accepting client connection: " << strerror(errno) << std::endl;
+    std::cerr << "Error accepting client connection: " << strerror(errno)
+              << std::endl;
     return false;
   }
 
   // Debugging: Check accepted client socket state
   int error = 0;
   socklen_t len = sizeof(error);
-  if (getsockopt(acceptedClient.getFd(), SOL_SOCKET, SO_ERROR, &error, &len) < 0) {
-    std::cerr << "Error getting socket option (SO_ERROR): " << strerror(errno) << std::endl;
+  if (getsockopt(acceptedClient.getFd(), SOL_SOCKET, SO_ERROR, &error, &len) <
+      0) {
+    std::cerr << "Error getting socket option (SO_ERROR): " << strerror(errno)
+              << std::endl;
     return false;
   } else if (error != 0) {
     std::cerr << "Socket error after accept: " << strerror(error) << std::endl;
@@ -241,7 +249,8 @@ bool testPollMultipleSockets() {
 
   // Send data to the client socket (to make it POLLIN ready)
   const char* message = "Hello from server!";
-  ssize_t bytesSent = send(client.getFd(), message, strlen(message), 0);  // Send from client to server
+  ssize_t bytesSent = send(client.getFd(), message, strlen(message),
+                           0);  // Send from client to server
   if (bytesSent < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
     std::cerr << "Error sending data: " << strerror(errno) << std::endl;
     return false;
@@ -249,26 +258,30 @@ bool testPollMultipleSockets() {
 
   // Add the accepted client socket to the poll manager
   net::PollManager manager;
-  manager.addSocket(acceptedClient.getFd(), POLLIN);  // Monitor for POLLIN event
+  manager.addSocket(acceptedClient.getFd(),
+                    POLLIN);  // Monitor for POLLIN event
 
   // Poll the sockets
   try {
     int numReady = manager.pollSockets(1000);  // Adjust the timeout as needed
     // Check if the number of ready sockets is correct
     if (numReady < 1) {
-      std::cerr << "Expected at least one ready socket, but found " << numReady << std::endl;
+      std::cerr << "Expected at least one ready socket, but found " << numReady
+                << std::endl;
       return false;
     }
 
     pollfd readyFd = manager.getPollFd(0);  // Get the first ready socket
     if ((readyFd.revents & POLLIN) == 0) {
-      std::cerr << "Expected POLLIN event, but found " << readyFd.revents << std::endl;
+      std::cerr << "Expected POLLIN event, but found " << readyFd.revents
+                << std::endl;
       return false;
     }
 
     // Read the data to confirm it's there
     char buffer[256];
-    ssize_t bytesRead = recv(acceptedClient.getFd(), buffer, sizeof(buffer) - 1, 0);
+    ssize_t bytesRead =
+        recv(acceptedClient.getFd(), buffer, sizeof(buffer) - 1, 0);
     if (bytesRead < 0) {
       std::cerr << "Error reading data: " << strerror(errno) << std::endl;
       return false;
@@ -282,7 +295,6 @@ bool testPollMultipleSockets() {
     return false;
   }
 }
-
 
 int main() {
   bool allTestsPassed = true;
