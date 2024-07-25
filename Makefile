@@ -24,11 +24,11 @@ $(NAME): $(OBJ)
 	@$(CC) $(FLAGS) -c $< -o $@
 
 clean:
-	@echo "$(UP)$(BEGIN)$(CUT)$(YELLOW)🧹Cleaning object files...$(RESET)"
+	@printf "$(UP)$(BEGIN)$(CUT)$(YELLOW)🧹Cleaning object files...$(RESET)"
 	@rm -rf $(OBJ)
 
 fclean:
-	@echo "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
+	@printf "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
 	@rm -rf $(OBJ)
 	@rm -f $(NAME)
 

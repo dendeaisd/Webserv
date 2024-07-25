@@ -8,29 +8,29 @@ namespace net {
 
 class pollManagerException : public std::runtime_error {
  public:
-  pollManagerException(const std::string& message) 
+  pollManagerException(const std::string& message)
       : std::runtime_error(message) {}
 };
 
 class duplicateSocket : public pollManagerException {
  public:
-  duplicateSocket ()
-    : pollManagerException("Socket already added to the poll") {} 
+  duplicateSocket()
+      : pollManagerException("Socket already added to the poll") {}
 };
 
 class invalidFd : public pollManagerException {
  public:
-  invalidFd(int fd) 
-      : pollManagerException("Invalid file descriptor: " 
-                             + std::to_string(fd)) {}
+  invalidFd(int fd)
+      : pollManagerException("Invalid file descriptor: " + std::to_string(fd)) {
+  }
 };
 
 class pollFailed : public pollManagerException {
  public:
   pollFailed(const std::string& message)
-      : pollManagerException("Poll failed: " + message) {} 
+      : pollManagerException("Poll failed: " + message) {}
 };
 
-}  // namespace net 
-  
+}  // namespace net
+
 #endif

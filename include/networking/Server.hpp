@@ -1,11 +1,12 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "Socket.hpp"
-#include "PollManager.hpp"
 #include <map>
 
-namespace net{
+#include "PollManager.hpp"
+#include "Socket.hpp"
+
+namespace net {
 
 class Server {
  public:
@@ -16,11 +17,11 @@ class Server {
   Socket serverSocket_;
   PollManager pollManager_;
   std::map<int, bool> clientConnections_;
-  
+
   void handleNewConnection();
   void handleClientData(int clientFd);
-  void handlePollError(int fd, const std::string& errorMessage); 
+  void handlePollError(int fd, const std::string& errorMessage);
 };
 
-}
-#endif 
+}  // namespace net
+#endif

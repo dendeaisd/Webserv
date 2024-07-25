@@ -8,8 +8,7 @@ namespace net {
 
 class socketException : public std::runtime_error {
  public:
-  socketException(const std::string &message) 
-      : std::runtime_error(message) {}
+  socketException(const std::string &message) : std::runtime_error(message) {}
 };
 
 class invalidAddress : public socketException {
