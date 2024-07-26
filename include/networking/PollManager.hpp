@@ -10,16 +10,15 @@ namespace net {
 
 class PollManager {
  public:
-  void addSocket(int fd, short events = POLLIN);
+  PollManager();
+  void addSocket(int fd);
   void removeSocket(int fd);
-  int pollSockets(int timeout);
-  struct pollfd& getPollFd(int idx);
-  std::size_t getPollSize() const;
+  void pollSockets();
+  std::vector<struct pollfd>& getFds();
 
  private:
-  std::vector<struct pollfd> fds_;
+  std::vector<struct pollfd> fds;
 };
-
 }  // namespace net
 
 #endif
