@@ -1,6 +1,7 @@
 #include "../../include/networking/PollManager.hpp"
 
 #include <errno.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -41,6 +42,33 @@ void PollManager::removeSocket(int fd) {
       std::cout << "PollManager::removeSocket: Found socket " << fd
                 << " in list" << std::endl;
 
+      // Check socket state
+      int optval;
+      socklen_t optlen = sizeof(optval);
+      if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &optlen) == 0) {
+        if (optval != 0) {
+          std::cerr << "PollManager::removeSocket: Socket " << fd
+                    << " has pending error: " << strerror(optval) << std::endl;
+        }
+      } else {
+        std::cerr << "PollManager::removeSocket: Error getting socket error"
+                  << std::endl;
+      }
+
+      // Check for pending data
+      int bytesAvailable;
+      if (ioctl(fd, FIONREAD, &bytesAvailable) == 0) {
+        if (bytesAvailable > 0) {
+          std::cerr << "PollManager::removeSocket: Socket " << fd
+                    << " has pending data: " << bytesAvailable << " bytes"
+                    << std::endl;
+        }
+      } else {
+        std::cerr
+            << "PollManager::removeSocket: Error checking for pending data"
+            << std::endl;
+      }
+
       // Close the socket
       close(fd);
 
@@ -50,26 +78,6 @@ void PollManager::removeSocket(int fd) {
       fds_.erase(it);
       std::cout << "PollManager::removeSocket: Socket " << fd
                 << " removed successfully" << std::endl;
-
-      // Check socket state
-      if (fd >= 0) {
-        int optval;
-        socklen_t optlen = sizeof(optval);
-        getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &optlen);
-        if (optval != 0) {
-          std::cerr << "PollManager::removeSocket: Socket " << fd
-                    << " has pending error: " << strerror(optval) << std::endl;
-        }
-
-        // Check for pending data
-        char buffer[1024];
-        int bytesReceived = recv(fd, buffer, 1024, MSG_PEEK);
-        if (bytesReceived > 0) {
-          std::cerr << "PollManager::removeSocket: Socket " << fd
-                    << " has pending data: " << bytesReceived << " bytes"
-                    << std::endl;
-        }
-      }
 
       return;
     }

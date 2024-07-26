@@ -47,26 +47,43 @@ void Server::handleEvents(int numEvents) {
 void Server::acceptNewClient() {
   Socket newClient = serverSocket_.Accept();
   if (newClient.getFd() != -1) {
+    std::cout << "New client connected: " << newClient.getFd() << std::endl;
     pollManager_.addSocket(newClient.getFd(), POLLIN);
     clients_.insert(
         std::make_pair(newClient.getFd(), Client(newClient.getFd())));
-    std::cout << "New client connected: " << newClient.getFd() << std::endl;
+    std::cout << "Client socket: " << newClient.getFd() << " added to poll list"
+              << std::endl;
   } else {
-    throw std::runtime_error("Error accepting new client: " +
-                             std::string(strerror(errno)));
+    throw std::runtime_error("Failed to accept new client");
   }
 }
 
 void Server::handleClientData(int clientFd) {
   std::map<int, Client>::iterator it = clients_.find(clientFd);
   if (it != clients_.end()) {
-    if (it->second.getFd() == clientFd &&
-        isValidSocket(clientFd)) { // Add a check for socket validity
-      if (!it->second.handleData()) {
-        std::cout << "Client disconnected: " << clientFd << std::endl;
+    if (it->second.getFd() == clientFd && isValidSocket(clientFd)) {
+      std::cout << "Handling data for client socket: " << clientFd << std::endl;
+      ssize_t bytesRead = it->second.recvData();
+      if (bytesRead > 0) {
+        std::cout << "Received data from client socket: " << clientFd
+                  << std::endl;
+        // Process the received data
+      } else if (bytesRead == 0) {
+        std::cout << "Client closed connection: " << clientFd << std::endl;
         clients_.erase(it);
         pollManager_.removeSocket(clientFd);
         close(clientFd); // Close the client socket
+        std::cout << "Client socket: " << clientFd << " removed from poll list"
+                  << std::endl;
+      } else {
+        // Handle recv() errors
+        int err = errno;
+        std::cerr << "recv() error: " << strerror(err) << std::endl;
+        clients_.erase(it);
+        pollManager_.removeSocket(clientFd);
+        close(clientFd); // Close the client socket
+        std::cout << "Client socket: " << clientFd << " removed from poll list"
+                  << std::endl;
       }
     } else {
       // Handle invalid socket error
@@ -74,8 +91,25 @@ void Server::handleClientData(int clientFd) {
       clients_.erase(it);
       pollManager_.removeSocket(clientFd);
       close(clientFd); // Close the client socket
+      std::cout << "Client socket: " << clientFd << " removed from poll list"
+                << std::endl;
     }
   }
+}
+
+ssize_t Client::recvData() {
+  char buffer[1024];
+  ssize_t bytesRead = recv(fd_, buffer, sizeof(buffer) - 1, 0);
+  if (bytesRead > 0) {
+    buffer[bytesRead] = '\0';
+    std::cout << "Received data: " << buffer << std::endl;
+  } else if (bytesRead == 0) {
+    std::cout << "Client closed connection" << std::endl;
+  } else {
+    int err = errno;
+    std::cerr << "recv() error: " << strerror(err) << std::endl;
+  }
+  return bytesRead;
 }
 
 bool Server::isValidSocket(int fd) {

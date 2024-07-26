@@ -2,6 +2,7 @@
 
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -11,14 +12,23 @@
 
 using namespace net;
 
-Socket::Socket(int domain, int type, int protocol) {
+Socket::Socket(int domain, int type, int protocol) : address_{} {
   fd_ = socket(domain, type, protocol);
   if (fd_ == -1) {
     throw socketException("Failed to create socket");
   }
+  address_.sin_family = AF_INET;
+  address_.sin_port = 0;                 // Default port
+  address_.sin_addr.s_addr = INADDR_ANY; // Default address
+  setNonBlocking(fd_);
 }
 
-Socket::Socket(int fd) : fd_(fd) {}
+Socket::Socket(int fd) : fd_(fd), address_{} {
+  address_.sin_family = AF_INET;
+  address_.sin_port = 0;                 // Default port
+  address_.sin_addr.s_addr = INADDR_ANY; // Default address
+  setNonBlocking(fd_);
+};
 
 Socket::~Socket() {
   close(fd_);
@@ -27,7 +37,7 @@ Socket::~Socket() {
 bool Socket::Bind(int port, const std::string& address) {
   address_.sin_family = AF_INET;
   address_.sin_port = htons(port);
-  inet_pton(AF_INET, address.c_str(), &(address_.sin_addr));
+  address_.sin_addr.s_addr = htonl(INADDR_ANY);
   if (bind(fd_, (struct sockaddr*)&address_, sizeof(address_)) == -1) {
     throw bindFailed("Failed to bind socket");
   }

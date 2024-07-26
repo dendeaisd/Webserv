@@ -44,6 +44,7 @@ class Client {
     }
     return true;
   };
+  ssize_t recvData();
 
  private:
   int fd_;
