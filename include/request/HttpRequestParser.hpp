@@ -10,6 +10,10 @@
 #include "../FileUpload.hpp"  // path was not correct, i changed it
 #include "HttpRequestEnums.hpp"
 
+// This class seems to have to much responsabilities in my
+// opinion(parsing, storing the parsed data and validation).
+// I would split this into smaller more focused classes
+// so we can have a tool for each specific job
 class HttpRequestParser {
  public:
   HttpRequestParseStatus status;

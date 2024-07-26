@@ -1,5 +1,7 @@
 #include "../../include/request/HttpRequestParser.hpp"  //also wouldn t recognize the path
 
+// Also, instead of returning early and setting a status
+// i would maybe throw different exceptions for different parsing errors
 HttpRequestParser::HttpRequestParser(const std::string request) {
   raw = request;
   status = HttpRequestParseStatus::NOT_PARSED;
