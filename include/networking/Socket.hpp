@@ -13,6 +13,7 @@ namespace net {
 class Socket {
  public:
   explicit Socket(int domain, int type, int protocol);
+  explicit Socket(int fd);
   ~Socket();
 
   static Socket fromFd(int fd);
@@ -25,7 +26,6 @@ class Socket {
   const sockaddr_in& getServerAddress() const;
 
  private:
-  explicit Socket(int fd);
   int fd_;
   struct sockaddr_in address_;
   struct sockaddr_in clientAddress_;

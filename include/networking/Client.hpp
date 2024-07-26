@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <sstream>
 
 class Client {
  public:
@@ -16,24 +17,17 @@ class Client {
   bool handleData() {
     char buffer[1024];
     ssize_t bytesRead = recv(fd_, buffer, sizeof(buffer) - 1, 0);
-    if (bytesRead <= 0) {
-      // Connection closed or error
-      std::cerr << "Client disconnected or error: " << strerror(errno)
-                << std::endl;
-      close(fd_);
-      fd_ = -1;
-      return false;
-    } else {
+    if (bytesRead > 0) {
       buffer[bytesRead] = '\0';
-      std::cout << "Received from client " << fd_ << ": " << buffer
-                << std::endl;
-      // Echo the received data back to the client
-      std::string response =
-          "HTTP/1.1 200 OK\r\nContent-Length: " + std::to_string(bytesRead) +
-          "\r\n\r\n" + std::string(buffer);
+      std::string response = "HTTP/1.1 200 OK\r\nContent-Length: ";
+      response += std::to_string(bytesRead) + "\r\n\r\n" + buffer;
       send(fd_, response.c_str(), response.size(), 0);
-      return true;
+    } else {
+      // handle error or close
+      close(fd_);
+      return false;
     }
+    return true;
   }
 
  private:
