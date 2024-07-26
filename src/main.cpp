@@ -21,8 +21,7 @@ const char* HTTP_RESPONSE =
     "Hello, World!";
 
 int main() {
-  net::Server Server(PORT);
-
-  Server.run();
+  net::Server server(PORT);
+  server.run();
   return 0;
 }
