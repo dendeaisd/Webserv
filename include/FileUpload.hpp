@@ -1,6 +1,4 @@
-#include <string>
 #include <map>
+#include <string>
 
-class FileUpload {
-
-};
+class FileUpload {};
