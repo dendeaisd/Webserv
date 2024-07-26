@@ -12,25 +12,26 @@ namespace net {
 
 class Socket {
  public:
-  explicit Socket(int domain, int type, int protocol);
-  explicit Socket(int fd);
+  Socket(int domain, int type, int protocol);
+  Socket(int fd);
   ~Socket();
 
-  static Socket fromFd(int fd);
   bool Bind(int port, const std::string& address);
   bool Listen(int backlog);
   Socket Accept();
-
   int getFd() const;
   const sockaddr_in& getClientAddress() const;
   const sockaddr_in& getServerAddress() const;
+  static Socket fromFd(int fd);
 
  private:
+  void setNonBlocking(int fd);
+
   int fd_;
-  struct sockaddr_in address_;
-  struct sockaddr_in clientAddress_;
+  sockaddr_in address_;
+  sockaddr_in clientAddress_;
 };
 
-}  // namespace net
+} // namespace net
 
 #endif

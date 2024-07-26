@@ -34,7 +34,7 @@ bool testAddValidSocketWithEvents() {
   int mockSocketFd = 456;
 
   try {
-    manager.addSocket(mockSocketFd, POLLOUT);  // Specify POLLOUT events
+    manager.addSocket(mockSocketFd, POLLOUT); // Specify POLLOUT events
   } catch (const invalidFd& e) {
     std::cerr << "Error adding valid socket with events: " << e.what()
               << std::endl;
@@ -50,7 +50,7 @@ bool testAddInvalidSocket() {
 
   try {
     manager.addSocket(invalidSocketFd);
-    return false;  // It should have thrown an exception
+    return false; // It should have thrown an exception
   } catch (const invalidFd& e) {
     return true;
   }
@@ -59,7 +59,7 @@ bool testAddInvalidSocket() {
 bool testRemoveValidSocket() {
   PollManager manager;
   int mockSocketFd = 456;
-  manager.addSocket(mockSocketFd);  // Add it first to remove it
+  manager.addSocket(mockSocketFd); // Add it first to remove it
 
   try {
     manager.removeSocket(mockSocketFd);
@@ -68,7 +68,7 @@ bool testRemoveValidSocket() {
     return false;
   }
 
-  return manager.getPollSize() == 0;  // Check if size decreased
+  return manager.getPollSize() == 0; // Check if size decreased
 }
 
 bool testRemoveInvalidSocket() {
@@ -77,7 +77,7 @@ bool testRemoveInvalidSocket() {
 
   try {
     manager.removeSocket(notAddedSocketFd);
-    return false;  // It should have thrown an exception
+    return false; // It should have thrown an exception
   } catch (const pollManagerException& e) {
     return true;
   }
@@ -88,7 +88,7 @@ bool testPollEmptySockets() {
   PollManager manager;
 
   try {
-    manager.pollSockets(100);  // Should throw an exception
+    manager.pollSockets(100); // Should throw an exception
     return false;
   } catch (const pollManagerException& e) {
     return true;
@@ -109,8 +109,8 @@ bool testPollTimeout() {
 
   manager.addSocket(sockets[0]);
   try {
-    int numReady = manager.pollSockets(10);  // Small timeout
-    close(sockets[0]);                       // Close the sockets after testing
+    int numReady = manager.pollSockets(10); // Small timeout
+    close(sockets[0]);                      // Close the sockets after testing
     close(sockets[1]);
     return numReady == 0;
   } catch (const pollFailed& e) {
@@ -141,7 +141,7 @@ bool testGetValidPollFd() {
 bool testGetInvalidPollFd() {
   PollManager manager;
   try {
-    manager.getPollFd(0);  // Should throw an exception
+    manager.getPollFd(0); // Should throw an exception
     return false;
   } catch (const pollManagerException& e) {
     return true;
@@ -156,25 +156,25 @@ bool testAddDuplicateSocket() {
   int mockSocketFd = 1024;
 
   std::cout << "Adding socket for the first time with POLLIN: " << mockSocketFd
-            << std::endl;           // Debug
-  manager.addSocket(mockSocketFd);  // Use default events (POLLIN)
+            << std::endl;          // Debug
+  manager.addSocket(mockSocketFd); // Use default events (POLLIN)
 
   std::cout << "Attempting to add the same socket again with POLLIN: "
-            << mockSocketFd << std::endl;  // Debug
+            << mockSocketFd << std::endl; // Debug
 
   try {
-    manager.addSocket(mockSocketFd);  // Should throw duplicateSocket exception
+    manager.addSocket(mockSocketFd); // Should throw duplicateSocket exception
 
     std::cerr << "Error: Adding duplicate socket with same events did NOT "
                  "throw an exception!"
               << std::endl;
     return false;
-  } catch (const duplicateSocket& e) {  // Catch the specific exception
+  } catch (const duplicateSocket& e) { // Catch the specific exception
     std::cout << "Caught expected duplicateSocket exception: " << e.what()
               << std::endl;
     return true;
   } catch (const pollManagerException&
-               e) {  // Catch any other unexpected PollManager exception
+               e) { // Catch any other unexpected PollManager exception
     std::cerr << "Error: Caught unexpected exception: " << e.what()
               << std::endl;
     return false;
@@ -187,10 +187,10 @@ bool testAddDuplicateSocketWithDifferentEvents() {
   PollManager manager;
   int mockSocketFd = 1024;
 
-  manager.addSocket(mockSocketFd, POLLIN);  // Add with POLLIN
+  manager.addSocket(mockSocketFd, POLLIN); // Add with POLLIN
 
   try {
-    manager.addSocket(mockSocketFd, POLLOUT);  // Add again with POLLOUT
+    manager.addSocket(mockSocketFd, POLLOUT); // Add again with POLLOUT
   } catch (const pollManagerException& e) {
     std::cerr << "Error: Adding duplicate socket with different events threw "
                  "an exception: "
@@ -198,7 +198,7 @@ bool testAddDuplicateSocketWithDifferentEvents() {
     return false;
   }
 
-  return manager.getPollSize() == 2;  // Check if both were added
+  return manager.getPollSize() == 2; // Check if both were added
 }
 
 // Test pollSockets with multiple sockets, some ready and some not
@@ -250,7 +250,7 @@ bool testPollMultipleSockets() {
   // Send data to the client socket (to make it POLLIN ready)
   const char* message = "Hello from server!";
   ssize_t bytesSent = send(client.getFd(), message, strlen(message),
-                           0);  // Send from client to server
+                           0); // Send from client to server
   if (bytesSent < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
     std::cerr << "Error sending data: " << strerror(errno) << std::endl;
     return false;
@@ -259,11 +259,11 @@ bool testPollMultipleSockets() {
   // Add the accepted client socket to the poll manager
   net::PollManager manager;
   manager.addSocket(acceptedClient.getFd(),
-                    POLLIN);  // Monitor for POLLIN event
+                    POLLIN); // Monitor for POLLIN event
 
   // Poll the sockets
   try {
-    int numReady = manager.pollSockets(1000);  // Adjust the timeout as needed
+    int numReady = manager.pollSockets(1000); // Adjust the timeout as needed
     // Check if the number of ready sockets is correct
     if (numReady < 1) {
       std::cerr << "Expected at least one ready socket, but found " << numReady
@@ -271,7 +271,7 @@ bool testPollMultipleSockets() {
       return false;
     }
 
-    pollfd readyFd = manager.getPollFd(0);  // Get the first ready socket
+    pollfd readyFd = manager.getPollFd(0); // Get the first ready socket
     if ((readyFd.revents & POLLIN) == 0) {
       std::cerr << "Expected POLLIN event, but found " << readyFd.revents
                 << std::endl;
@@ -366,18 +366,19 @@ bool testPollMultipleSockets() {
 // }
 #include <iostream>
 #include <stdexcept>
+
 #include "../include/networking/Server.hpp"
 
 int main() {
-    try {
-        Server server(8080);
+  try {
+    Server server(8080);
 
-        // Start the server loop
-        server.run();
-    } catch (const std::exception &e) {
-        std::cerr << "Server error: " << e.what() << std::endl;
-        return 1;
-    }
+    // Start the server loop
+    server.run();
+  } catch (const std::exception& e) {
+    std::cerr << "Server error: " << e.what() << std::endl;
+    return 1;
+  }
 
-    return 0;
+  return 0;
 }

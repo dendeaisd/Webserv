@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include <algorithm>
 #include <cerrno>
@@ -14,11 +15,13 @@
 using namespace net;
 
 void PollManager::addSocket(int fd, short events) {
-  if (fd < 0) throw invalidFd(fd);
+  if (fd < 0)
+    throw invalidFd(fd);
 
-  for (std::vector<struct pollfd>::iterator it = fds_.begin(); it != fds_.end();
-       ++it) {
-    if (it->fd == fd && it->events == events) throw duplicateSocket();
+  for (std::vector<struct pollfd>::const_iterator it = fds_.begin();
+       it != fds_.end(); ++it) {
+    if (it->fd == fd && it->events == events)
+      throw duplicateSocket();
   }
 
   struct pollfd poll = {fd, events, 0};
@@ -26,17 +29,54 @@ void PollManager::addSocket(int fd, short events) {
 }
 
 void PollManager::removeSocket(int fd) {
-  if (fd < 0) throw invalidFd(fd);
+  if (fd < 0) {
+    throw invalidFd(fd);
+  }
+
+  std::cout << "PollManager::removeSocket: Removing socket " << fd << std::endl;
 
   for (std::vector<struct pollfd>::iterator it = fds_.begin(); it != fds_.end();
        ++it) {
     if (it->fd == fd) {
-      std::iter_swap(it, fds_.end() - 1);
-      fds_.pop_back();
+      std::cout << "PollManager::removeSocket: Found socket " << fd
+                << " in list" << std::endl;
+
+      // Close the socket
+      close(fd);
+
+      // Set the socket to an invalid value
+      it->fd = -1;
+
+      fds_.erase(it);
+      std::cout << "PollManager::removeSocket: Socket " << fd
+                << " removed successfully" << std::endl;
+
+      // Check socket state
+      if (fd >= 0) {
+        int optval;
+        socklen_t optlen = sizeof(optval);
+        getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &optlen);
+        if (optval != 0) {
+          std::cerr << "PollManager::removeSocket: Socket " << fd
+                    << " has pending error: " << strerror(optval) << std::endl;
+        }
+
+        // Check for pending data
+        char buffer[1024];
+        int bytesReceived = recv(fd, buffer, 1024, MSG_PEEK);
+        if (bytesReceived > 0) {
+          std::cerr << "PollManager::removeSocket: Socket " << fd
+                    << " has pending data: " << bytesReceived << " bytes"
+                    << std::endl;
+        }
+      }
+
       return;
     }
   }
 
+  std::cerr << "PollManager::removeSocket: Error: File descriptor " << fd
+            << " not found in poll list" << std::endl;
   throw pollManagerException("File descriptor not found in poll list");
 }
 
@@ -49,7 +89,8 @@ int PollManager::pollSockets(int timeout) {
   if (numEvents == -1) {
     throw pollFailed(std::strerror(errno));
   } else if (numEvents == 0) {
-    return 0;  // Return 0 to indicate timeout
+    std::cout << "PollManager::pollSockets: Timeout" << std::endl;
+    return 0; // Return 0 to indicate timeout
   }
 
   std::vector<int> socketsToRemove;
@@ -80,7 +121,9 @@ int PollManager::pollSockets(int timeout) {
 
   // Remove closed or errored sockets
   for (int fd : socketsToRemove) {
-    removeSocket(fd);
+    if (fd >= 0) {
+      removeSocket(fd);
+    }
   }
 
   return numEvents;
@@ -94,4 +137,6 @@ struct pollfd& PollManager::getPollFd(int idx) {
   return fds_[idx];
 }
 
-size_t PollManager::getPollSize() const { return fds_.size(); }
+size_t PollManager::getPollSize() const {
+  return fds_.size();
+}

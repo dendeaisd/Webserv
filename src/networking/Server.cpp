@@ -25,14 +25,21 @@ void Server::run() {
   while (true) {
     int numEvents = pollManager_.pollSockets(1000);
     if (numEvents > 0) {
-      for (size_t i = 0; i < pollManager_.getPollSize(); ++i) {
-        struct pollfd pfd = pollManager_.getPollFd(i);
-        if (pfd.fd == serverSocket_.getFd() && (pfd.revents & POLLIN)) {
-          acceptNewClient();
-        } else if (pfd.revents & POLLIN) {
-          handleClientData(pfd.fd);
-        }
-      }
+      handleEvents(numEvents);
+    }
+  }
+}
+
+void Server::handleEvents(int numEvents) {
+  for (size_t i = 0; i < pollManager_.getPollSize(); ++i) {
+    struct pollfd pfd = pollManager_.getPollFd(i);
+    if (pfd.revents & POLLERR || pfd.revents & POLLHUP ||
+        pfd.revents & POLLNVAL) {
+      handleSocketError(pfd.fd);
+    } else if (pfd.fd == serverSocket_.getFd() && (pfd.revents & POLLIN)) {
+      acceptNewClient();
+    } else if (pfd.revents & POLLIN) {
+      handleClientData(pfd.fd);
     }
   }
 }
@@ -41,20 +48,48 @@ void Server::acceptNewClient() {
   Socket newClient = serverSocket_.Accept();
   if (newClient.getFd() != -1) {
     pollManager_.addSocket(newClient.getFd(), POLLIN);
-    clients_.insert(std::make_pair(newClient.getFd(), newClient.getFd()));
+    clients_.insert(
+        std::make_pair(newClient.getFd(), Client(newClient.getFd())));
     std::cout << "New client connected: " << newClient.getFd() << std::endl;
   } else {
-    std::cerr << "Error accepting new client: " << strerror(errno) << std::endl;
+    throw std::runtime_error("Error accepting new client: " +
+                             std::string(strerror(errno)));
   }
 }
 
 void Server::handleClientData(int clientFd) {
   std::map<int, Client>::iterator it = clients_.find(clientFd);
   if (it != clients_.end()) {
-    if (!it->second.handleData()) {
-      std::cout << "Client disconnected: " << clientFd << std::endl;
+    if (it->second.getFd() == clientFd &&
+        isValidSocket(clientFd)) { // Add a check for socket validity
+      if (!it->second.handleData()) {
+        std::cout << "Client disconnected: " << clientFd << std::endl;
+        clients_.erase(it);
+        pollManager_.removeSocket(clientFd);
+        close(clientFd); // Close the client socket
+      }
+    } else {
+      // Handle invalid socket error
+      std::cerr << "Invalid socket: " << clientFd << std::endl;
       clients_.erase(it);
       pollManager_.removeSocket(clientFd);
+      close(clientFd); // Close the client socket
     }
+  }
+}
+
+bool Server::isValidSocket(int fd) {
+  return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
+}
+
+void Server::handleSocketError(int fd) {
+  if (isValidSocket(fd)) {
+    std::cout << "Socket error: " << fd << std::endl;
+    clients_.erase(fd);
+    pollManager_.removeSocket(fd);
+    close(fd); // Close the socket
+  } else {
+    // Handle invalid socket error
+    std::cerr << "Invalid socket: " << fd << std::endl;
   }
 }

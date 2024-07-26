@@ -8,45 +8,52 @@ namespace net {
 
 class socketException : public std::runtime_error {
  public:
-  socketException(const std::string &message) : std::runtime_error(message) {}
+  socketException(const std::string& message) : std::runtime_error(message) {}
 };
 
 class invalidAddress : public socketException {
  public:
-  invalidAddress(const std::string &address)
+  invalidAddress(const std::string& address)
       : socketException("Invalid address: " + address) {}
 };
 
 class bindFailed : public socketException {
  public:
-  bindFailed(const std::string &message)
+  bindFailed(const std::string& message)
       : socketException("Bind failed: " + message) {}
 };
 
 class listenFailed : public socketException {
  public:
-  listenFailed(const std::string &message)
+  listenFailed(const std::string& message)
       : socketException("Listen failed: " + message) {}
 };
 
 class acceptFailed : public socketException {
  public:
-  acceptFailed(const std::string &message)
+  acceptFailed(const std::string& message)
       : socketException("Accept failed: " + message) {}
 };
 
 class getFlagsFailed : public socketException {
  public:
-  getFlagsFailed(const std::string &message)
+  getFlagsFailed(const std::string& message)
       : socketException("Failed to get falgs for socket: " + message) {}
 };
 
 class setNonBlockingModeFailed : public socketException {
  public:
-  setNonBlockingModeFailed(const std::string &message)
+  setNonBlockingModeFailed(const std::string& message)
       : socketException("Failed to set non-blocking mode: " + message) {}
 };
 
-}  // namespace net
+// class setNonBlockingModeFailed : public std::runtime_error {
+// public:
+//     setNonBlockingModeFailed(const std::string& message)
+//         : std::runtime_error("Failed to set non-blocking mode: " + message)
+//         {}
+// };
+
+} // namespace net
 
 #endif

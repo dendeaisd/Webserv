@@ -17,11 +17,14 @@ class Server {
  private:
   void acceptNewClient();
   void handleClientData(int clientFd);
+  void handleEvents(int numEvents);
+  void handleSocketError(int fd);
+  bool isValidSocket(int fd);
 
   int port_;
   Socket serverSocket_;
   net::PollManager pollManager_;
   std::map<int, Client> clients_;
 };
-}  // namespace net
+} // namespace net
 #endif
