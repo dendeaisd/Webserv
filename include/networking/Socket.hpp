@@ -15,10 +15,10 @@ class Socket {
   Socket(int domain, int type, int protocol);
   ~Socket();
 
-  bool bindSocket(int port);
-  bool listenSocket(int backlog);
+  void bindSocket(int port);
+  void listenSocket(int backlog);
   int acceptConnection(struct sockaddr_in *address, socklen_t *addrlen);
-  int getFd() const;
+  void setSocketOption(int level, int optname, int optval);
   int readData(int sockfd, char *buffer, size_t size);
   int sendData(int sockfd, const char *buffer, size_t size);
   void setNonBlocking();

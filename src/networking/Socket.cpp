@@ -12,71 +12,79 @@
 
 using namespace net;
 
-Socket::Socket(int domain, int type, int protocol) : address_{} {
-  fd_ = socket(domain, type, protocol);
-  if (fd_ == -1) {
-    throw socketException("Failed to create socket");
-  }
-  address_.sin_family = AF_INET;
-  address_.sin_port = 0;                  // Default port
-  address_.sin_addr.s_addr = INADDR_ANY;  // Default address
-  setNonBlocking(fd_);
-}
-
-Socket::Socket(int fd) : fd_(fd), address_{} {
-  address_.sin_family = AF_INET;
-  address_.sin_port = 0;                  // Default port
-  address_.sin_addr.s_addr = INADDR_ANY;  // Default address
-  setNonBlocking(fd_);
-};
-
-Socket::~Socket() { close(fd_); }
-
-bool Socket::Bind(int port, const std::string& address) {
-  address_.sin_family = AF_INET;
-  address_.sin_port = htons(port);
-  address_.sin_addr.s_addr = htonl(INADDR_ANY);
-  if (bind(fd_, (struct sockaddr*)&address_, sizeof(address_)) == -1) {
-    throw bindFailed("Failed to bind socket");
-  }
-  return true;
-}
-
-bool Socket::Listen(int backlog) {
-  if (listen(fd_, backlog) == -1) {
-    throw listenFailed("Failed to listen on socket");
-  }
-  return true;
-}
-
-Socket Socket::Accept() {
-  sockaddr_in clientAddress;
-  socklen_t clientAddressLength = sizeof(clientAddress);
-  int clientFd =
-      accept(fd_, (struct sockaddr*)&clientAddress, &clientAddressLength);
-  if (clientFd == -1) {
-    throw acceptFailed("Failed to accept connection");
-  }
-  Socket clientSocket(clientFd);
-  clientSocket.clientAddress_ = clientAddress;
-  return clientSocket;
-}
-
-int Socket::getFd() const { return fd_; }
-
-const sockaddr_in& Socket::getClientAddress() const { return clientAddress_; }
-
-const sockaddr_in& Socket::getServerAddress() const { return address_; }
-
-Socket Socket::fromFd(int fd) { return Socket(fd); }
-
-void Socket::setNonBlocking(int fd) {
-  int flags = fcntl(fd, F_GETFL, 0);
-  if (flags == -1) {
-    throw getFlagsFailed("Failed to get socket flags");
-  }
-  flags |= O_NONBLOCK;
-  if (fcntl(fd, F_SETFL, flags) == -1) {
-    throw setNonBlockingModeFailed("Failed to set non-blocking mode");
+Socket::Socket(int domain, int type, int protocol) {
+  if ((sockFd_ = socket(domain, type, protocol)) == -1) {
+    perror("Failed to create socket");
+    exit(EXIT_FAILURE);
   }
 }
+
+Socket::~Socket() { close(sockFd_); }
+
+void Socket::setSocketOption(int level, int optname, int optval) {
+  if (setsockopt(sockFd_, level, optname, (char *)&optval, sizeof(optval)) <
+      0) {
+    perror("setsockopt");
+    close(sockFd_);
+    exit(EXIT_FAILURE);
+  }
+}
+
+void Socket::bindSocket(int port) {
+  struct sockaddr_in address;
+  address.sin_family = AF_INET;
+  address.sin_addr.s_addr = INADDR_ANY;
+  address.sin_port = htons(port);
+
+  if (bind(sockFd_, (struct sockaddr *)&address, sizeof(address)) < 0) {
+    perror("bind failed");
+    close(sockFd_);
+    exit(EXIT_FAILURE);
+  }
+}
+
+void Socket::listenSocket(int backlog) {
+  if (listen(sockFd_, backlog) < 0) {
+    perror("listen");
+    close(sockFd_);
+    exit(EXIT_FAILURE);
+  }
+}
+
+int Socket::acceptConnection(struct sockaddr_in *address, socklen_t *addrlen) {
+  int new_socket;
+  if ((new_socket = accept(sockFd_, (struct sockaddr *)address, addrlen)) < 0) {
+    perror("accept");
+  }
+  return new_socket;
+}
+
+int Socket::readData(int sockFd_, char *buffer, size_t size) {
+  int bytes_read = read(sockFd_, buffer, size);
+  if (bytes_read < 0) {
+    perror("read");
+  }
+  return bytes_read;
+}
+
+int Socket::sendData(int sockFd_, const char *buffer, size_t size) {
+  int bytes_sent = send(sockFd_, buffer, size, 0);
+  if (bytes_sent < 0) {
+    perror("send");
+  }
+  return bytes_sent;
+}
+
+void Socket::setNonBlocking() {
+  int flags = fcntl(sockFd_, F_GETFL, 0);
+  if (flags < 0) {
+    perror("fcntl(F_GETFL)");
+    exit(EXIT_FAILURE);
+  }
+  if (fcntl(sockFd_, F_SETFL, flags | O_NONBLOCK) < 0) {
+    perror("fcntl(F_SETFL)");
+    exit(EXIT_FAILURE);
+  }
+}
+
+int Socket::getSocketFd() const { return sockFd_; }
