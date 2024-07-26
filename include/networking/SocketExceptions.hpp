@@ -54,6 +54,6 @@ class setNonBlockingModeFailed : public socketException {
 //         {}
 // };
 
-} // namespace net
+}  // namespace net
 
 #endif

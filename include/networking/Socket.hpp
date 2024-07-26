@@ -32,6 +32,6 @@ class Socket {
   sockaddr_in clientAddress_;
 };
 
-} // namespace net
+}  // namespace net
 
 #endif

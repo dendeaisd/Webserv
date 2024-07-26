@@ -364,21 +364,142 @@ bool testPollMultipleSockets() {
 //     return 1;
 //   }
 // }
-#include <iostream>
-#include <stdexcept>
+// #include <iostream>
+// #include <stdexcept>
+//
+// #include "../include/networking/Server.hpp"
+//
+// int main() {
+//   try {
+//     Server server(8080);
+//
+//     // Start the server loop
+//     server.run();
+//   } catch (const std::exception& e) {
+//     std::cerr << "Server error: " << e.what() << std::endl;
+//     return 1;
+//   }
+//
+//   return 0;
+// }
 
-#include "../include/networking/Server.hpp"
+#include <netinet/in.h>
+#include <poll.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+
+#define PORT 8080
+#define MAX_CLIENTS 10
+#define BUFFER_SIZE 1024
+
+const char* HTTP_RESPONSE =
+    "HTTP/1.1 200 OK\r\n"
+    "Content-Type: text/html\r\n"
+    "Content-Length: 13\r\n"
+    "\r\n"
+    "Hello, World!";
 
 int main() {
-  try {
-    Server server(8080);
+  int server_fd, new_socket, opt = 1;
+  struct sockaddr_in address;
+  int addrlen = sizeof(address);
+  char buffer[BUFFER_SIZE];
+  struct pollfd fds[MAX_CLIENTS + 1];
+  int nfds = 1; // number of file descriptors
 
-    // Start the server loop
-    server.run();
-  } catch (const std::exception& e) {
-    std::cerr << "Server error: " << e.what() << std::endl;
-    return 1;
+  // Create socket
+  if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+    perror("socket failed");
+    exit(EXIT_FAILURE);
   }
 
+  // Set socket options
+  if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt,
+                 sizeof(opt)) < 0) {
+    perror("setsockopt");
+    close(server_fd);
+    exit(EXIT_FAILURE);
+  }
+
+  // Bind socket to port
+  address.sin_family = AF_INET;
+  address.sin_addr.s_addr = INADDR_ANY;
+  address.sin_port = htons(PORT);
+  if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
+    perror("bind failed");
+    close(server_fd);
+    exit(EXIT_FAILURE);
+  }
+
+  // Start listening
+  if (listen(server_fd, 3) < 0) {
+    perror("listen");
+    close(server_fd);
+    exit(EXIT_FAILURE);
+  }
+
+  // Initialize pollfd structure
+  fds[0].fd = server_fd;
+  fds[0].events = POLLIN;
+
+  while (true) {
+    int poll_count = poll(fds, nfds, -1);
+
+    if (poll_count < 0) {
+      perror("poll error");
+      close(server_fd);
+      exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < nfds; i++) {
+      if (fds[i].revents & POLLIN) {
+        if (fds[i].fd == server_fd) {
+          // New incoming connection
+          if ((new_socket = accept(server_fd, (struct sockaddr*)&address,
+                                   (socklen_t*)&addrlen)) < 0) {
+            perror("accept");
+            continue;
+          }
+
+          // Add new socket to pollfd array
+          if (nfds < MAX_CLIENTS + 1) {
+            fds[nfds].fd = new_socket;
+            fds[nfds].events = POLLIN;
+            nfds++;
+          } else {
+            std::cerr << "Too many clients, rejecting connection." << std::endl;
+            close(new_socket);
+          }
+        } else {
+          // Data received from client
+          int client_fd = fds[i].fd;
+          int bytes_read = read(client_fd, buffer, BUFFER_SIZE);
+
+          if (bytes_read <= 0) {
+            // Connection closed or error
+            close(client_fd);
+            fds[i] = fds[nfds - 1]; // Replace current with last
+            nfds--;
+          } else {
+            // Respond with HTTP response
+            buffer[bytes_read] = '\0';
+            std::cout << "Received: " << buffer << std::endl;
+            send(client_fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
+            close(client_fd);
+            fds[i] = fds[nfds - 1]; // Replace current with last
+            nfds--;
+          }
+        }
+      }
+    }
+  }
+
+  // Close server socket
+  close(server_fd);
   return 0;
 }

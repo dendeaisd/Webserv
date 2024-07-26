@@ -18,21 +18,19 @@ Socket::Socket(int domain, int type, int protocol) : address_{} {
     throw socketException("Failed to create socket");
   }
   address_.sin_family = AF_INET;
-  address_.sin_port = 0;                 // Default port
-  address_.sin_addr.s_addr = INADDR_ANY; // Default address
+  address_.sin_port = 0;                  // Default port
+  address_.sin_addr.s_addr = INADDR_ANY;  // Default address
   setNonBlocking(fd_);
 }
 
 Socket::Socket(int fd) : fd_(fd), address_{} {
   address_.sin_family = AF_INET;
-  address_.sin_port = 0;                 // Default port
-  address_.sin_addr.s_addr = INADDR_ANY; // Default address
+  address_.sin_port = 0;                  // Default port
+  address_.sin_addr.s_addr = INADDR_ANY;  // Default address
   setNonBlocking(fd_);
 };
 
-Socket::~Socket() {
-  close(fd_);
-}
+Socket::~Socket() { close(fd_); }
 
 bool Socket::Bind(int port, const std::string& address) {
   address_.sin_family = AF_INET;
@@ -64,21 +62,13 @@ Socket Socket::Accept() {
   return clientSocket;
 }
 
-int Socket::getFd() const {
-  return fd_;
-}
+int Socket::getFd() const { return fd_; }
 
-const sockaddr_in& Socket::getClientAddress() const {
-  return clientAddress_;
-}
+const sockaddr_in& Socket::getClientAddress() const { return clientAddress_; }
 
-const sockaddr_in& Socket::getServerAddress() const {
-  return address_;
-}
+const sockaddr_in& Socket::getServerAddress() const { return address_; }
 
-Socket Socket::fromFd(int fd) {
-  return Socket(fd);
-}
+Socket Socket::fromFd(int fd) { return Socket(fd); }
 
 void Socket::setNonBlocking(int fd) {
   int flags = fcntl(fd, F_GETFL, 0);

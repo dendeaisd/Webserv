@@ -72,7 +72,7 @@ void Server::handleClientData(int clientFd) {
         std::cout << "Client closed connection: " << clientFd << std::endl;
         clients_.erase(it);
         pollManager_.removeSocket(clientFd);
-        close(clientFd); // Close the client socket
+        close(clientFd);  // Close the client socket
         std::cout << "Client socket: " << clientFd << " removed from poll list"
                   << std::endl;
       } else {
@@ -81,7 +81,7 @@ void Server::handleClientData(int clientFd) {
         std::cerr << "recv() error: " << strerror(err) << std::endl;
         clients_.erase(it);
         pollManager_.removeSocket(clientFd);
-        close(clientFd); // Close the client socket
+        close(clientFd);  // Close the client socket
         std::cout << "Client socket: " << clientFd << " removed from poll list"
                   << std::endl;
       }
@@ -90,7 +90,7 @@ void Server::handleClientData(int clientFd) {
       std::cerr << "Invalid socket: " << clientFd << std::endl;
       clients_.erase(it);
       pollManager_.removeSocket(clientFd);
-      close(clientFd); // Close the client socket
+      close(clientFd);  // Close the client socket
       std::cout << "Client socket: " << clientFd << " removed from poll list"
                 << std::endl;
     }
@@ -121,7 +121,7 @@ void Server::handleSocketError(int fd) {
     std::cout << "Socket error: " << fd << std::endl;
     clients_.erase(fd);
     pollManager_.removeSocket(fd);
-    close(fd); // Close the socket
+    close(fd);  // Close the socket
   } else {
     // Handle invalid socket error
     std::cerr << "Invalid socket: " << fd << std::endl;

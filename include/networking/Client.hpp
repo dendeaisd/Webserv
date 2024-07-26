@@ -12,9 +12,7 @@ class Client {
  public:
   Client(int fd) : fd_(fd) {}
 
-  int getFd() const {
-    return fd_;
-  }
+  int getFd() const { return fd_; }
 
   bool handleData() {
     char buffer[1024];
@@ -34,7 +32,7 @@ class Client {
       if (err == EAGAIN || err == EINTR) {
         // Handle temporary errors, e.g., retry or wait
         std::cerr << "recv() error: " << strerror(err) << std::endl;
-        return true; // Retry or wait
+        return true;  // Retry or wait
       } else {
         // Handle fatal errors
         std::cerr << "recv() error: " << strerror(err) << std::endl;
@@ -57,4 +55,4 @@ class Client {
   }
 };
 
-#endif // CLIENT_H
+#endif  // CLIENT_H

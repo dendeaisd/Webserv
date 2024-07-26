@@ -26,5 +26,5 @@ class Server {
   net::PollManager pollManager_;
   std::map<int, Client> clients_;
 };
-} // namespace net
+}  // namespace net
 #endif

@@ -31,6 +31,6 @@ class pollFailed : public pollManagerException {
       : pollManagerException("Poll failed: " + message) {}
 };
 
-} // namespace net
+}  // namespace net
 
 #endif

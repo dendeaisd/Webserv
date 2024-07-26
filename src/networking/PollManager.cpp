@@ -16,13 +16,10 @@
 using namespace net;
 
 void PollManager::addSocket(int fd, short events) {
-  if (fd < 0)
-    throw invalidFd(fd);
-
+  if (fd < 0) throw invalidFd(fd);
   for (std::vector<struct pollfd>::const_iterator it = fds_.begin();
        it != fds_.end(); ++it) {
-    if (it->fd == fd && it->events == events)
-      throw duplicateSocket();
+    if (it->fd == fd && it->events == events) throw duplicateSocket();
   }
 
   struct pollfd poll = {fd, events, 0};
@@ -98,7 +95,7 @@ int PollManager::pollSockets(int timeout) {
     throw pollFailed(std::strerror(errno));
   } else if (numEvents == 0) {
     std::cout << "PollManager::pollSockets: Timeout" << std::endl;
-    return 0; // Return 0 to indicate timeout
+    return 0;  // Return 0 to indicate timeout
   }
 
   std::vector<int> socketsToRemove;
@@ -145,6 +142,4 @@ struct pollfd& PollManager::getPollFd(int idx) {
   return fds_[idx];
 }
 
-size_t PollManager::getPollSize() const {
-  return fds_.size();
-}
+size_t PollManager::getPollSize() const { return fds_.size(); }

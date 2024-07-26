@@ -20,6 +20,6 @@ class PollManager {
   std::vector<struct pollfd> fds_;
 };
 
-} // namespace net
+}  // namespace net
 
 #endif
