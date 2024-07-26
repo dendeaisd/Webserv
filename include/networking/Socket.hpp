@@ -13,23 +13,19 @@ namespace net {
 class Socket {
  public:
   Socket(int domain, int type, int protocol);
-  Socket(int fd);
   ~Socket();
 
-  bool Bind(int port, const std::string& address);
-  bool Listen(int backlog);
-  Socket Accept();
+  bool bindSocket(int port);
+  bool listenSocket(int backlog);
+  int acceptConnection(struct sockaddr_in *address, socklen_t *addrlen);
   int getFd() const;
-  const sockaddr_in& getClientAddress() const;
-  const sockaddr_in& getServerAddress() const;
-  static Socket fromFd(int fd);
+  int readData(int sockfd, char *buffer, size_t size);
+  int sendData(int sockfd, const char *buffer, size_t size);
+  void setNonBlocking();
+  int getSocketFd() const;
 
  private:
-  void setNonBlocking(int fd);
-
-  int fd_;
-  sockaddr_in address_;
-  sockaddr_in clientAddress_;
+  int sockFd_;
 };
 
 }  // namespace net
