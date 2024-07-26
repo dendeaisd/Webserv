@@ -13,18 +13,18 @@ class Server {
  public:
   Server(int port);
   void run();
+  ~Server(){};
 
  private:
-  void acceptNewClient();
-  void handleClientData(int clientFd);
-  void handleEvents(int numEvents);
-  void handleSocketError(int fd);
-  bool isValidSocket(int fd);
-
-  int port_;
   Socket serverSocket_;
-  net::PollManager pollManager_;
-  std::map<int, Client> clients_;
+  PollManager pollManager_;
+  std::vector<Client *> clients_;
+
+  void handleEvents();
+  void acceptNewClient();
+  void handleClientData(Client *client);
+  void cleanupClients();
 };
+
 }  // namespace net
 #endif
