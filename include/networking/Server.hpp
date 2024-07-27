@@ -13,7 +13,7 @@ class Server {
  public:
   Server(int port);
   void run();
-  ~Server(){};
+  ~Server();
 
  private:
   Socket serverSocket_;
@@ -21,7 +21,7 @@ class Server {
   std::vector<Client *> clients_;
 
   void handleEvents();
-  void acceptNewClient();
+  void handleNewConnection();
   void handleClientData(Client *client);
   void cleanupClients();
 };

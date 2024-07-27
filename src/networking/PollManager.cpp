@@ -26,10 +26,6 @@ void PollManager::addSocket(int fd, int events) {
 }
 
 void PollManager::removeSocket(int fd) {
-  if (fd < 0) {
-    throw invalidFd(fd);
-  }
-
   for (size_t i = 0; i < fds_.size(); ++i) {
     if (fds_[i].fd == fd) {
       std::swap(fds_[i], fds_.back());
