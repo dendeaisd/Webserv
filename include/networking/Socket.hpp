@@ -6,6 +6,7 @@
 #include <sys/types.h>
 
 #include <cstring>
+
 #include "SocketExceptions.hpp"
 
 namespace net {
