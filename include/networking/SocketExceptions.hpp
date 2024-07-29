@@ -11,11 +11,11 @@ class socketException : public std::runtime_error {
   socketException(const std::string& message) : std::runtime_error(message) {}
 };
 
-class invalidAddress : public socketException {
- public:
-  invalidAddress(const std::string& address)
-      : socketException("Invalid address: " + address) {}
-};
+// class invalidAddress : public socketException {
+//  public:
+//   invalidAddress(const std::string& address)
+//       : socketException("Invalid address: " + address) {}
+// };
 
 class bindFailed : public socketException {
  public:

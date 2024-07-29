@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include "PollManagerExceptions.hpp"
+
 namespace net {
 
 class PollManager {
