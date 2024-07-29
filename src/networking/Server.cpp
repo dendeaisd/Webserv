@@ -32,28 +32,28 @@ void Server::run() {
   }
 }
 
-
 void Server::handleEvents() {
-    std::vector<struct pollfd>& fds = pollManager_.getFds();
+  std::vector<struct pollfd>& fds = pollManager_.getFds();
 
-    for (size_t i = 0; i < fds.size(); ++i) {
-        if (fds[i].revents & POLLIN) {
-            if (fds[i].fd == serverSocket_.getSocketFd()) {
-                handleNewConnection();
-            } else {
-                for (std::vector<Client*>::iterator it = clients_.begin(); it != clients_.end(); ++it) {
-                    if ((*it)->getFd() == fds[i].fd) {
-                        if (!(*it)->handleRequest()) {
-                            pollManager_.removeSocket((*it)->getFd());
-                            delete *it;
-                            clients_.erase(it);
-                            break;
-                        }
-                    }
-                }
+  for (size_t i = 0; i < fds.size(); ++i) {
+    if (fds[i].revents & POLLIN) {
+      if (fds[i].fd == serverSocket_.getSocketFd()) {
+        handleNewConnection();
+      } else {
+        for (std::vector<Client*>::iterator it = clients_.begin();
+             it != clients_.end(); ++it) {
+          if ((*it)->getFd() == fds[i].fd) {
+            if (!(*it)->handleRequest()) {
+              pollManager_.removeSocket((*it)->getFd());
+              delete *it;
+              clients_.erase(it);
+              break;
             }
+          }
         }
+      }
     }
+  }
 }
 
 void Server::handleNewConnection() {
@@ -83,7 +83,7 @@ void Server::cleanupClients() {
       delete *it;
       it = clients_.erase(it);
     } else {
-     ++it;
+      ++it;
     }
   }
 }

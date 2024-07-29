@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <vector>
 
-
 using namespace net;
 
 PollManager::PollManager() {}

@@ -35,6 +35,18 @@ class acceptFailed : public socketException {
       : socketException("Accept failed: " + message) {}
 };
 
+class readFailed : public socketException {
+ public:
+  readFailed(const std::string& message)
+      : socketException("Failed to read data:" + message) {}
+};
+
+class sendFailed : public socketException {
+ public:
+  sendFailed(const std::string& message)
+      : socketException("Failed to send data:" + message) {}
+};
+
 class getFlagsFailed : public socketException {
  public:
   getFlagsFailed(const std::string& message)
@@ -46,13 +58,6 @@ class setNonBlockingModeFailed : public socketException {
   setNonBlockingModeFailed(const std::string& message)
       : socketException("Failed to set non-blocking mode: " + message) {}
 };
-
-// class setNonBlockingModeFailed : public std::runtime_error {
-// public:
-//     setNonBlockingModeFailed(const std::string& message)
-//         : std::runtime_error("Failed to set non-blocking mode: " + message)
-//         {}
-// };
 
 }  // namespace net
 
