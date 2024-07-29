@@ -4,6 +4,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "SocketExceptions.hpp"
+
 class Client {
  public:
   Client(int fd);

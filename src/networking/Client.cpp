@@ -2,6 +2,8 @@
 
 #include <fcntl.h>
 
+#include <cerrno>
+#include <cstring>
 #include <iostream>
 
 #define BUFFER_SIZE 1024
@@ -31,12 +33,10 @@ bool Client::handleRequest() {
       send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
       return true;
     } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-      // No data available right now, continue and try again
       continue;
     } else {
-      // Error or connection closed
       if (bytes_read < 0) {
-        perror("read");
+        throw net::readFailed(std::strerror(errno));
       }
       close(fd);
       fd = -1;
