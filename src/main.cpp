@@ -4,10 +4,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-
 #include "../include/networking/Server.hpp"
 
 #define PORT 8080

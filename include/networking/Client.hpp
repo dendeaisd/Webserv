@@ -4,17 +4,13 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <cstring>
-#include <iostream>
-#include <sstream>
-
 class Client {
  public:
   Client(int fd);
   ~Client();
 
   int getFd() const;
-  void handleRequest();
+  bool handleRequest();
 
  private:
   int fd;

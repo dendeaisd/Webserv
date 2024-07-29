@@ -6,10 +6,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <cerrno>
-
-#include "../../include/networking/SocketExceptions.hpp"
-
 using namespace net;
 
 Socket::Socket(int domain, int type, int protocol) {

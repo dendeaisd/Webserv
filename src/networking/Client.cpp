@@ -1,6 +1,7 @@
 #include "../../include/networking/Client.hpp"
 
 #include <fcntl.h>
+#include <iostream>
 
 #define BUFFER_SIZE 1024
 
@@ -17,7 +18,7 @@ const char* HTTP_RESPONSE =
     "\r\n"
     "Hello, World!";
 
-void Client::handleRequest() {
+bool Client::handleRequest() {
   char buffer[BUFFER_SIZE];
   int bytes_read;
 
@@ -27,6 +28,7 @@ void Client::handleRequest() {
       buffer[bytes_read] = '\0';
       std::cout << "Received: " << buffer << std::endl;
       send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
+      return true;
     } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
       // No data available right now, continue and try again
       continue;
@@ -37,7 +39,7 @@ void Client::handleRequest() {
       }
       close(fd);
       fd = -1;
-      break;
+      return false;
     }
   }
 }

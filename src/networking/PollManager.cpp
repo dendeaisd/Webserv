@@ -1,17 +1,13 @@
 #include "../../include/networking/PollManager.hpp"
 
-#include <errno.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
 #include <algorithm>
-#include <cerrno>
 #include <cstddef>
-#include <iostream>
 #include <vector>
 
-#include "../../include/networking/PollManagerExceptions.hpp"
 
 using namespace net;
 

@@ -3,7 +3,6 @@
 
 #include <poll.h>
 
-#include <cstring>
 #include <vector>
 
 namespace net {
