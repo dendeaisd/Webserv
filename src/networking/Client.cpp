@@ -1,6 +1,7 @@
 #include "../../include/networking/Client.hpp"
 
 #include <fcntl.h>
+
 #include <iostream>
 
 #define BUFFER_SIZE 1024
