@@ -4,121 +4,153 @@
 // i would maybe throw different exceptions for different parsing errors
 HttpRequestParser::HttpRequestParser(const std::string request) {
   raw = request;
-  status = HttpRequestParseStatus::NOT_PARSED;
+  status = NOT_PARSED;
+  hasFile = false;
+  parse();
 }
 
-HttpRequestParser::~HttpRequestParser() {
-  headers.clear();
-  queryParams.clear();
+HttpRequestParser::~HttpRequestParser() { }
+
+HttpRequest HttpRequestParser::getHttpRequest() {
+  // if (status == PARSED) {
+  //   return request;
+  // } else {
+  //   return HttpRequest();
+  // }
+  return request;
 }
 
 void HttpRequestParser::parse() {
   std::stringstream ss(raw);
   std::string requestLine;
   std::getline(ss, requestLine);
+  std::cout << requestLine << std::endl;
   parseRequestLine((char *)requestLine.c_str());
-  if (status == HttpRequestParseStatus::INVALID ||
-      status == HttpRequestParseStatus::INCOMPLETE) {
+  if (status == INVALID ||
+      status == INCOMPLETE) {
     return;  // TODO: raise exception
   }
-  std::string header;
-  while (std::getline(ss, header) && header != "\r\n") {
-    size_t pos = header.find(": ");
-    if (pos != std::string::npos) {
-      std::string key = header.substr(0, pos);
-      if (headerSet.find(key) == headerSet.end()) {
-        status = HttpRequestParseStatus::INVALID;
-        return;
-      }
-      std::string value = header.substr(pos + 2);
-      headers[key] = value;
-    } else {
-      status = HttpRequestParseStatus::INVALID;
-      return;
-    }
-  }
-  if (headers.find("Host") != headers.end()) {
-    size_t pos = headers["Host"].find(":");
-    if (pos != std::string::npos) {
-      host = headers["Host"].substr(0, pos);
-      port = headers["Host"].substr(pos + 1);
-    } else {
-      host = headers["Host"];
-      port = "80";
-    }
-  } else {
-    status = HttpRequestParseStatus::INVALID;
-    return;
-  }
+  parseHeaders(ss);
   std::string query;
-  size_t pos = uri.find("?");
+  size_t pos = request.getUri().find("?");
   if (pos != std::string::npos) {
-    query = uri.substr(pos + 1);
-    uri = uri.substr(0, pos);
+    request.setQuery(request.getUri().substr(pos + 1));
+    request.setUri(request.getUri().substr(0, pos));
     parseQueryParams(query);
   }
-  // TODO: check if body is present
-  // TODO: check if file is present
-  // TODO: check if request method support body
-  std::string body;
-  while (std::getline(ss, body)) {
-    this->body += body;
+  if (request.getHeader("Content-Length") != "") {
+    parseBody(ss);
   }
 }
 
 void HttpRequestParser::parseRequestLine(char *requestLine) {
-  int i = 0;
+  size_t i = 0;
   size_t len = std::strlen(requestLine);
   for (i = 0; i < len; i++) {
     if (requestLine[i] == ' ') {
-      method = std::string(requestLine, i);
+      request.setMethod(std::string(requestLine, i));
       break;
     }
   }
   if (!validateRequestMethod()) {
-    status = HttpRequestParseStatus::INVALID;
+    status = INVALID;
     return;
   }
-  int j = i + 1;
+  size_t j = i + 1;
   for (i = j; i < len; i++) {
     if (requestLine[i] == ' ') {
-      uri = std::string(requestLine + j, i - j);
+      request.setUri(std::string(requestLine + j, i - j));
       break;
     }
   }
-  if (i == len || uri.empty() || uri[0] != '/') {
-    status = HttpRequestParseStatus::INCOMPLETE;
+  if (i == len || request.getUri().empty() || request.getUri()[0] != '/') {
+    status = INCOMPLETE;
     return;
   }
+  std::cout << "URI: " << request.getUri() << std::endl;
   j = i + 1;
   for (i = j; i < len; i++) {
-    if (requestLine[i] == '\r' && requestLine[i + 1] == '\n') {
-      httpVersion = std::string(requestLine + j, i - j);
+    if (requestLine[i] == '\r' || i == len - 1) {
+      int offset = requestLine[i] == '\r' ? 0 : 1;
+      request.setHttpVersion(std::string(requestLine + j, i - j + offset));
       break;
     }
   }
-  if (!validateHttpVersion()) {
-    status = HttpRequestParseStatus::INVALID;
+  if (!validateHttpVersion()) {\
+    std::cout << "Invalid HTTP version" << std::endl;
+    status = INVALID;
     return;
   }
 }
 
+void HttpRequestParser::parseHeaders(std::stringstream &ss) {
+  std::string header;
+  std::cout << "Headers:" << std::endl;
+  while (std::getline(ss, header) && (header != "\r" && header != "")) {
+    std::cout << header << std::endl;
+    size_t pos = header.find(": ");
+    if (pos != std::string::npos) {
+      std::string key = header.substr(0, pos);
+      if (HttpMaps::headerSet.find(key) == HttpMaps::headerSet.end()) {
+        status = INVALID;
+        return;
+      }
+      std::string value = header.substr(pos + 2);
+      request.setHeader(key, value);
+    } else {
+      status = INVALID;
+      return;
+    }
+  }
+  std::string host = request.getHeader("Host");
+  if (host != "") {
+    size_t pos = host.find(":");
+    if (pos != std::string::npos) {
+      request.setHost(host.substr(0, pos));
+      request.setPort(host.substr(pos + 1));
+    } else {
+      request.setHost(host);
+      request.setPort("80");
+    }
+    status = PARSED;
+  } else {
+    status = INVALID;
+    return;
+  }
+}
+
+void HttpRequestParser::parseBody(std::stringstream &ss) {
+  // TODO: check if body is present
+  // TODO: check if file is present
+  // TODO: check if request method support body
+  std::string body;
+  std::string line;
+  while (std::getline(ss, line)) {
+    body += line;
+  }
+  request.setBody(body);
+}
+
 bool HttpRequestParser::validateRequestMethod() {
-  if (httpRequestMethodMap.find(method) != httpRequestMethodMap.end()) {
-    httpRequestMethod = httpRequestMethodMap[method];
+  if (HttpMaps::httpRequestMethodMap.find(request.getMethod()) != HttpMaps::httpRequestMethodMap.end()) {
+    request.setMethod(HttpMaps::httpRequestMethodMap.at(
+      HttpMaps::httpRequestMethodMap.find(request.getMethod())->first
+    ));
     return true;
   } else {
-    httpRequestMethod = HttpRequestMethod::UNKNOWN;
+    request.setMethod(METHOD_UNKNOWN);
     return false;
   }
 }
 
 bool HttpRequestParser::validateHttpVersion() {
-  if (httpRequestVersionMap.find(httpVersion) != httpRequestVersionMap.end()) {
-    httpProtocolVersion = httpRequestVersionMap[httpVersion];
+  if (HttpMaps::httpRequestVersionMap.find(request.getHttpVersion()) != HttpMaps::httpRequestVersionMap.end()) {
+    request.setHttpVersion(HttpMaps::httpRequestVersionMap.at(
+      HttpMaps::httpRequestVersionMap.find(request.getHttpVersion())->first
+    ));
     return true;
   } else {
-    httpProtocolVersion = HttpRequestVersion::UNKNOWN;
+    request.setHttpVersion(VERSION_UNKNOWN);
     return false;
   }
 }
@@ -131,76 +163,7 @@ void HttpRequestParser::parseQueryParams(std::string query) {
     if (pos != std::string::npos) {
       std::string key = param.substr(0, pos);
       std::string value = param.substr(pos + 1);
-      queryParams[key] = value;
+      request.setQueryParam(key, value);
     }
-  }
-}
-
-std::string HttpRequestParser::getMethod() { return method; }
-
-std::string HttpRequestParser::getUri() { return uri; }
-
-std::string HttpRequestParser::getHttpVersion() { return httpVersion; }
-
-std::string HttpRequestParser::getHost() { return host; }
-
-std::string HttpRequestParser::getPort() { return port; }
-
-std::string HttpRequestParser::getBody() { return body; }
-
-std::string HttpRequestParser::getHeader(std::string header) {
-  if (headers.find(header) != headers.end()) {
-    return headers[header];
-  } else {
-    return "";
-  }
-}
-
-std::map<std::string, std::string> HttpRequestParser::getHeaders() {
-  return headers;
-}
-
-void HttpRequestParser::setMethod(std::string method) { method = method; }
-
-void HttpRequestParser::setUri(std::string uri) { uri = uri; }
-
-void HttpRequestParser::setHttpVersion(std::string httpVersion) {
-  httpVersion = httpVersion;
-}
-
-void HttpRequestParser::setHost(std::string host) { host = host; }
-
-void HttpRequestParser::setPort(std::string port) { port = port; }
-
-void HttpRequestParser::setBody(std::string body) { body = body; }
-
-void HttpRequestParser::setHeader(std::string header, std::string value) {
-  headers[header] = value;
-}
-
-void HttpRequestParser::setHeaders(std::map<std::string, std::string> headers) {
-  headers = headers;
-}
-
-std::string HttpRequestParser::toString() {
-  std::string str = method + " " + uri;
-  if (!queryParams.empty()) {
-    str += "?";
-    for (std::map<std::string, std::string>::iterator it = queryParams.begin();
-         it != queryParams.end(); it++) {
-      str += it->first + "=" + it->second;
-      if (it != --queryParams.end()) {
-        str += "&";
-      }
-    }
-  }
-  str += " " + httpVersion + "\r\n";
-  for (std::map<std::string, std::string>::iterator it = headers.begin();
-       it != headers.end(); it++) {
-    str += it->first + ": " + it->second + "\r\n";
-  }
-  str += "\r\n";
-  if (!body.empty()) {
-    str += body;
   }
 }
