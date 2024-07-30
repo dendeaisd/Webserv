@@ -3,6 +3,7 @@ NAME := webserv
 CC := c++
 CFLAGS := -Werror -Wextra -Wall -std=c++98
 INCLUDE_DIRS := -I./include
+TESTER_MAIN := tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
 SRC := main.cpp src/http/HttpMaps.cpp src/request/HttpRequest.cpp src/request/HttpRequestParser.cpp
 
 SRC_DIR := .
