@@ -1,5 +1,5 @@
-// also exception, maybe it should be included in the file that
-// is actually using the header ?
+#ifndef HTTPREQUEST_HPP
+#define HTTPREQUEST_HPP
 #include <exception>
 #include <map>
 #include <set>
@@ -10,12 +10,12 @@
 // #include "../FileUpload.hpp"  // path was not correct, i changed it
 #include "HttpRequestEnums.hpp"
 
-class HttpRequest{
+class HttpRequest {
  public:
   bool hasFile;
-
   HttpRequest();
   ~HttpRequest();
+ 
   std::string getMethod();
   HttpRequestMethod getMethodEnum();
   std::string getUri();
@@ -23,6 +23,7 @@ class HttpRequest{
   std::string getHttpVersion();
   HttpRequestVersion getHttpVersionEnum();
   std::string getHost();
+  std::string getSubDomain();
   std::string getPort();
   std::string getBody();
   std::string getHeader(std::string header);
@@ -35,12 +36,14 @@ class HttpRequest{
   void setHttpVersion(std::string httpVersion);
   void setHttpVersion(HttpRequestVersion httpProtocolVersion);
   void setHost(std::string host);
+  void setSubDomain(std::string subDomain);
   void setPort(std::string port);
   void setBody(std::string body);
   void setHeader(std::string header, std::string value);
   void setHeaders(std::map<std::string, std::string> headers);
   void setQueryParam(std::string key, std::string value);
   std::string toString();
+  std::string toJson();
 
  private:
   std::string raw;
@@ -61,3 +64,5 @@ class HttpRequest{
   std::map<std::string, std::string> _queryParams;
   
 };
+
+#endif

@@ -12,12 +12,11 @@ HttpRequestParser::HttpRequestParser(const std::string request) {
 HttpRequestParser::~HttpRequestParser() { }
 
 HttpRequest HttpRequestParser::getHttpRequest() {
-  // if (status == PARSED) {
-  //   return request;
-  // } else {
-  //   return HttpRequest();
-  // }
-  return request;
+  if (status == PARSED) {
+    return request;
+  } else {
+    return HttpRequest();
+  }
 }
 
 void HttpRequestParser::parse() {
@@ -25,6 +24,8 @@ void HttpRequestParser::parse() {
   std::string requestLine;
   std::getline(ss, requestLine);
   std::cout << requestLine << std::endl;
+  if (requestLine.find("\r") != std::string::npos)
+	requestLine.erase(requestLine.find("\r"), 1);
   parseRequestLine((char *)requestLine.c_str());
   if (status == INVALID ||
       status == INCOMPLETE) {
@@ -67,15 +68,15 @@ void HttpRequestParser::parseRequestLine(char *requestLine) {
     status = INCOMPLETE;
     return;
   }
-  std::cout << "URI: " << request.getUri() << std::endl;
   j = i + 1;
-  for (i = j; i < len; i++) {
-    if (requestLine[i] == '\r' || i == len - 1) {
-      int offset = requestLine[i] == '\r' ? 0 : 1;
-      request.setHttpVersion(std::string(requestLine + j, i - j + offset));
-      break;
-    }
-  }
+  request.setHttpVersion(std::string(requestLine + j, len - j));
+//   for (i = j; i < len; i++) {
+//     if (requestLine[i] == '\r' || i == len - 1) {
+//       int offset = requestLine[i] == '\r' ? 0 : 1;
+//       request.setHttpVersion(std::string(requestLine + j, i - j + offset));
+//       break;
+//     }
+//   }
   if (!validateHttpVersion()) {\
     std::cout << "Invalid HTTP version" << std::endl;
     status = INVALID;
@@ -85,9 +86,7 @@ void HttpRequestParser::parseRequestLine(char *requestLine) {
 
 void HttpRequestParser::parseHeaders(std::stringstream &ss) {
   std::string header;
-  std::cout << "Headers:" << std::endl;
   while (std::getline(ss, header) && (header != "\r" && header != "")) {
-    std::cout << header << std::endl;
     size_t pos = header.find(": ");
     if (pos != std::string::npos) {
       std::string key = header.substr(0, pos);
@@ -95,7 +94,10 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
         status = INVALID;
         return;
       }
+	  if (header.find("\r") != std::string::npos)
+	  	header.erase(header.find("\r"), 1);
       std::string value = header.substr(pos + 2);
+	  std::cout << "value " << value << std::endl;
       request.setHeader(key, value);
     } else {
       status = INVALID;
