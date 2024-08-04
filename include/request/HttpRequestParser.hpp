@@ -20,12 +20,13 @@ class HttpRequestParser {
 
   HttpRequestParser(std::string request);
   HttpRequest getHttpRequest();
+  int parse();
   ~HttpRequestParser();
 
  private:
   HttpRequest request;
   std::string raw;
-  void parse();
+
   void parseRequestLine(char *requestLine);
   void parseHeaders(std::stringstream &ss);
   void parseBody(std::stringstream &ss);

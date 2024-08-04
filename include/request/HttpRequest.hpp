@@ -62,6 +62,7 @@ class HttpRequest {
   // FileUpload file;
   std::map<std::string, std::string> _headers;
   std::map<std::string, std::string> _queryParams;
+  std::map<std::string, std::string> _formData;
 };
 
 #endif

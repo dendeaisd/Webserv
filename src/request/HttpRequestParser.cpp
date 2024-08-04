@@ -2,12 +2,8 @@
 
 // Also, instead of returning early and setting a status
 // i would maybe throw different exceptions for different parsing errors
-HttpRequestParser::HttpRequestParser(const std::string request) {
-  raw = request;
-  status = NOT_PARSED;
-  hasFile = false;
-  parse();
-}
+HttpRequestParser::HttpRequestParser(const std::string request)
+    : status(NOT_PARSED), hasFile(false), raw(request) {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
@@ -19,7 +15,7 @@ HttpRequest HttpRequestParser::getHttpRequest() {
   }
 }
 
-void HttpRequestParser::parse() {
+int HttpRequestParser::parse() {
   std::stringstream ss(raw);
   std::string requestLine;
   std::getline(ss, requestLine);
@@ -28,9 +24,12 @@ void HttpRequestParser::parse() {
     requestLine.erase(requestLine.find("\r"), 1);
   parseRequestLine((char *)requestLine.c_str());
   if (status == INVALID || status == INCOMPLETE) {
-    return;  // TODO: raise exception
+    return 400;
   }
   parseHeaders(ss);
+  if (status == INVALID) {
+    return 400;
+  }
   std::string query;
   size_t pos = request.getUri().find("?");
   if (pos != std::string::npos) {
@@ -41,6 +40,7 @@ void HttpRequestParser::parse() {
   if (request.getHeader("Content-Length") != "") {
     parseBody(ss);
   }
+  return 200;
 }
 
 void HttpRequestParser::parseRequestLine(char *requestLine) {
@@ -69,13 +69,6 @@ void HttpRequestParser::parseRequestLine(char *requestLine) {
   }
   j = i + 1;
   request.setHttpVersion(std::string(requestLine + j, len - j));
-  //   for (i = j; i < len; i++) {
-  //     if (requestLine[i] == '\r' || i == len - 1) {
-  //       int offset = requestLine[i] == '\r' ? 0 : 1;
-  //       request.setHttpVersion(std::string(requestLine + j, i - j + offset));
-  //       break;
-  //     }
-  //   }
   if (!validateHttpVersion()) {
     std::cout << "Invalid HTTP version" << std::endl;
     status = INVALID;
@@ -86,6 +79,16 @@ void HttpRequestParser::parseRequestLine(char *requestLine) {
 void HttpRequestParser::parseHeaders(std::stringstream &ss) {
   std::string header;
   while (std::getline(ss, header) && (header != "\r" && header != "")) {
+    /*
+    No whitespace is allowed between the field name and colon.  In the
+    past, differences in the handling of such whitespace have led to
+    security vulnerabilities in request routing and response handling.
+    -- src: https://www.rfc-editor.org/rfc/inline-errata/rfc9112.html
+    */
+    if (header.find(" : ") != std::string::npos) {
+      status = INVALID;
+      return;
+    }
     size_t pos = header.find(": ");
     if (pos != std::string::npos) {
       std::string key = header.substr(0, pos);
