@@ -1,6 +1,6 @@
-#include "TestCase.hpp"
 #include "../include/request/HttpRequest.hpp"
 #include "../include/request/HttpRequestParser.hpp"
+#include "TestCase.hpp"
 
 class TestRequest : public TestCase {
  private:
@@ -8,8 +8,8 @@ class TestRequest : public TestCase {
 
   void testGET();
   void testPOST();
-//   void testPUT();
-//   void testDELETE();
+  //   void testPUT();
+  //   void testDELETE();
 
  public:
   TestRequest();

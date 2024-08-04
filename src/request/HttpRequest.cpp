@@ -1,6 +1,8 @@
 #include "../../include/request/HttpRequest.hpp"
 
-HttpRequest::HttpRequest() : _httpRequestMethod(METHOD_UNKNOWN), _httpProtocolVersion(VERSION_UNKNOWN) {}
+HttpRequest::HttpRequest()
+    : _httpRequestMethod(METHOD_UNKNOWN),
+      _httpProtocolVersion(VERSION_UNKNOWN) {}
 
 HttpRequest::~HttpRequest() {
   _queryParams.clear();
@@ -60,7 +62,9 @@ void HttpRequest::setHttpVersion(HttpRequestVersion httpProtocolVersion) {
 
 void HttpRequest::setHost(std::string host) { _host = host; }
 
-void HttpRequest::setSubDomain(std::string subDomain) { _subDomain = subDomain; }
+void HttpRequest::setSubDomain(std::string subDomain) {
+  _subDomain = subDomain;
+}
 
 void HttpRequest::setPort(std::string port) { _port = port; }
 
@@ -103,32 +107,32 @@ std::string HttpRequest::toString() {
 }
 
 std::string HttpRequest::toJson() {
-	std::string str = "{";
-	str += "\"method\": \"" + _method + "\",";
-	str += "\"uri\": \"" + _uri + "\",";
-	str += "\"httpVersion\": \"" + _httpVersion + "\",";
-	str += "\"host\": \"" + _host + "\",";
-	str += "\"port\": \"" + _port + "\",";
-	str += "\"subDomain\": \"" + _subDomain + "\",";
-	str += "\"body\": \"" + _body + "\",";
-	str += "\"headers\": {";
-	for (std::map<std::string, std::string>::iterator it = _headers.begin();
-	     it != _headers.end(); it++) {
-		str += "\"" + it->first + "\": \"" + it->second + "\"";
-		if (it != --_headers.end()) {
-			str += ",";
-		}
-	}
-	str += "},";
-	str += "\"queryParams\": {";
-	for (std::map<std::string, std::string>::iterator it = _queryParams.begin();
-	     it != _queryParams.end(); it++) {
-		str += "\"" + it->first + "\": \"" + it->second + "\"";
-		if (it != --_queryParams.end()) {
-			str += ",";
-		}
-	}
-	str += "}";
-	str += "}";
-	return str;
+  std::string str = "{";
+  str += "\"method\": \"" + _method + "\",";
+  str += "\"uri\": \"" + _uri + "\",";
+  str += "\"httpVersion\": \"" + _httpVersion + "\",";
+  str += "\"host\": \"" + _host + "\",";
+  str += "\"port\": \"" + _port + "\",";
+  str += "\"subDomain\": \"" + _subDomain + "\",";
+  str += "\"body\": \"" + _body + "\",";
+  str += "\"headers\": {";
+  for (std::map<std::string, std::string>::iterator it = _headers.begin();
+       it != _headers.end(); it++) {
+    str += "\"" + it->first + "\": \"" + it->second + "\"";
+    if (it != --_headers.end()) {
+      str += ",";
+    }
+  }
+  str += "},";
+  str += "\"queryParams\": {";
+  for (std::map<std::string, std::string>::iterator it = _queryParams.begin();
+       it != _queryParams.end(); it++) {
+    str += "\"" + it->first + "\": \"" + it->second + "\"";
+    if (it != --_queryParams.end()) {
+      str += ",";
+    }
+  }
+  str += "}";
+  str += "}";
+  return str;
 }

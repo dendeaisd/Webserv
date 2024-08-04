@@ -15,7 +15,7 @@ class HttpRequest {
   bool hasFile;
   HttpRequest();
   ~HttpRequest();
- 
+
   std::string getMethod();
   HttpRequestMethod getMethodEnum();
   std::string getUri();
@@ -62,7 +62,6 @@ class HttpRequest {
   // FileUpload file;
   std::map<std::string, std::string> _headers;
   std::map<std::string, std::string> _queryParams;
-  
 };
 
 #endif

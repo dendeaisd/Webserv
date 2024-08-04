@@ -9,7 +9,7 @@ HttpRequestParser::HttpRequestParser(const std::string request) {
   parse();
 }
 
-HttpRequestParser::~HttpRequestParser() { }
+HttpRequestParser::~HttpRequestParser() {}
 
 HttpRequest HttpRequestParser::getHttpRequest() {
   if (status == PARSED) {
@@ -25,10 +25,9 @@ void HttpRequestParser::parse() {
   std::getline(ss, requestLine);
   std::cout << requestLine << std::endl;
   if (requestLine.find("\r") != std::string::npos)
-	requestLine.erase(requestLine.find("\r"), 1);
+    requestLine.erase(requestLine.find("\r"), 1);
   parseRequestLine((char *)requestLine.c_str());
-  if (status == INVALID ||
-      status == INCOMPLETE) {
+  if (status == INVALID || status == INCOMPLETE) {
     return;  // TODO: raise exception
   }
   parseHeaders(ss);
@@ -70,14 +69,14 @@ void HttpRequestParser::parseRequestLine(char *requestLine) {
   }
   j = i + 1;
   request.setHttpVersion(std::string(requestLine + j, len - j));
-//   for (i = j; i < len; i++) {
-//     if (requestLine[i] == '\r' || i == len - 1) {
-//       int offset = requestLine[i] == '\r' ? 0 : 1;
-//       request.setHttpVersion(std::string(requestLine + j, i - j + offset));
-//       break;
-//     }
-//   }
-  if (!validateHttpVersion()) {\
+  //   for (i = j; i < len; i++) {
+  //     if (requestLine[i] == '\r' || i == len - 1) {
+  //       int offset = requestLine[i] == '\r' ? 0 : 1;
+  //       request.setHttpVersion(std::string(requestLine + j, i - j + offset));
+  //       break;
+  //     }
+  //   }
+  if (!validateHttpVersion()) {
     std::cout << "Invalid HTTP version" << std::endl;
     status = INVALID;
     return;
@@ -94,10 +93,10 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
         status = INVALID;
         return;
       }
-	  if (header.find("\r") != std::string::npos)
-	  	header.erase(header.find("\r"), 1);
+      if (header.find("\r") != std::string::npos)
+        header.erase(header.find("\r"), 1);
       std::string value = header.substr(pos + 2);
-	  std::cout << "value " << value << std::endl;
+      std::cout << "value " << value << std::endl;
       request.setHeader(key, value);
     } else {
       status = INVALID;
@@ -134,10 +133,10 @@ void HttpRequestParser::parseBody(std::stringstream &ss) {
 }
 
 bool HttpRequestParser::validateRequestMethod() {
-  if (HttpMaps::httpRequestMethodMap.find(request.getMethod()) != HttpMaps::httpRequestMethodMap.end()) {
+  if (HttpMaps::httpRequestMethodMap.find(request.getMethod()) !=
+      HttpMaps::httpRequestMethodMap.end()) {
     request.setMethod(HttpMaps::httpRequestMethodMap.at(
-      HttpMaps::httpRequestMethodMap.find(request.getMethod())->first
-    ));
+        HttpMaps::httpRequestMethodMap.find(request.getMethod())->first));
     return true;
   } else {
     request.setMethod(METHOD_UNKNOWN);
@@ -146,10 +145,10 @@ bool HttpRequestParser::validateRequestMethod() {
 }
 
 bool HttpRequestParser::validateHttpVersion() {
-  if (HttpMaps::httpRequestVersionMap.find(request.getHttpVersion()) != HttpMaps::httpRequestVersionMap.end()) {
+  if (HttpMaps::httpRequestVersionMap.find(request.getHttpVersion()) !=
+      HttpMaps::httpRequestVersionMap.end()) {
     request.setHttpVersion(HttpMaps::httpRequestVersionMap.at(
-      HttpMaps::httpRequestVersionMap.find(request.getHttpVersion())->first
-    ));
+        HttpMaps::httpRequestVersionMap.find(request.getHttpVersion())->first));
     return true;
   } else {
     request.setHttpVersion(VERSION_UNKNOWN);
