@@ -37,8 +37,12 @@ int HttpRequestParser::parse() {
     request.setUri(request.getUri().substr(0, pos));
     parseQueryParams(query);
   }
-  if (request.getHeader("Content-Length") != "") {
+  if (request.getHeader("Content-Type").find("application/json") !=
+      std::string::npos) {
     parseBody(ss);
+  } else if (request.getHeader("Content-Type").find("multipart/form-data") !=
+             std::string::npos) {
+    parseFormData(request.getHeader("boundary"), ss);
   }
   return 200;
 }
@@ -124,9 +128,13 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
 }
 
 void HttpRequestParser::parseBody(std::stringstream &ss) {
-  // TODO: check if body is present
-  // TODO: check if file is present
-  // TODO: check if request method support body
+  if (request.getMethodEnum() == GET || request.getMethodEnum() == DELETE) {
+    // While it's not strictly forbidden to send a body in a GET request,
+    // it's not recommended and it's not supported by most servers.
+    // This is a design decision, and it's not a requirement of the HTTP
+    status = INVALID;
+    return;
+  }
   std::string body;
   std::string line;
   while (std::getline(ss, line)) {
@@ -134,6 +142,9 @@ void HttpRequestParser::parseBody(std::stringstream &ss) {
   }
   request.setBody(body);
 }
+
+void HttpRequestParser::parseFormData(std::string boundary,
+                                      std::stringstream &ss) {}
 
 bool HttpRequestParser::validateRequestMethod() {
   if (HttpMaps::httpRequestMethodMap.find(request.getMethod()) !=
@@ -168,6 +179,8 @@ void HttpRequestParser::parseQueryParams(std::string query) {
       std::string key = param.substr(0, pos);
       std::string value = param.substr(pos + 1);
       request.setQueryParam(key, value);
+    } else {
+      request.setQueryParam(param, "");
     }
   }
 }

@@ -30,6 +30,7 @@ class HttpRequestParser {
   void parseRequestLine(char *requestLine);
   void parseHeaders(std::stringstream &ss);
   void parseBody(std::stringstream &ss);
+  void parseFormData(std::string boundary, std::stringstream &ss);
   void parseQueryParams(std::string query);
   bool validateRequestMethod();
   bool validateHttpVersion();
