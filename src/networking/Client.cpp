@@ -39,7 +39,6 @@ bool Client::handleRequest() {
         throw net::readFailed(std::strerror(errno));
       }
       close(fd);
-      fd = -1;
       return false;
     }
   }

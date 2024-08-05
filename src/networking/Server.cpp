@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include <cstring>
+#include <iostream>
 
 using namespace net;
 
@@ -43,7 +44,16 @@ void Server::handleEvents() {
         for (std::vector<Client*>::iterator it = clients_.begin();
              it != clients_.end(); ++it) {
           if ((*it)->getFd() == fds[i].fd) {
-            if (!(*it)->handleRequest()) {
+            try {
+              if (!(*it)->handleRequest()) {
+                pollManager_.removeSocket((*it)->getFd());
+                delete *it;
+                clients_.erase(it);
+                break;
+              }
+            } catch (const std::exception& e) {
+              std::cerr << "Exception caught while handling request:"
+                        << e.what() << std::endl;
               pollManager_.removeSocket((*it)->getFd());
               delete *it;
               clients_.erase(it);
