@@ -18,12 +18,13 @@ class Server {
  private:
   Socket serverSocket_;
   PollManager pollManager_;
-  std::vector<Client *> clients_;
+  std::vector<Client*> clients_;
 
   void handleEvents();
   void handleNewConnection();
-  void handleClientData(Client *client);
-  void cleanupClients();
+  void handleClientRequest(int fd);
+  void processClientRequest(std::vector<Client*>::iterator& it);
+  void cleanupClient(std::vector<Client*>::iterator& it);
 };
 
 }  // namespace net

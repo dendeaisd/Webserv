@@ -14,7 +14,6 @@ Server::Server(int port) : serverSocket_(AF_INET, SOCK_STREAM, 0) {
   serverSocket_.bindSocket(port);
   serverSocket_.listenSocket(3);
   serverSocket_.setNonBlocking();
-
   pollManager_.addSocket(serverSocket_.getSocketFd());
 }
 
@@ -29,7 +28,6 @@ void Server::run() {
   while (true) {
     pollManager_.pollSockets();
     handleEvents();
-    cleanupClients();
   }
 }
 
@@ -41,29 +39,38 @@ void Server::handleEvents() {
       if (fds[i].fd == serverSocket_.getSocketFd()) {
         handleNewConnection();
       } else {
-        for (std::vector<Client*>::iterator it = clients_.begin();
-             it != clients_.end(); ++it) {
-          if ((*it)->getFd() == fds[i].fd) {
-            try {
-              if (!(*it)->handleRequest()) {
-                pollManager_.removeSocket((*it)->getFd());
-                delete *it;
-                clients_.erase(it);
-                break;
-              }
-            } catch (const std::exception& e) {
-              std::cerr << "Exception caught while handling request:"
-                        << e.what() << std::endl;
-              pollManager_.removeSocket((*it)->getFd());
-              delete *it;
-              clients_.erase(it);
-              break;
-            }
-          }
-        }
+        handleClientRequest(fds[i].fd);
       }
     }
   }
+}
+
+void Server::handleClientRequest(int fd) {
+  for (std::vector<Client*>::iterator it = clients_.begin();
+       it != clients_.end(); ++it) {
+    if ((*it)->getFd() == fd) {
+      processClientRequest(it);
+      break;
+    }
+  }
+}
+
+void Server::processClientRequest(std::vector<Client*>::iterator& it) {
+  try {
+    if (!(*it)->handleRequest()) {
+      cleanupClient(it);
+    }
+  } catch (const std::exception& e) {
+    std::cerr << "Exception caught while handling request: " << e.what()
+              << std::endl;
+    cleanupClient(it);
+  }
+}
+
+void Server::cleanupClient(std::vector<Client*>::iterator& it) {
+  pollManager_.removeSocket((*it)->getFd());
+  delete *it;
+  clients_.erase(it);
 }
 
 void Server::handleNewConnection() {
@@ -75,25 +82,5 @@ void Server::handleNewConnection() {
     Client* new_client = new Client(new_socket);
     clients_.push_back(new_client);
     pollManager_.addSocket(new_socket);
-  }
-}
-
-void Server::handleClientData(Client* client) {
-  client->handleRequest();
-
-  if (client->getFd() == -1) {
-    pollManager_.removeSocket(client->getFd());
-  }
-}
-
-void Server::cleanupClients() {
-  std::vector<Client*>::iterator it = clients_.begin();
-  while (it != clients_.end()) {
-    if ((*it)->getFd() == -1) {
-      delete *it;
-      it = clients_.erase(it);
-    } else {
-      ++it;
-    }
   }
 }
