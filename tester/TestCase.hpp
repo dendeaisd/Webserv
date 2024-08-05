@@ -1,3 +1,4 @@
+#include <cassert>
 #include <exception>
 #include <iostream>
 #include <string>
@@ -18,7 +19,7 @@ class TestCase {
       if (HALT_ON_FAILURE == 1)
         assert(actual == expected);
       else if (actual != expected)
-        throw std::exception();
+        throw std::runtime_error("Assertion failed");
       printSuccess("PASS");
       std::cout << std::endl;
       TestCase::_passed++;

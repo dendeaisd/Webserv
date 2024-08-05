@@ -144,7 +144,10 @@ void HttpRequestParser::parseBody(std::stringstream &ss) {
 }
 
 void HttpRequestParser::parseFormData(std::string boundary,
-                                      std::stringstream &ss) {}
+                                      std::stringstream &ss) {
+  (void)boundary;
+  (void)ss;
+}
 
 bool HttpRequestParser::validateRequestMethod() {
   if (HttpMaps::httpRequestMethodMap.find(request.getMethod()) !=
