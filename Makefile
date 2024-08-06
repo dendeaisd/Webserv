@@ -1,39 +1,37 @@
-NAME := WebServ
+NAME        :=  server_test
+CC          :=  c++
+FLAGS       :=  -Wall -Wextra -Werror -std=c++98 -g
 
-CC := c++
-CFLAGS := -Werror -Wextra -Wall -std=c++98 -g
+SRC         :=  $(wildcard src/*.cpp) $(wildcard src/networking/*.cpp)
+OBJ         :=  $(SRC:.cpp=.o)
 
-TESTER_MAIN := tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
-SRC = $(TESTER_MAIN)
+# Colors
+YELLOW      :=  \033[38;2;204;204;0m
+ORANGE      :=  \033[38;2;255;87;34m
+RESET       :=  \033[0m
 
-SRC_DIR := .
-OBJ_DIR := obj
+# Cursor manipulation
+UP          :=  \033[A
+CUT         :=  \033[K
+BEGIN       :=  \033[0G
 
-OBJ := $(addprefix $(OBJ_DIR)/, $(subst /,@,$(SRC:.cpp=.o)))
-
-all:
-	@$(MAKE) $(NAME) -j
+all: $(NAME)
 
 $(NAME): $(OBJ)
-	@$(CC) $(OBJ) -o $(NAME) $(CFLAGS) && echo "Compiled $(NAME) successfully..!"
+	@$(CC) $(FLAGS) $(OBJ) -o $(NAME)
 
-## OBJ_DIR can be replaced by INCLUDE directory incase you need to include a library
-.SECONDEXPANSION:
-$(OBJ_DIR)/%.o: $(SRC_DIR)/$$(subst @,/,$$*).cpp
-	@$(CC) $(CFLAGS) $(addprefix -iquote ,$(OBJ_DIR)) -c $< -o $@
-
-$(OBJ): $(OBJ_DIR)
-
-$(OBJ_DIR):
-	@mkdir -p $(OBJ_DIR)
+%.o: %.cpp
+	@$(CC) $(FLAGS) -c $< -o $@
 
 clean:
+	@printf "$(UP)$(BEGIN)$(CUT)$(YELLOW)🧹Cleaning object files...$(RESET)"
 	@rm -rf $(OBJ)
 
-fclean: clean
-	@rm -rf $(OBJ_DIR)
-	@rm -rf $(NAME)
+fclean:
+	@printf "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
+	@rm -rf $(OBJ)
+	@rm -f $(NAME)
 
 re: fclean all
 
-.PHONY: clean fclean re
+.PHONY: all clean fclean re
