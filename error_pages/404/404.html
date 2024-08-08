@@ -4,14 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 Not Found</title>
-    <link rel="stylesheet" href="/error_pages/404/assets/styles.css">
+    <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
-    <div class="basic-text">
+    <div class="broken-screen">
         <h1>404</h1>
         <p>Oops! The page you're looking for can't be found.</p>
     </div>
-    <script src="/error_pages/404/assets/script.js"></script>
+    <div class="crack-overlay">
+        <svg class="crack-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <!-- Define crack paths -->
+            <path class="crack-path" d="M30,30 Q35,40 40,30 T50,20" />
+            <path class="crack-path" d="M70,30 Q65,40 60,30 T50,20" />
+            <path class="crack-path" d="M30,70 Q35,60 40,70 T50,80" />
+            <path class="crack-path" d="M70,70 Q65,60 60,70 T50,80" />
+            <path class="crack-path" d="M10,10 Q15,20 20,10 T30,0" />
+            <path class="crack-path" d="M90,10 Q85,20 80,10 T70,0" />
+            <path class="crack-path" d="M10,90 Q15,80 20,90 T30,100" />
+            <path class="crack-path" d="M90,90 Q85,80 80,90 T70,100" />
+		</svg>		
+    </div>
+    <script src="assets/script.js"></script>
 </body>
 </html>
 
