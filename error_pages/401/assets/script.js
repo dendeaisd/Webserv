@@ -1,11 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const loaders = document.querySelectorAll(".loader");
+  const loaders = document.querySelectorAll(".loader, .loader1");
   const safeZone = {
       top: 30,
       bottom: 70,
       left: 20,
       right: 80
-  };
+  };+
 
   loaders.forEach(loader => {
       let randomX, randomY;
