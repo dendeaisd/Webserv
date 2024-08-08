@@ -22,7 +22,7 @@ int HttpRequestParser::parse() {
   std::cout << requestLine << std::endl;
   if (requestLine.find("\r") != std::string::npos)
     requestLine.erase(requestLine.find("\r"), 1);
-  parseRequestLine((char *)requestLine.c_str());
+  parseRequestLine((char *)requestLine.c_str(), requestLine.length());
   if (status == INVALID || status == INCOMPLETE) {
     return 400;
   }
@@ -47,9 +47,8 @@ int HttpRequestParser::parse() {
   return 200;
 }
 
-void HttpRequestParser::parseRequestLine(char *requestLine) {
+void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
   size_t i = 0;
-  size_t len = std::strlen(requestLine);
   for (i = 0; i < len; i++) {
     if (requestLine[i] == ' ') {
       request.setMethod(std::string(requestLine, i));

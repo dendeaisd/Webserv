@@ -52,11 +52,11 @@ $(OBJ_DIR):
 
 clean:
 	@printf "$(UP)$(BEGIN)$(CUT)$(YELLOW)🧹Cleaning object files...$(RESET)"
-	@rm -rf $(OBJ)
+	@rm -rf $(OBJ_DIR)
 
 fclean:
 	@printf "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
-	@rm -rf $(OBJ)
+	@rm -rf $(OBJ_DIR)
 	@rm -f $(NAME)
 
 re: fclean all
