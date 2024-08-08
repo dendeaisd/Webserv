@@ -90,3 +90,33 @@ void TestRequest::testPostWithFile() {
   assertEqual<std::string>(request.getPort(), "80");
   assertEqual<std::string>(request.getBody(), "");
 }
+
+void TestRequest::testPUT() {
+  std::string putReq =
+      "PUT /post HTTP/1.1\r\nHost: localhost:8080\r\nConnection: "
+      "keep-alive\r\nContent-Length: 5\r\n\r\nhello";
+  HttpRequestParser parser(putReq);
+  int status = parser.parse();
+  assertEqual<int>(status, 200);
+  request = parser.getHttpRequest();
+  assertEqual<std::string>(request.getMethod(), "PUT");
+  assertEqual<std::string>(request.getUri(), "/");
+  assertEqual<std::string>(request.getHttpVersion(), "HTTP/1.1");
+  assertEqual<std::string>(request.getHost(), "localhost");
+  assertEqual<std::string>(request.getPort(), "8080");
+  assertEqual<std::string>(request.getBody(), "hello");
+}
+
+void TestRequest::testDELETE() {
+  std::string deleteReq =
+	  "DELETE /post/1 HTTP/1.1\r\nHost: localhost:8080\r\n";
+  HttpRequestParser parser(deleteReq);
+  int status = parser.parse();
+  assertEqual<int>(status, 200);
+  request = parser.getHttpRequest();
+  assertEqual<std::string>(request.getMethod(), "DELETE");
+  assertEqual<std::string>(request.getUri(), "/");
+  assertEqual<std::string>(request.getHttpVersion(), "HTTP/1.1");
+  assertEqual<std::string>(request.getHost(), "localhost");
+  assertEqual<std::string>(request.getPort(), "8080");
+}
