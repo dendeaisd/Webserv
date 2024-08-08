@@ -33,7 +33,8 @@ void TestRequest::testGET() {
 void TestRequest::testPOST() {
   std::string postRequest =
       "POST / HTTP/1.1\r\nHost: localhost:8080\r\nConnection: "
-      "keep-alive\r\nContent-Length: 5\r\nContent-Type: application/json\r\n\r\nhello";
+      "keep-alive\r\nContent-Length: 5\r\nContent-Type: "
+      "application/json\r\n\r\nhello";
   HttpRequestParser parser(postRequest);
   int status = parser.parse();
   assertEqual<int>(status, 200);
@@ -108,8 +109,7 @@ void TestRequest::testPUT() {
 }
 
 void TestRequest::testDELETE() {
-  std::string deleteReq =
-	  "DELETE /post/1 HTTP/1.1\r\nHost: localhost:8080\r\n";
+  std::string deleteReq = "DELETE /post/1 HTTP/1.1\r\nHost: localhost:8080\r\n";
   HttpRequestParser parser(deleteReq);
   int status = parser.parse();
   assertEqual<int>(status, 200);
