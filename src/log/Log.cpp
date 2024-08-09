@@ -32,17 +32,17 @@ void log::Log::error(const std::string& message) {
 
 void log::Log::warning(const std::string& message) {
   std::lock_guard<std::mutex> lock(mutex_);
-  writeLog("[ WARNING ]" + message);
+  writeLog("[ WARNING ] " + message);
 }
 
 void log::Log::info(const std::string& message) {
   std::lock_guard<std::mutex> lock(mutex_);
-  writeLog("[ INFO ]" + message);
+  writeLog("[ INFO ] " + message);
 }
 
 void log::Log::debug(const std::string& message) {
   std::lock_guard<std::mutex> lock(mutex_);
-  writeLog("[ DEBUG ]" + message);
+  writeLog("[ DEBUG ] " + message);
 }
 
 void log::Log::writeLog(const std::string& message) {
@@ -61,6 +61,7 @@ void log::Log::writeError(const std::string& message) {
     std::cerr << "Failed to open error log file" << std::endl;
     return;
   }
-  file << getCurrentDatetime() << " [ ERROR ] " << " " << message << std::endl;
+  file << getCurrentDatetime() << " [ ERROR ] ";
+  file << " " << message << std::endl;
   file.close();
 }
