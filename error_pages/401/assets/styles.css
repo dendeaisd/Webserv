@@ -64,13 +64,12 @@ p3 {
 
 .loader {
   position: absolute;
-  width: 50px;
-  height: 30px;
+  height: 50px;
   aspect-ratio: 2;
   background:
-      radial-gradient(farthest-side, #000 15%, #0000 20%) 0 0 / 50% 100%,
-      radial-gradient(50% 100% at 50% 160%, #fff 95%, #0000) 0 0 / 50% 50%,
-      radial-gradient(50% 100% at 50% -60%, #fff 95%, #0000) 0 100% / 50% 50%;
+      radial-gradient(farthest-side, #fff 15%, #0000 20%) 0 0 / 50% 100%,
+      radial-gradient(50% 100% at 50% 160%,  #eb2015 95%, #0000) 0 0 / 50% 50%,
+      radial-gradient(50% 100% at 50% -60%, #eb2015 95%, #0000) 0 100% / 50% 50%;
   background-repeat: repeat-x;
   -webkit-mask: radial-gradient(50% 100%, #000 95%, #0000) 0 100% / 50% 0% repeat-x;
   -moz-mask: radial-gradient(50% 100%, #000 95%, #0000) 0 100% / 50% 0% repeat-x;
@@ -80,13 +79,13 @@ p3 {
 }
 
 .loader1 {
-  height: 30px;
+  height: 50px;
   aspect-ratio: 2;
   display: grid;
   background:
-    radial-gradient(farthest-side,#000 15%,#0000 18%)0 0/50% 100%,
-    radial-gradient(50% 100% at 50% 160%,#fff 95%,#0000) 0 0   /50% 50%,
-    radial-gradient(50% 100% at 50% -60%,#fff 95%,#0000) 0 100%/50% 50%;
+    radial-gradient(farthest-side,#fff 15%,#0000 18%)0 0/50% 100%,
+    radial-gradient(50% 100% at 50% 160%,#eb2015 95%,#0000) 0 0   /50% 50%,
+    radial-gradient(50% 100% at 50% -60%,#eb2015 95%,#0000) 0 100%/50% 50%;
   background-repeat: repeat-x;
   animation: l2 1.5s infinite linear;
 }
