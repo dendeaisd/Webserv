@@ -1,7 +1,19 @@
 #include "../../include/log/Log.hpp"
 
+#include <chrono>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
+
+std::string getCurrentDatetime() {
+  auto now = std::chrono::system_clock::now();
+  std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+  std::tm* now_tm = std::localtime(&now_c);
+  std::stringstream ss;
+  ss << std::put_time(now_tm, "%Y-%m-%d %H:%M:%S");
+  return ss.str();
+}
 
 log::Log& log::Log::getInstance() {
   static Log instance;
@@ -39,7 +51,7 @@ void log::Log::writeLog(const std::string& message) {
     std::cerr << "Failed to open log file" << std::endl;
     return;
   }
-  file << message << std::endl;
+  file << getCurrentDatetime() << " " << message << std::endl;
   file.close();
 }
 
@@ -49,6 +61,6 @@ void log::Log::writeError(const std::string& message) {
     std::cerr << "Failed to open error log file" << std::endl;
     return;
   }
-  file << "[ ERROR ] " << message << std::endl;
+  file << getCurrentDatetime() << " [ ERROR ] " << " " << message << std::endl;
   file.close();
 }
