@@ -6,7 +6,7 @@
 #include <cstring>
 #include <iostream>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 4096
 
 Client::Client(int fd) : fd(fd) { fcntl(fd, F_SETFL, O_NONBLOCK); }
 
