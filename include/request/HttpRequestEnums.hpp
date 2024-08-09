@@ -18,4 +18,6 @@ enum HttpRequestVersion { HTTP_1_0, HTTP_1_1, HTTP_2_0, VERSION_UNKNOWN };
 
 enum HttpRequestParseStatus { NOT_PARSED, PARSED, INVALID, INCOMPLETE };
 
+enum HttpRequestHandler { CGI, STATIC, REDIRECT };
+
 #endif

@@ -1,5 +1,6 @@
 
 #include "../../include/networking/Server.hpp"
+#include "../../include/cgi/CGI.hpp"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -57,9 +58,12 @@ void Server::handleClientRequest(int fd) {
 
 void Server::processClientRequest(std::vector<Client*>::iterator& it) {
   try {
-    if (!(*it)->handleRequest()) {
-      cleanupClient(it);
-    }
+	cgi::CGI cgi((*it)->getFd());
+	cgi.run();
+	cleanupClient(it);
+    // if (!(*it)->handleRequest()) {
+    //   cleanupClient(it);
+    // }
   } catch (const std::exception& e) {
     std::cerr << "Exception caught while handling request: " << e.what()
               << std::endl;
