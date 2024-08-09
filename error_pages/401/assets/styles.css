@@ -1,12 +1,21 @@
-body, html {
+:root {
+  --sclera-color: #eb2015;
+  --background-color: #000;
+  --pupil-color: #fff;
+  --loader-height: 50px;
+  --loader-aspect-ratio: 2;
+}
+
+body,
+html {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-
+  display: flex;
   align-items: center;
-  color:white;
-  background-color: #000;
+  color: white;
+  background-color: var(--background-color);
   overflow: hidden;
 }
 
@@ -47,79 +56,72 @@ p {
   margin: 10px 0;
 }
 
+p1,
+p2,
+p3 {
+  margin: 10px;
+}
+
 p1 {
   font-size: 1.3em;
-  margin: 10px;
 }
-
 p2 {
-  font-size:0.7em;
-  margin: 10px;
+  font-size: 0.7em;
 }
-
 p3 {
   font-size: 0.5em;
-  margin: 10px;
+}
+
+.loader,
+.loader1 {
+  height: var(--loader-height);
+  aspect-ratio: var(--loader-aspect-ratio);
+  background: radial-gradient(farthest-side, var(--pupil-color) 15%, #0000 20%)
+      0 0 / 50% 100%,
+    radial-gradient(50% 100% at 50% 160%, var(--sclera-color) 95%, #0000) 0 0 /
+      50% 50%,
+    radial-gradient(50% 100% at 50% -60%, var(--sclera-color) 95%, #0000) 0 100% /
+      50% 50%;
+  background-repeat: repeat-x;
 }
 
 .loader {
   position: absolute;
-  height: 50px;
-  aspect-ratio: 2;
-  background:
-      radial-gradient(farthest-side, #fff 15%, #0000 20%) 0 0 / 50% 100%,
-      radial-gradient(50% 100% at 50% 160%,  #eb2015 95%, #0000) 0 0 / 50% 50%,
-      radial-gradient(50% 100% at 50% -60%, #eb2015 95%, #0000) 0 100% / 50% 50%;
-  background-repeat: repeat-x;
-  -webkit-mask: radial-gradient(50% 100%, #000 95%, #0000) 0 100% / 50% 0% repeat-x;
-  -moz-mask: radial-gradient(50% 100%, #000 95%, #0000) 0 100% / 50% 0% repeat-x;
-  -ms-mask: radial-gradient(50% 100%, #000 95%, #0000) 0 100% / 50% 0% repeat-x;
-  mask: radial-gradient(50% 100%, #000 95%, #0000) 0 100% / 50% 0% repeat-x;
   animation: l3 1s infinite alternate ease-in;
+  mask: radial-gradient(50% 100%, #000 95%, #0000) 0 100% / 50% 100% repeat-x;
 }
 
 .loader1 {
-  height: 50px;
-  aspect-ratio: 2;
   display: grid;
-  background:
-    radial-gradient(farthest-side,#fff 15%,#0000 18%)0 0/50% 100%,
-    radial-gradient(50% 100% at 50% 160%,#eb2015 95%,#0000) 0 0   /50% 50%,
-    radial-gradient(50% 100% at 50% -60%,#eb2015 95%,#0000) 0 100%/50% 50%;
-  background-repeat: repeat-x;
   animation: l2 1.5s infinite linear;
 }
+
 @keyframes l2 {
   0%,
-  15% {background-position:0   0,0 0,0 100%}
-  20%,
-  40% {background-position:5px 0,0 0,0 100%}
+  15%,
   45%,
-  55% {background-position:0   0,0 0,0 100%}
-  60%,
-  80%{background-position:-5px 0,0 0,0 100%}
+  55%,
   85%,
-  100% {background-position:0   0,0 0,0 100%}
+  100% {
+    background-position: 0 0, 0 0, 0 100%;
+  }
+  20%,
+  40% {
+    background-position: 5px 0, 0 0, 0 100%;
+  }
+  60%,
+  80% {
+    background-position: -5px 0, 0 0, 0 100%;
+  }
 }
 
 @keyframes l3 {
   0%,
-  70% { 
-      -webkit-mask-size: 50% 100%;
-      -moz-mask-size: 50% 100%;
-      -ms-mask-size: 50% 100%;
-      mask-size: 50% 100%;
+  70%,
+  100% {
+    mask-size: 50% 100%;
   }
-  85% { 
-      -webkit-mask-size: 50% 0;
-      -moz-mask-size: 50% 0;
-      -ms-mask-size: 50% 0;
-      mask-size: 50% 0;
-  }
-  100% { 
-      -webkit-mask-size: 50% 100%;
-      -moz-mask-size: 50% 100%;
-      -ms-mask-size: 50% 100%;
-      mask-size: 50% 100%;
+  85% {
+    mask-size: 50% 0;
   }
 }
