@@ -6,6 +6,8 @@
 
 namespace log {
 class Log {
+  enum class LogLevel { INFO, WARNING, ERROR, DEBUG };
+
  public:
   static Log& getInstance();
 
@@ -24,10 +26,12 @@ class Log {
 
   void writeLog(const std::string& message);
   void writeError(const std::string& message);
+  void moveOldLogs(const std::string& file);
 
   std::mutex mutex_;
   std::string logFile_ = "logs/server.log";
   std::string errorFile_ = "logs/error.log";
+  LogLevel logLevel_ = LogLevel::DEBUG;
 };
 }  // namespace log
 
