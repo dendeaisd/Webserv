@@ -2,6 +2,7 @@
 #define HTTP_CONTEXT_HPP
 
 #include <iostream>
+#include <vector>
 #include "ServerContext.hpp"
 
 class HttpContext
@@ -9,7 +10,7 @@ class HttpContext
   public:
     HttpContext();
 
-    ServerContext serverContext_;
+    std::vector<ServerContext> serverContext_;
 
     std::string geoipCountry_;
     std::string serverValue_;
