@@ -1,5 +1,7 @@
 #include "../../include/request/HttpRequestParser.hpp"  //also wouldn t recognize the path
 
+#include "../../include/request/HttpRequestEnums.hpp"
+
 // Also, instead of returning early and setting a status
 // i would maybe throw different exceptions for different parsing errors
 HttpRequestParser::HttpRequestParser(const std::string request)
@@ -12,6 +14,15 @@ HttpRequest HttpRequestParser::getHttpRequest() {
     return request;
   } else {
     return HttpRequest();
+  }
+}
+
+void HttpRequestParser::electHandler() {
+  // TODO: update this to use server configuration
+  if (request.getUri().find("cgi-bin") != std::string::npos) {
+    request.setHandler(HttpRequestHandler::CGI);
+  } else {
+    request.setHandler(HttpRequestHandler::STATIC);
   }
 }
 
@@ -44,6 +55,7 @@ int HttpRequestParser::parse() {
              std::string::npos) {
     parseFormData(request.getHeader("boundary"), ss);
   }
+  electHandler();
   return 200;
 }
 

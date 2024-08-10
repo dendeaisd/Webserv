@@ -136,3 +136,7 @@ std::string HttpRequest::toJson() {
   str += "}";
   return str;
 }
+
+HttpRequestHandler HttpRequest::getHandler() { return _handler; }
+
+void HttpRequest::setHandler(HttpRequestHandler handler) { _handler = handler; }

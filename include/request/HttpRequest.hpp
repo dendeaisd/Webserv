@@ -16,6 +16,7 @@ class HttpRequest {
   HttpRequest();
   ~HttpRequest();
 
+  HttpRequestHandler getHandler();
   std::string getMethod();
   HttpRequestMethod getMethodEnum();
   std::string getUri();
@@ -29,6 +30,7 @@ class HttpRequest {
   std::string getHeader(std::string header);
   std::map<std::string, std::string> getHeaders();
   std::map<std::string, std::string> getQueryParams();
+  void setHandler(HttpRequestHandler handler);
   void setMethod(std::string method);
   void setMethod(HttpRequestMethod httpRequestMethod);
   void setUri(std::string uri);
@@ -59,6 +61,7 @@ class HttpRequest {
   std::string _body;
   std::string _subDomain;
   std::string _domain;
+  HttpRequestHandler _handler;
   // FileUpload file;
   std::map<std::string, std::string> _headers;
   std::map<std::string, std::string> _queryParams;
