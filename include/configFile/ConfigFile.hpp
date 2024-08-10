@@ -9,6 +9,8 @@ class ConfigFile {
 
   ConfigFile();
 
+  void parsConfigFile(const std::string &fileName);
+  void detect_type();
   std::string workerProcessesValue_;
   std::string pidValue_;
   std::string errorLogValue_;
