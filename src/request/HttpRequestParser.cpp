@@ -1,8 +1,8 @@
 #include "../../include/request/HttpRequestParser.hpp"  //also wouldn t recognize the path
 
-#include "../../include/request/HttpRequestEnums.hpp"
-
 #include <utility>
+
+#include "../../include/request/HttpRequestEnums.hpp"
 
 // Also, instead of returning early and setting a status
 // i would maybe throw different exceptions for different parsing errors
@@ -118,7 +118,8 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
       std::string key = header.substr(0, pos);
       if (HttpMaps::headerSet.find(key) == HttpMaps::headerSet.end()) {
         std::cout << "Unknown header" << std::endl;
-		// Unknown headers are ignored to improve server performance and prevent security vulnerabilities
+        // Unknown headers are ignored to improve server performance and prevent
+        // security vulnerabilities
         continue;
       }
       if (header.find("\r") != std::string::npos)
