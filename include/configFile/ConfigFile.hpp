@@ -2,20 +2,20 @@
 #define CONFIG_FILE_HPP
 
 #include <iostream>
+
 #include "HttpContext.hpp"
 
 class ConfigFile {
  public:
-
   ConfigFile();
 
-  void parsConfigFile(const std::string &fileName);
-  void detect_type();
-  std::string workerProcessesValue_;
-  std::string pidValue_;
-  std::string errorLogValue_;
+  void storeConfiguration(const std::string &fileName);
 
-  HttpContext httpContext_;
+  std::string _workerProcessesValue;
+  std::string _pidValue;
+  std::string _errorLogValue;
+
+  HttpContext _httpContext;
 };
 
 #endif  // CONFIG_FILE_HPP

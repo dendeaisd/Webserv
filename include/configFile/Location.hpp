@@ -5,33 +5,32 @@
 
 class Location {
  public:
+  Location();
 
-   Location();
-
-   std::string urlValue_;
-   std::string rootValue_;
-   std::string proxy_passValue_;
-   std::string aliasValue_;
-   std::string try_filesValue_;
-   std::string indexValue_;
-   std::string error_pageValue_;
-   std::string rewriteValue_;
-   std::string returnValue_;
-   std::string access_logValue_;
-   std::string denyValue_;
-   std::string allowValue_;
-   std::string add_headerValue_;
-   std::string expiresValue_;
-   std::string limit_reqValue_;
-   std::string limit_connValue_;
-   std::string proxy_set_headerValue_;
-   std::string proxy_redirectValue_;
-   std::string fastcgi_passValue_;
-   std::string uwsgi_passValue_;
-   std::string scgi_passValue_;
-   std::string ContextsValue_;
-   std::string ifValue_;
-   std::string limit_exceptValue_;
+  std::string _urlValue;
+  std::string _rootValue;
+  std::string _proxy_passValue;
+  std::string _aliasValue;
+  std::string _try_filesValue;
+  std::string _indexValue;
+  std::string _error_pageValue;
+  std::string _rewriteValue;
+  std::string _returnValue;
+  std::string _access_logValue;
+  std::string _denyValue;
+  std::string _allowValue;
+  std::string _add_headerValue;
+  std::string _expiresValue;
+  std::string _limit_reqValue;
+  std::string _limit_connValue;
+  std::string _proxy_set_headerValue;
+  std::string _proxy_redirectValue;
+  std::string _fastcgi_passValue;
+  std::string _uwsgi_passValue;
+  std::string _scgi_passValue;
+  std::string _ContextsValue;
+  std::string _ifValue;
+  std::string _limit_exceptValue;
 };
 
 #endif  // LOCATION_HPP

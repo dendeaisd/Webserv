@@ -1,0 +1,21 @@
+#ifndef CONFIG_FILE_HPP
+#define CONFIG_FILE_HPP
+
+#include <iostream>
+#include "HttpContext.hpp"
+
+class ConfigFile {
+ public:
+
+  ConfigFile();
+
+  void parsConfigFile(const std::string &fileName);
+  void detect_type();
+  std::string workerProcessesValue_;
+  std::string pidValue_;
+  std::string errorLogValue_;
+
+  HttpContext httpContext_;
+};
+
+#endif  // CONFIG_FILE_HPP
