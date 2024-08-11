@@ -34,7 +34,8 @@ bool Client::handleRequest() {
       buffer[bytes_read] = '\0';
       std::cout << "Received: " << buffer << std::endl;
       HttpRequestParser parser(buffer);
-      if (parser.parse() == 200) {
+      int status = parser.parse();
+      if (status == 200) {
         std::cout << "Parsed successfully" << std::endl;
         auto request = parser.getHttpRequest();
         if (request.getHandler() == HttpRequestHandler::CGI) {
@@ -46,8 +47,9 @@ bool Client::handleRequest() {
           send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
         }
       } else {
-		auto request = parser.getHttpRequest();
-		std::cout << request.getHandler() << std::endl;
+        std::cout << "Status: " << status << std::endl;
+        auto request = parser.getHttpRequest();
+        std::cout << request.getHandler() << std::endl;
         std::cout << "Failed to parse" << std::endl;
       }
       return true;

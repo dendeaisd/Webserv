@@ -35,10 +35,12 @@ int HttpRequestParser::parse() {
     requestLine.erase(requestLine.find("\r"), 1);
   parseRequestLine((char *)requestLine.c_str(), requestLine.length());
   if (status == INVALID || status == INCOMPLETE) {
+    std::cout << "Invalid request line" << std::endl;
     return 400;
   }
   parseHeaders(ss);
   if (status == INVALID) {
+    std::cout << "Invalid headers" << std::endl;
     return 400;
   }
   std::string query;
@@ -101,16 +103,19 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
     -- src: https://www.rfc-editor.org/rfc/inline-errata/rfc9112.html
     */
     if (header.find(" : ") != std::string::npos) {
+      std::cout << "Invalid header" << std::endl;
       status = INVALID;
       return;
     }
     size_t pos = header.find(": ");
     if (pos != std::string::npos) {
       std::string key = header.substr(0, pos);
-      if (HttpMaps::headerSet.find(key) == HttpMaps::headerSet.end()) {
-        status = INVALID;
-        return;
-      }
+      // TODO: do we actually want to limit headers?
+      // if (HttpMaps::headerSet.find(key) == HttpMaps::headerSet.end()) {
+      //   std::cout << "Duplicate headers" << std::endl;
+      //   status = INVALID;
+      //   return;
+      // }
       if (header.find("\r") != std::string::npos)
         header.erase(header.find("\r"), 1);
       std::string value = header.substr(pos + 2);

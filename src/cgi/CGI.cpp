@@ -21,7 +21,7 @@ cgi::CGI::CGI(int fd) {
   fd_ = fd;
   script_ = "./cgi-bin/hello.py";
   language_ = "/usr/bin/python3";
-  load();
+  // load();
   if (pipe(pipeInFd_) == -1 || pipe(pipeOutFd_) == -1) {
     throw std::runtime_error("Failed to create pipe");
   }
