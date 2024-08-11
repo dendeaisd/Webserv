@@ -2,6 +2,8 @@
 
 #include "../../include/request/HttpRequestEnums.hpp"
 
+#include <utility>
+
 // Also, instead of returning early and setting a status
 // i would maybe throw different exceptions for different parsing errors
 HttpRequestParser::HttpRequestParser(const std::string request)
@@ -15,6 +17,10 @@ HttpRequest HttpRequestParser::getHttpRequest() {
   } else {
     return HttpRequest();
   }
+}
+
+bool isCGI(const std::string &uri) {
+  return uri.find("cgi-bin") != std::string::npos;
 }
 
 void HttpRequestParser::electHandler() {
@@ -110,12 +116,11 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
     size_t pos = header.find(": ");
     if (pos != std::string::npos) {
       std::string key = header.substr(0, pos);
-      // TODO: do we actually want to limit headers?
-      // if (HttpMaps::headerSet.find(key) == HttpMaps::headerSet.end()) {
-      //   std::cout << "Duplicate headers" << std::endl;
-      //   status = INVALID;
-      //   return;
-      // }
+      if (HttpMaps::headerSet.find(key) == HttpMaps::headerSet.end()) {
+        std::cout << "Unknown header" << std::endl;
+		// Unknown headers are ignored to improve server performance and prevent security vulnerabilities
+        continue;
+      }
       if (header.find("\r") != std::string::npos)
         header.erase(header.find("\r"), 1);
       std::string value = header.substr(pos + 2);

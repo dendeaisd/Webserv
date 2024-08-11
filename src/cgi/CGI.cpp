@@ -17,10 +17,13 @@ const char *HTTP_RESPONSE_CGI =
     "\r\n"
     "Hello, Universe!\n";
 
-cgi::CGI::CGI(int fd) {
+cgi::CGI::CGI(int fd, cgi::CGIFileManager &cgiFileManager, HttpRequest &request) {
   fd_ = fd;
-  script_ = "./cgi-bin/hello.py";
-  language_ = "/usr/bin/python3";
+  script_ = "." + request.getUri();
+  language_ = cgiFileManager.getExecutor(script_);
+  if (language_.empty()) {
+	throw std::runtime_error("Failed to get executor for script");
+  }
   // load();
   if (pipe(pipeInFd_) == -1 || pipe(pipeOutFd_) == -1) {
     throw std::runtime_error("Failed to create pipe");

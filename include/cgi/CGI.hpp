@@ -2,11 +2,13 @@
 #define CGI_HPP
 
 #include <string>
+#include "CGIFileManager.hpp"
+#include "../request/HttpRequest.hpp"
 
 namespace cgi {
 class CGI {
  public:
-  CGI(int fd);
+  CGI(int fd, cgi::CGIFileManager &cgiFileManager, HttpRequest &request);
   ~CGI() {}
   void run();
   void wait();

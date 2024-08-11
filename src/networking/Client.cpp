@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "../../include/cgi/CGI.hpp"
+#include "../../include/cgi/CGIFileManager.hpp"
 #include "../../include/request/HttpRequestParser.hpp"
 
 #define BUFFER_SIZE 4096
@@ -40,7 +41,8 @@ bool Client::handleRequest() {
         auto request = parser.getHttpRequest();
         if (request.getHandler() == HttpRequestHandler::CGI) {
           std::cout << "CGI" << std::endl;
-          cgi::CGI cgi(fd);
+		  cgi::CGIFileManager cgiFileManager("./cgi-bin");
+          cgi::CGI cgi(fd, cgiFileManager, request);
           cgi.run();
         } else {
           std::cout << "STATIC" << std::endl;
