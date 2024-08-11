@@ -2,6 +2,8 @@
 #define CONFIG_FILE_HPP
 
 #include <iostream>
+#include <stack>
+#include "states.hpp"
 
 #include "HttpContext.hpp"
 
@@ -16,6 +18,17 @@ class ConfigFile {
   std::string _errorLogValue;
 
   HttpContext _httpContext;
+
+ private:
+  void setCurrentState(const std::string &line);
+  void trackBrackets(const std::string &line);
+  void popBracketForCurrentState();
+  void pushBracketForCurrentState();
+
+  TStoringStates _state;
+  std::stack<char> _httpBracket;
+  std::stack<char> _serverBracket;
+  std::stack<char> _locationBracket;
 };
 
 #endif  // CONFIG_FILE_HPP
