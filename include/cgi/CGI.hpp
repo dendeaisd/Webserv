@@ -2,8 +2,9 @@
 #define CGI_HPP
 
 #include <string>
-#include "CGIFileManager.hpp"
+
 #include "../request/HttpRequest.hpp"
+#include "CGIFileManager.hpp"
 
 namespace cgi {
 class CGI {

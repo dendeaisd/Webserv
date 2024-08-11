@@ -17,12 +17,13 @@ const char *HTTP_RESPONSE_CGI =
     "\r\n"
     "Hello, Universe!\n";
 
-cgi::CGI::CGI(int fd, cgi::CGIFileManager &cgiFileManager, HttpRequest &request) {
+cgi::CGI::CGI(int fd, cgi::CGIFileManager &cgiFileManager,
+              HttpRequest &request) {
   fd_ = fd;
   script_ = "." + request.getUri();
   language_ = cgiFileManager.getExecutor(script_);
   if (language_.empty()) {
-	throw std::runtime_error("Failed to get executor for script");
+    throw std::runtime_error("Failed to get executor for script");
   }
   // load();
   if (pipe(pipeInFd_) == -1 || pipe(pipeOutFd_) == -1) {

@@ -41,7 +41,7 @@ bool Client::handleRequest() {
         auto request = parser.getHttpRequest();
         if (request.getHandler() == HttpRequestHandler::CGI) {
           std::cout << "CGI" << std::endl;
-		  cgi::CGIFileManager cgiFileManager("./cgi-bin");
+          cgi::CGIFileManager cgiFileManager("./cgi-bin");
           cgi::CGI cgi(fd, cgiFileManager, request);
           cgi.run();
         } else {
