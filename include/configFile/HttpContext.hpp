@@ -10,6 +10,7 @@ class HttpContext {
  public:
   HttpContext();
 
+  unsigned int _numberOfServer;
   std::vector<ServerContext> _serverContext;
   Location _locationContext;
 
