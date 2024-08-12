@@ -28,13 +28,9 @@ class ConfigFile {
  private:
   void setCurrentState(const std::string &line);
   void trackBrackets(const std::string &line);
-  void popBracketForCurrentState();
-  void pushBracketForCurrentState();
+  void transferStateToBracketStatus(EBracketStatus &status);
 
   TStoringStates _state;
-  std::stack<char> _httpBracket;
-  std::stack<char> _serverBracket;
-  std::stack<char> _locationBracket;
   std::stack<char> _bracketStatus[3];
 };
 
