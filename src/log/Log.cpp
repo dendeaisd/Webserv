@@ -33,17 +33,14 @@ log::Log& log::Log::getInstance() {
   return instance;
 }
 
-void log::Log::log(const std::string& message) {
-  std::lock_guard<std::mutex> lock(mutex_);
-  writeLog(message);
-}
-
 void log::Log::error(const std::string& message) {
+  if (logLevel_ < LogLevel::ERROR) return;
   std::lock_guard<std::mutex> lock(mutex_);
   writeError(message);
 }
 
 void log::Log::warning(const std::string& message) {
+  if (logLevel_ < LogLevel::WARNING) return;
   std::lock_guard<std::mutex> lock(mutex_);
   writeLog("[ WARNING ] " + message);
 }
@@ -60,6 +57,7 @@ void log::Log::debug(const std::string& message) {
 }
 
 void log::Log::writeLog(const std::string& message) {
+  if (logLevel_ == LogLevel::NOLOG) return;
   if (getFileAge(logFile_).count() > LOG_CYCLE) {
     moveOldLogs(logFile_);
   }
@@ -86,7 +84,7 @@ void log::Log::writeError(const std::string& message) {
   file.close();
 }
 
-void moveOldLogs(const std::string& filename) {
+void log::Log::moveOldLogs(const std::string& filename) {
   std::string tmp = filename;
   std::string oldFilename = tmp.erase(tmp.find_last_of('.'));
   oldFilename.append("_" + getCurrentDatetime() + ".log");
