@@ -3,9 +3,15 @@
 
 #include <iostream>
 #include <stack>
-#include "states.hpp"
 
 #include "HttpContext.hpp"
+#include "states.hpp"
+
+enum EBracketStatus {
+  HTTP_BRACKET = 0,
+  SERVER_BRACKET = 1,
+  LOCATION_BRACKET = 2
+};
 
 class ConfigFile {
  public:
@@ -29,6 +35,7 @@ class ConfigFile {
   std::stack<char> _httpBracket;
   std::stack<char> _serverBracket;
   std::stack<char> _locationBracket;
+  std::stack<char> _bracketStatus[3];
 };
 
 #endif  // CONFIG_FILE_HPP
