@@ -2,20 +2,33 @@
 #define CONFIG_FILE_HPP
 
 #include <iostream>
+#include <stack>
+#include "states.hpp"
+
 #include "HttpContext.hpp"
 
 class ConfigFile {
  public:
-
   ConfigFile();
 
-  void parsConfigFile(const std::string &fileName);
-  void detect_type();
-  std::string workerProcessesValue_;
-  std::string pidValue_;
-  std::string errorLogValue_;
+  void storeConfiguration(const std::string &fileName);
 
-  HttpContext httpContext_;
+  std::string _workerProcessesValue;
+  std::string _pidValue;
+  std::string _errorLogValue;
+
+  HttpContext _httpContext;
+
+ private:
+  void setCurrentState(const std::string &line);
+  void trackBrackets(const std::string &line);
+  void popBracketForCurrentState();
+  void pushBracketForCurrentState();
+
+  TStoringStates _state;
+  std::stack<char> _httpBracket;
+  std::stack<char> _serverBracket;
+  std::stack<char> _locationBracket;
 };
 
 #endif  // CONFIG_FILE_HPP

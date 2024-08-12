@@ -34,3 +34,7 @@
 # Debug files
 .vscode/
 obj/
+
+# Config files
+.ccls
+.ccls-cache
