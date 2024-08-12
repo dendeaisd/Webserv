@@ -46,6 +46,7 @@ void log::Log::warning(const std::string& message) {
 }
 
 void log::Log::info(const std::string& message) {
+  if (logLevel_ < LogLevel::INFO) return;
   std::lock_guard<std::mutex> lock(mutex_);
   writeLog("[ INFO ] " + message);
 }
