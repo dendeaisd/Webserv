@@ -8,14 +8,15 @@ class ServerContext {
  public:
   ServerContext();
 
-  std::string listenValue_;
-  std::string serverNameValue_;
-  std::string sslCertificateValue_;
-  std::string sslCertificateKeyValue_;
-  std::string indexValue_;
-  std::string rootValue_;
+  std::string _listenValue;
+  std::string _serverNameValue;
+  std::string _sslCertificateValue;
+  std::string _sslCertificateKeyValue;
+  std::string _indexValue;
+  std::string _rootValue;
 
-  Location locationContext_;
+  Location _locationContext;
+
 };
 
 #endif
