@@ -1,6 +1,6 @@
 NAME        :=  webserv
 CC          :=  c++
-CFLAGS       :=  -Wall -Wextra -Werror -std=c++17
+CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g
 
 INCLUDE_DIRS := -I./include -I./tester
 TESTER_MAIN := tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
@@ -10,7 +10,7 @@ SRC_DIR := .
 OBJ_DIR := obj
 
 SRC         :=  $(wildcard src/*.cpp) $(wildcard src/networking/*.cpp) \
-	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp) $(wildcard src/cgi/*.cpp)
+	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp) $(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp)
 
 OBJ         :=  $(SRC:.cpp=.o)
 
@@ -48,7 +48,7 @@ $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
 %.o: %.cpp
-	@$(CC) $(FLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	@printf "$(UP)$(BEGIN)$(CUT)$(YELLOW)🧹Cleaning object files...$(RESET)"
