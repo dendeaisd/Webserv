@@ -14,4 +14,4 @@ RUN make run_tests
 
 EXPOSE 8080
 
-CMD ["./server_test"]
+CMD ["./webserv"]
