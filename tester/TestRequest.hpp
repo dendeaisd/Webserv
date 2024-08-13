@@ -1,11 +1,16 @@
+#include "../include/request/HttpRequest.hpp"
+#include "../include/request/HttpRequestParser.hpp"
 #include "TestCase.hpp"
 
 class TestRequest : public TestCase {
  private:
-  void testHeader();
-  void testBody() {}
-  void testMethod() {}
-  void testUrl() {}
+  HttpRequest request;
+
+  void testGET();
+  void testPOST();
+  void testPostWithFile();
+  void testPUT();
+  void testDELETE();
 
  public:
   TestRequest();
