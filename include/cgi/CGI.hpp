@@ -3,10 +3,12 @@
 
 #include <string>
 
-namespace cgi {
+#include "../request/HttpRequest.hpp"
+#include "CGIFileManager.hpp"
+
 class CGI {
  public:
-  CGI(int fd);
+  CGI(int fd, CGIFileManager &cgiFileManager, HttpRequest &request);
   ~CGI() {}
   void run();
   void wait();
@@ -23,6 +25,5 @@ class CGI {
   std::string script_;
   std::string language_;
 };
-}  // namespace cgi
 
 #endif

@@ -6,6 +6,10 @@
 #include <cstring>
 #include <iostream>
 
+#include "../../include/cgi/CGI.hpp"
+#include "../../include/cgi/CGIFileManager.hpp"
+#include "../../include/request/HttpRequestParser.hpp"
+
 #define BUFFER_SIZE 4096
 
 Client::Client(int fd) : fd(fd) { fcntl(fd, F_SETFL, O_NONBLOCK); }
@@ -30,7 +34,26 @@ bool Client::handleRequest() {
     if (bytes_read > 0) {
       buffer[bytes_read] = '\0';
       std::cout << "Received: " << buffer << std::endl;
-      send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
+      HttpRequestParser parser(buffer);
+      int status = parser.parse();
+      if (status == 200) {
+        std::cout << "Parsed successfully" << std::endl;
+        auto request = parser.getHttpRequest();
+        if (request.getHandler() == HttpRequestHandler::CGI) {
+          std::cout << "CGI" << std::endl;
+          CGIFileManager cgiFileManager("./cgi-bin");
+          CGI cgi(fd, cgiFileManager, request);
+          cgi.run();
+        } else {
+          std::cout << "STATIC" << std::endl;
+          send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
+        }
+      } else {
+        std::cout << "Status: " << status << std::endl;
+        auto request = parser.getHttpRequest();
+        std::cout << request.getHost() << std::endl;
+        std::cout << "Failed to parse" << std::endl;
+      }
       return true;
     } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
       continue;

@@ -55,7 +55,7 @@ clean:
 	@rm -rf $(OBJ_DIR)
 
 fclean:
-	@printf "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
+	@echo "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
 	@rm -rf $(OBJ_DIR)
 	@rm -f $(NAME)
 

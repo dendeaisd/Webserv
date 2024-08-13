@@ -26,7 +26,7 @@ class HttpRequestParser {
  private:
   HttpRequest request;
   std::string raw;
-
+  void electHandler();
   void parseRequestLine(char *requestLine, size_t len);
   void parseHeaders(std::stringstream &ss);
   void parseBody(std::stringstream &ss);
