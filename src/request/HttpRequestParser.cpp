@@ -7,7 +7,9 @@
 // Also, instead of returning early and setting a status
 // i would maybe throw different exceptions for different parsing errors
 HttpRequestParser::HttpRequestParser(const std::string request)
-    : status(HttpRequestParseStatus::NOT_PARSED), hasFile(false), raw(request) {}
+    : status(HttpRequestParseStatus::NOT_PARSED),
+      hasFile(false),
+      raw(request) {}
 
 HttpRequestParser::~HttpRequestParser() {}
 
@@ -40,7 +42,8 @@ int HttpRequestParser::parse() {
   if (requestLine.find("\r") != std::string::npos)
     requestLine.erase(requestLine.find("\r"), 1);
   parseRequestLine((char *)requestLine.c_str(), requestLine.length());
-  if (status == HttpRequestParseStatus::INVALID || status == HttpRequestParseStatus::INCOMPLETE) {
+  if (status == HttpRequestParseStatus::INVALID ||
+      status == HttpRequestParseStatus::INCOMPLETE) {
     std::cout << "Invalid request line" << std::endl;
     return 400;
   }
@@ -150,7 +153,8 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
 }
 
 void HttpRequestParser::parseBody(std::stringstream &ss) {
-  if (request.getMethodEnum() == HttpRequestMethod::GET || request.getMethodEnum() == HttpRequestMethod::DELETE) {
+  if (request.getMethodEnum() == HttpRequestMethod::GET ||
+      request.getMethodEnum() == HttpRequestMethod::DELETE) {
     // While it's not strictly forbidden to send a body in a GET request,
     // it's not recommended and it's not supported by most servers.
     // This is a design decision, and it's not a requirement of the HTTP
