@@ -17,8 +17,7 @@ const char *HTTP_RESPONSE_CGI =
     "\r\n"
     "Hello, Universe!\n";
 
-CGI::CGI(int fd, CGIFileManager &cgiFileManager,
-              HttpRequest &request) {
+CGI::CGI(int fd, CGIFileManager &cgiFileManager, HttpRequest &request) {
   fd_ = fd;
   script_ = "." + request.getUri();
   language_ = cgiFileManager.getExecutor(script_);
