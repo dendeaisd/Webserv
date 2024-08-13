@@ -45,5 +45,5 @@ function unlockVault() {
   alert(
     "You entered the correct code! However..."
   );
-  window.location.href = "../../403_success/success.html"
+  window.location.href = "../403_success/success.html"
 }
