@@ -1,7 +1,7 @@
 #pragma once
 #ifndef HTTP_REQUEST_ENUMS_HPP
 #define HTTP_REQUEST_ENUMS_HPP
-enum HttpRequestMethod {
+enum class HttpRequestMethod {
   GET,
   POST,
   PUT,
@@ -11,11 +11,13 @@ enum HttpRequestMethod {
   PATCH,
   TRACE,
   CONNECT,
-  METHOD_UNKNOWN
+  UNKNOWN
 };
 
-enum HttpRequestVersion { HTTP_1_0, HTTP_1_1, HTTP_2_0, VERSION_UNKNOWN };
+enum class HttpRequestVersion { HTTP_1_0, HTTP_1_1, HTTP_2_0, UNKNOWN };
 
-enum HttpRequestParseStatus { NOT_PARSED, PARSED, INVALID, INCOMPLETE };
+enum class HttpRequestParseStatus { NOT_PARSED, PARSED, INVALID, INCOMPLETE };
+
+enum class HttpRequestHandler { CGI, STATIC, REDIRECT };
 
 #endif

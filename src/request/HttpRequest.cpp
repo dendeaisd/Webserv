@@ -1,8 +1,8 @@
 #include "../../include/request/HttpRequest.hpp"
 
 HttpRequest::HttpRequest()
-    : _httpRequestMethod(METHOD_UNKNOWN),
-      _httpProtocolVersion(VERSION_UNKNOWN) {}
+    : _httpRequestMethod(HttpRequestMethod::UNKNOWN),
+      _httpProtocolVersion(HttpRequestVersion::UNKNOWN) {}
 
 HttpRequest::~HttpRequest() {
   _queryParams.clear();
@@ -136,3 +136,7 @@ std::string HttpRequest::toJson() {
   str += "}";
   return str;
 }
+
+HttpRequestHandler HttpRequest::getHandler() { return _handler; }
+
+void HttpRequest::setHandler(HttpRequestHandler handler) { _handler = handler; }

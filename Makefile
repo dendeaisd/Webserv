@@ -10,7 +10,7 @@ SRC_DIR := .
 OBJ_DIR := obj
 
 SRC         :=  $(wildcard src/*.cpp) $(wildcard src/networking/*.cpp) \
-	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp) $(wildcard src/log/*.cpp)
+	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp) $(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp)
 
 OBJ         :=  $(SRC:.cpp=.o)
 
@@ -62,7 +62,7 @@ clean:
 	@rm -rf $(OBJ_DIR)
 
 fclean:
-	@printf "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
+	@echo "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
 	@rm -rf $(OBJ_DIR)
 	@rm -f $(NAME) $(TEST_NAME)
 
