@@ -27,7 +27,6 @@ document.getElementById("submit-button").addEventListener("click", function () {
       message = "Haha, very funny. But no entry!";
       break;
     case "0403": // The correct code
-      message = "Welcome! But wait... This is still a 403 page.";
       unlockVault();
       break;
     default:
@@ -44,7 +43,7 @@ document.getElementById("submit-button").addEventListener("click", function () {
 
 function unlockVault() {
   alert(
-    "You entered the correct code! However, this vault isn't going anywhere..."
+    "You entered the correct code! However..."
   );
-  // Additional page here
+  window.location.href = "../../403_success/success.html"
 }
