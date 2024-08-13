@@ -17,7 +17,7 @@ const char *HTTP_RESPONSE_CGI =
     "\r\n"
     "Hello, Universe!\n";
 
-cgi::CGI::CGI(int fd, cgi::CGIFileManager &cgiFileManager,
+CGI::CGI(int fd, CGIFileManager &cgiFileManager,
               HttpRequest &request) {
   fd_ = fd;
   script_ = "." + request.getUri();
@@ -31,7 +31,7 @@ cgi::CGI::CGI(int fd, cgi::CGIFileManager &cgiFileManager,
   }
 }
 
-void cgi::CGI::run() {
+void CGI::run() {
   pid_ = fork();
   if (pid_ == -1) {
     throw std::runtime_error("Failed to fork");
@@ -52,7 +52,7 @@ void cgi::CGI::run() {
   wait();
 }
 
-void cgi::CGI::wait() {
+void CGI::wait() {
   // TODO: make this non-blocking and check if timeout reached return 408
   // error with timeout message
   int status;
@@ -60,7 +60,7 @@ void cgi::CGI::wait() {
                               // update relevant code
   if (WIFEXITED(status)) {
     if (WEXITSTATUS(status) != 0) {
-      // return 500 error
+      // TODO: return 500 error
       throw std::runtime_error("Script exited with non-zero status");
     }
     int sent = send(fd_, HTTP_RESPONSE_CGI, strlen(HTTP_RESPONSE_CGI), 0);
@@ -68,16 +68,16 @@ void cgi::CGI::wait() {
       throw std::runtime_error(std::strerror(errno));
     }
     if (sent < static_cast<int>(strlen(HTTP_RESPONSE_CGI))) {
-      // return 500 error
+      // TODO: return 500 error
       throw std::runtime_error("Failed to send full response");
     }
   } else {
-    // return 500 error
+    // TODO: return 500 error
     throw std::runtime_error("Script did not exit normally");
   }
 }
 
-void cgi::CGI::executeCGI() {
+void CGI::executeCGI() {
   std::vector<char *> args;
   std::vector<char *> envp;
 
@@ -94,7 +94,7 @@ void cgi::CGI::executeCGI() {
   exit(1);
 }
 
-int cgi::CGI::load() {
+int CGI::load() {
   char buffer[4096];
   int bytes_read;
   while (true) {

@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-namespace cgi {
 struct CGIFile {
   std::string path;
   std::string executor;
@@ -23,8 +22,7 @@ class CGIFileManager {
   std::vector<CGIFile> cgiFiles_;
   std::map<std::string, std::string> cgiExecutors_;
   std::string cgiDir_;
-  void addCGIFiles();
+  void mapCGIDir();
 };
-}  // namespace cgi
 
 #endif

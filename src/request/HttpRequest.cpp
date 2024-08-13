@@ -1,8 +1,8 @@
 #include "../../include/request/HttpRequest.hpp"
 
 HttpRequest::HttpRequest()
-    : _httpRequestMethod(METHOD_UNKNOWN),
-      _httpProtocolVersion(VERSION_UNKNOWN) {}
+    : _httpRequestMethod(HttpRequestMethod::UNKNOWN),
+      _httpProtocolVersion(HttpRequestVersion::UNKNOWN) {}
 
 HttpRequest::~HttpRequest() {
   _queryParams.clear();

@@ -1,6 +1,6 @@
 NAME        :=  webserv
 CC          :=  c++
-CFLAGS       :=  -Wall -Wextra -Werror -std=c++17
+CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g
 
 INCLUDE_DIRS := -I./include -I./tester
 TESTER_MAIN := tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
@@ -55,7 +55,7 @@ clean:
 	@rm -rf $(OBJ_DIR)
 
 fclean:
-	@printf "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
+	@echo "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
 	@rm -rf $(OBJ_DIR)
 	@rm -f $(NAME)
 

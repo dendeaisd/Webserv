@@ -41,8 +41,8 @@ bool Client::handleRequest() {
         auto request = parser.getHttpRequest();
         if (request.getHandler() == HttpRequestHandler::CGI) {
           std::cout << "CGI" << std::endl;
-          cgi::CGIFileManager cgiFileManager("./cgi-bin");
-          cgi::CGI cgi(fd, cgiFileManager, request);
+          CGIFileManager cgiFileManager("./cgi-bin");
+          CGI cgi(fd, cgiFileManager, request);
           cgi.run();
         } else {
           std::cout << "STATIC" << std::endl;
@@ -51,7 +51,7 @@ bool Client::handleRequest() {
       } else {
         std::cout << "Status: " << status << std::endl;
         auto request = parser.getHttpRequest();
-        std::cout << request.getHandler() << std::endl;
+        std::cout << request.getHost() << std::endl;
         std::cout << "Failed to parse" << std::endl;
       }
       return true;

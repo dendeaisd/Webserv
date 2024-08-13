@@ -5,20 +5,20 @@
 
 namespace fs = std::filesystem;
 
-cgi::CGIFileManager::CGIFileManager(std::string cgiDir) : cgiDir_(cgiDir) {
+CGIFileManager::CGIFileManager(std::string cgiDir) : cgiDir_(cgiDir) {
   // TEMP map for cgi executors
   cgiExecutors_[".php"] = "/usr/bin/php";
   cgiExecutors_[".py"] = "/usr/bin/python3";
   cgiExecutors_[".pl"] = "/usr/bin/perl";
   cgiExecutors_[".rb"] = "/usr/bin/ruby";
   cgiExecutors_[".sh"] = "/bin/bash";
-  addCGIFiles();
+  mapCGIDir();
   for (auto &file : cgiFiles_) {
     std::cout << file.path << " " << file.executor << std::endl;
   }
 }
 
-std::string cgi::CGIFileManager::getExecutor(std::string path) {
+std::string CGIFileManager::getExecutor(std::string path) {
   for (auto &file : cgiFiles_) {
     if (file.path == path) {
       return file.executor;
@@ -27,8 +27,7 @@ std::string cgi::CGIFileManager::getExecutor(std::string path) {
   return "";
 }
 
-void cgi::CGIFileManager::addCGIFiles() {
-  // List files in directory
+void CGIFileManager::mapCGIDir() {
   for (const auto &entry : fs::directory_iterator(cgiDir_)) {
     std::string path = entry.path().string();
     std::string extension = path.substr(path.find_last_of('.'));

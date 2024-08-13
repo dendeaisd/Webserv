@@ -6,10 +6,9 @@
 #include "../request/HttpRequest.hpp"
 #include "CGIFileManager.hpp"
 
-namespace cgi {
 class CGI {
  public:
-  CGI(int fd, cgi::CGIFileManager &cgiFileManager, HttpRequest &request);
+  CGI(int fd, CGIFileManager &cgiFileManager, HttpRequest &request);
   ~CGI() {}
   void run();
   void wait();
@@ -26,6 +25,5 @@ class CGI {
   std::string script_;
   std::string language_;
 };
-}  // namespace cgi
 
 #endif

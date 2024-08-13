@@ -12,24 +12,24 @@ const std::set<std::string> HttpMaps::requiredHeaders1_1 =
 
 std::map<std::string, HttpRequestMethod> HttpMaps::initHttpRequestMethodMap() {
   std::map<std::string, HttpRequestMethod> map;
-  map["GET"] = GET;
-  map["POST"] = POST;
-  map["PUT"] = PUT;
-  map["DELETE"] = DELETE;
-  map["HEAD"] = HEAD;
-  map["OPTIONS"] = OPTIONS;
-  map["PATCH"] = PATCH;
-  map["TRACE"] = TRACE;
-  map["CONNECT"] = CONNECT;
+  map["GET"] = HttpRequestMethod::GET;
+  map["POST"] = HttpRequestMethod::POST;
+  map["PUT"] = HttpRequestMethod::PUT;
+  map["DELETE"] = HttpRequestMethod::DELETE;
+  map["HEAD"] = HttpRequestMethod::HEAD;
+  map["OPTIONS"] = HttpRequestMethod::OPTIONS;
+  map["PATCH"] = HttpRequestMethod::PATCH;
+  map["TRACE"] = HttpRequestMethod::TRACE;
+  map["CONNECT"] = HttpRequestMethod::CONNECT;
   return map;
 }
 
 std::map<std::string, HttpRequestVersion>
 HttpMaps::initHttpRequestVersionMap() {
   std::map<std::string, HttpRequestVersion> map;
-  map["HTTP/1.0"] = HTTP_1_0;
-  map["HTTP/1.1"] = HTTP_1_1;
-  map["HTTP/2.0"] = HTTP_2_0;
+  map["HTTP/1.0"] = HttpRequestVersion::HTTP_1_0;
+  map["HTTP/1.1"] = HttpRequestVersion::HTTP_1_1;
+  map["HTTP/2.0"] = HttpRequestVersion::HTTP_2_0;
   return map;
 }
 
