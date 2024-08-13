@@ -37,16 +37,6 @@ html {
   align-items: center;
   justify-content: center;
   text-align: center;
-  transition: transform 0.3s ease;
-}
-
-.glitch-wrapper:hover .glitch {
-  transform: scale(1.9);
-}
-
-.glitch-wrapper:hover .glitch:before,
-.glitch-wrapper:hover .glitch:after {
-  transform: scale(1.9);
 }
 
 .glitch {
@@ -94,6 +84,15 @@ html {
   animation: noise-after 2s infinite linear alternate-reverse,
     flicker 0.1s infinite;
   transition: transform 0.3s ease;
+}
+
+.glitch:hover {
+  transform: scale(1.7);
+}
+
+.glitch:hover:before,
+.glitch:hover:after {
+  transform: scale(1.7);
 }
 
 @keyframes hue-rotation {
