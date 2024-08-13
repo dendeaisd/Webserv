@@ -1,0 +1,217 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #333;
+  color: white;
+  font-family: "Arial", sans-serif;
+  overflow: hidden;
+}
+
+.vault-container {
+  text-align: center;
+}
+
+.vault-door-outer {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  background: rgb(235, 235, 235);
+  border-radius: 6%;
+}
+
+.vault-door-inner {
+  position: absolute;
+  margin: 52px;
+  width: 390px;
+  height: 390px;
+  background: rgb(219, 219, 219);
+  border-radius: 25%;
+}
+
+.vault-door-lock-shadow {
+  position: absolute;
+  width: 340px;
+  height: 180px;
+  background: linear-gradient(rgba(160, 160, 160, 0.2), transparent);
+  margin: 170px 90px;
+  transform: rotate(-45deg);
+  transition: all 0.05s ease-out;
+}
+
+.vault-door-lock-wrapper {
+  position: absolute;
+  width: 190px;
+  height: 190px;
+}
+
+.vault-door-lock {
+  background: rgb(185, 185, 185);
+}
+
+.vault-door-circle {
+  position: absolute;
+  width: 310px;
+  height: 310px;
+  margin: 40px;
+  border-radius: 50%;
+}
+
+.vault-door-pistons {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  margin: 180px 25px;
+  background: none;
+}
+
+.piston {
+  position: absolute;
+  background: rgb(185, 185, 185);
+  width: 340px;
+  height: 30px;
+  border-radius: 8px;
+  transition: all 0.05s ease-out;
+}
+
+.piston2 {
+  transform: rotate(45deg);
+}
+
+.piston3 {
+  transform: rotate(90deg);
+}
+
+.piston4 {
+  transform: rotate(135deg);
+}
+
+.vault-door-handle-shadow {
+  position: absolute;
+  background: rgb(160, 160, 160);
+  width: 150px;
+  height: 150px;
+  margin: 120px;
+  border-radius: 50%;
+}
+
+.vault-door-handle-long-shadow {
+  position: absolute;
+  background: linear-gradient(rgb(160, 160, 160), transparent);
+  width: 186px;
+  height: 186px;
+  margin: 165px;
+  transform: rotate(-45deg);
+}
+
+.vault-door-handle {
+  position: absolute;
+  border: solid 23px rgb(214, 214, 214);
+  width: 140px;
+  height: 140px;
+  margin: 102px;
+  border-radius: 50%;
+  transition: all 0.3s ease-in-out;
+}
+
+.handle-bar {
+  position: absolute;
+  background: rgb(214, 214, 214);
+  height: 22px;
+  width: 140px;
+  margin: 59px 0;
+}
+
+.bar1 {
+  transform: rotate(45deg);
+}
+
+.bar2 {
+  transform: rotate(135deg);
+}
+
+.vault-sign {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5em;
+  color: #ff4f4f;
+  text-align: center;
+}
+
+.message {
+  margin: 20px 0;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.keypad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#code-input {
+  font-size: 1.2em;
+  padding: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+  width: 150px;
+  border: 2px solid #444;
+  border-radius: 5px;
+  background-color: #222;
+  color: white;
+}
+
+#submit-button {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  background-color: #444;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+#submit-button:hover {
+  background-color: #555;
+}
+
+#submit-button:active {
+  background-color: #666;
+}
+
+.hidden {
+  display: none;
+}
+
+#error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+.vault-door-outer:hover .vault-door-lock-shadow {
+  width: 300px;
+  margin: 150px 90px;
+  transition: all 0.2s ease-out;
+}
+
+.vault-door-outer:hover .piston {
+  width: 310px;
+  margin-left: 15px;
+  margin-right: 15px;
+  transition: all 0.2s ease-out;
+}
+
+.vault-door-outer:hover .vault-door-handle {
+  transform: rotate(-180deg);
+  transition: all 0.7s ease-in-out;
+}
