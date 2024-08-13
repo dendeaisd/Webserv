@@ -1,3 +1,12 @@
+document
+  .getElementById("code-input")
+  .addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      document.getElementById("submit-button").click();
+    }
+  });
+
 document.getElementById("submit-button").addEventListener("click", function () {
   const codeInput = document.getElementById("code-input").value;
   const errorMessage = document.getElementById("error-message");
