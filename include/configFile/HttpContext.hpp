@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include "ServerContext.hpp"
 
@@ -10,8 +11,10 @@ class HttpContext {
  public:
   HttpContext();
 
-  unsigned int _numberOfServer;
-  std::vector<ServerContext> _serverContext;
+  void addNewEmptyServer();
+
+  std::vector<std::unique_ptr<ServerContext>> _serverContext;
+  unsigned int _numberOfServers;
   Location _locationContext;
 
   std::string _geoipCountry;

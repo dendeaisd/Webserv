@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/12 09:25:42 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/12 13:50:59 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ void ConfigFile::storeConfiguration(const std::string &fileName) {
   file.open(fileName.c_str());
   while (std::getline(file, line)) {
     setCurrentState(line);
+    possibleNewServerContextSetup(line);
     trackBrackets(line);
   }
 }
@@ -43,6 +44,12 @@ void ConfigFile::setCurrentState(const std::string &line) {
   else if (_state == LOCATION_CONTEXT_IN_SERVER &&
            _bracketStatus[LOCATION_BRACKET].size() == 0)
     _state = SERVER_CONTEXT_IN_HTTP;
+}
+
+void ConfigFile::possibleNewServerContextSetup(const std::string &line)
+{
+  if (_state == SERVER_CONTEXT_IN_HTTP && line.find("server") != line.npos)
+    _httpContext.addNewEmptyServer();
 }
 
 void ConfigFile::trackBrackets(const std::string &line) {

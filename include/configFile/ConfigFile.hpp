@@ -27,6 +27,7 @@ class ConfigFile {
 
  private:
   void setCurrentState(const std::string &line);
+  void possibleNewServerContextSetup(const std::string &line);
   void trackBrackets(const std::string &line);
   void transferStateToBracketStatus(EBracketStatus &status);
 
