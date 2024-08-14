@@ -41,18 +41,6 @@ class HttpContext {
   std::string _error_logValue;
   std::string _limit_req_zoneValue;
   std::string _limit_reqValue;
-  std::string _geoip_countryValue;
-  std::string _returnValue;
-  std::string _fastcgi_passValue;
-  std::string _fastcgi_indexValue;
-  std::string _includeValue;
-  std::string _uwsgi_passValue;
-  std::string _scgi_passValue;
-  std::string _mp4Value;
-  std::string _mp4_buffer_sizeValue;
-  std::string _mp4_max_buffer_sizeValue;
-  std::string _sub_filterValue;
-  std::string _sub_filter_onceValue;
 };
 
 #endif  // HTTP_CONTEXT_HPP
