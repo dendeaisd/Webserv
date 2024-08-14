@@ -1,0 +1,74 @@
+body,
+html {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Arial", sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+  text-align: center;
+}
+
+h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+  color: #e74c3c;
+}
+
+.clock {
+  width: 40vw;
+  height: 40vw;
+  max-width: 500px;
+  max-height: 500px;
+  border: 6px solid #e0e0e0;
+  border-radius: 50%;
+  position: relative;
+  margin: 0 auto;
+  background-color: #333;
+}
+
+.clock::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hand {
+  width: 50%;
+  height: 2px;
+  background-color: #e0e0e0;
+  position: absolute;
+  top: 50%;
+  transform-origin: 100%;
+  animation: spin 1.5s linear infinite;
+  border-radius: 2px;
+}
+
+.minute-hand {
+  height: 3px;
+  background-color: #b0b0b0;
+  animation-duration: 0.75s;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+p {
+  font-size: 16px;
+  color: #b0b0b0;
+  margin-top: 10px;
+}
