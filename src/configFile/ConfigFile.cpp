@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/12 13:50:59 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/14 12:16:16 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,3 +79,37 @@ void ConfigFile::transfareStateToBracketStatus(EBracketStatus &status) {
       break;
   }
 }
+
+void ConfigFile::mainContextSaveDirective(const std::string &line)
+{
+  if (_state != MAIN_CONTEXT)
+    return ;
+  if (line.find("worker_processes") != line.npos)
+    saveDirective(line, _workerProcessesValue);
+  else if (line.find("pid") != line.npos)
+    saveDirective(line, _pidValue);
+  else if (line.find("error_log") != line.npos)
+    saveDirective(line, _errorLogValue);
+}
+
+void ConfigFile::saveDirective(const std::string &line, std::string &directive)
+{
+  std::string value;
+  getValue(line, value);
+
+  directive = value;
+}
+
+void ConfigFile::getValue(const std::string &line, std::string &value)
+{
+  int endOfKey;
+  while (line[endOfKey] != ' ' && line[endOfKey] != '\0')
+  {
+    endOfKey++;
+  }
+  value = line;
+  value.erase(0, endOfKey);
+  value.erase(value.size() - 1, value.size() - 1);
+}
+
+

@@ -30,9 +30,13 @@ class ConfigFile {
   void possibleNewServerContextSetup(const std::string &line);
   void trackBrackets(const std::string &line);
   void transferStateToBracketStatus(EBracketStatus &status);
+  void mainContextSaveDirective(const std::string &line);
+  void saveDirective(const std::string &line, std::string &directive);
+  void getValue(const std::string &line, std::string &value);
+
 
   TStoringStates _state;
   std::stack<char> _bracketStatus[3];
 };
 
-#endif  // CONFIG_FILE_HPP
+#endif
