@@ -15,8 +15,8 @@ class ServerContext {
   std::string _indexValue;
   std::string _rootValue;
 
+  std::unordered_map<std::string, std::string> cgi;
   Location _locationContext;
-
 };
 
 #endif
