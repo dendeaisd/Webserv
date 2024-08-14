@@ -160,17 +160,6 @@ html {
   transform: rotate(135deg);
 }
 
-/* for now its redundant */
-/* .vault-sign {
-  position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.5em;
-  color: #ff4f4f;
-  text-align: center;
-} */
-
 .message {
   margin: 20px 0;
   font-size: 1.2em;
@@ -222,7 +211,7 @@ html {
 
 #error-message {
   color: #e74c3c;
-  background-color: rgba(231, 76, 60, 0.1); 
+  background-color: rgba(231, 76, 60, 0.1);
   padding: 10px 15px;
   margin-top: 15px;
   border: 1px solid #e74c3c;
@@ -232,7 +221,6 @@ html {
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   transition: all 0.4s ease;
 }
-
 
 .vault-door-outer:hover .vault-door-lock-shadow {
   width: 300px;
@@ -250,4 +238,65 @@ html {
 .vault-door-outer:hover .vault-door-handle {
   transform: rotate(-180deg);
   transition: all 0.7s ease-in-out;
+}
+
+.question-mark-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.question-mark-container:hover {
+  transform: scale(1.1);
+}
+
+.question-mark {
+  font-size: 50px;
+  font-weight: bold;
+  background-color: #fff;
+  color: #2c3e50;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s ease, background-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.question-mark-container:hover .question-mark {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  background-color: #f0f0f0;
+  transform: rotate(360deg);
+}
+
+.tooltip {
+  display: none;
+  background-color: rgb(58, 75, 97, 0.9);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  max-width: 300px;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  position: absolute;
+  bottom: 60px;
+  right: 10px;
+  transform: translateY(-10px);
+}
+
+.question-mark-container:hover .tooltip {
+  display: block;
+  opacity: 1;
 }

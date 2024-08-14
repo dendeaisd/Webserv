@@ -12,7 +12,7 @@
 }
 
 body {
- background: transparent;
+  background: transparent;
   height: 100vh;
   overflow: hidden;
 }
@@ -34,11 +34,8 @@ h1 {
   width: 100vw;
   z-index: 3;
   color: #080808ec;
-  text-shadow:
-  0 0 20px rgba(55, 211, 27, 0.2), 
-  0 0 40px rgba(55, 211, 27, 0.4),
-  0 0 80px rgba(55, 211, 27, 0.6)
-  0 0 120px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 20px rgba(55, 211, 27, 0.2), 0 0 40px rgba(55, 211, 27, 0.4),
+    0 0 80px rgba(55, 211, 27, 0.6) 0 0 120px rgba(0, 0, 0, 0.8);
   top: 50%;
   transform: translateY(-50%);
   font-family: "Montserrat", monospace;
