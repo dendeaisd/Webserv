@@ -2,8 +2,8 @@
 #define HTTP_CONTEXT_HPP
 
 #include <iostream>
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "ServerContext.hpp"
 
@@ -12,35 +12,30 @@ class HttpContext {
   HttpContext();
 
   void addNewEmptyServer();
+  void httpSaveDirectiveValue(const std::string &value,
+                              const std::string &directive);
 
   std::vector<std::unique_ptr<ServerContext>> _serverContext;
   unsigned int _numberOfServers;
   Location _locationContext;
 
   std::string _geoipCountry;
-  std::string _serverValue;
-  std::string _server_nameValue;
-  std::string _listenValue;
-  std::string _rootValue;
-  std::string _indexValue;
-  std::string _ssl_certificateValue;
-  std::string _ssl_certificate_keyValue;
-  std::string _proxy_passValue;
-  std::string _proxy_set_headerValue;
-  std::string _upstreamValue;
-  std::string _proxy_cache_pathValue;
-  std::string _proxy_cacheValue;
-  std::string _proxy_cache_validValue;
-  std::string _proxy_cache_use_staleValue;
-  std::string _rewriteValue;
+  std::string _proxyCachePathValue;
+  std::string _proxyCacheValue;
+  std::string _proxyCacheUseStaleValue;
   std::string _gzipValue;
-  std::string _gzip_typesValue;
-  std::string _allowValue;
-  std::string _denyValue;
-  std::string _access_logValue;
-  std::string _error_logValue;
-  std::string _limit_req_zoneValue;
-  std::string _limit_reqValue;
+  std::string _limitReq_zoneValue;
+
+  std::vector<std::string> _proxySetHeaderValue;
+  std::vector<std::string> _proxyCacheValidValue;
+  std::vector<std::string> _gzipTypesValue;
+  std::vector<std::string> _limitReqValue;
+
+  //std::string _indexValue; // Do we need that in the http context?
+  //std::string _rootValue; // Do we need that in the http context?
+  //std::string _upstreamValue; // Do we inplement that???
+  //std::string _accessLogValue; // Do we inplement that here??
+  //std::string _errorLogValue; // Do we inplement that here??
 };
 
 #endif  // HTTP_CONTEXT_HPP
