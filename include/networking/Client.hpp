@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "../../include/request/HttpRequestParser.hpp"
 #include "SocketExceptions.hpp"
 
 class Client {
@@ -16,5 +17,6 @@ class Client {
 
  private:
   int fd;
+  HttpRequestParser parser;
 };
 #endif  // CLIENT_H

@@ -8,7 +8,6 @@
 
 #include "../../include/cgi/CGI.hpp"
 #include "../../include/cgi/CGIFileManager.hpp"
-#include "../../include/request/HttpRequestParser.hpp"
 
 #define BUFFER_SIZE 4096
 
@@ -27,15 +26,28 @@ const char* HTTP_RESPONSE =
 
 bool Client::handleRequest() {
   char buffer[BUFFER_SIZE];
+
   int bytes_read;
+  int status;
 
   while (true) {
+    if (parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+      status = parser.handshake();
+      if (status == 200) {
+        std::cout << "Handshake successful" << std::endl;
+        std::cout << "STATIC" << std::endl;
+        send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
+        return true;
+      } else {
+        std::cout << "Handshake failed" << std::endl;
+        return false;
+      }
+    }
     bytes_read = read(fd, buffer, BUFFER_SIZE);
     if (bytes_read > 0) {
       buffer[bytes_read] = '\0';
-      std::cout << "Received: " << buffer << std::endl;
-      HttpRequestParser parser(buffer);
-      int status = parser.parse();
+      parser = HttpRequestParser(buffer, fd);
+      status = parser.parse();
       if (status == 200) {
         std::cout << "Parsed successfully" << std::endl;
         auto request = parser.getHttpRequest();

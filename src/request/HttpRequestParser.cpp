@@ -1,14 +1,21 @@
 #include "../../include/request/HttpRequestParser.hpp"  //also wouldn t recognize the path
 
+#include <sys/socket.h>
+#include <unistd.h>
+
+#include <fstream>
 #include <utility>
 
+#include "../../include/log/Log.hpp"
 #include "../../include/request/HttpRequestEnums.hpp"
 
-// Also, instead of returning early and setting a status
-// i would maybe throw different exceptions for different parsing errors
-HttpRequestParser::HttpRequestParser(const std::string request)
+HttpRequestParser::HttpRequestParser()
+    : status(HttpRequestParseStatus::NOT_PARSED) {}
+
+HttpRequestParser::HttpRequestParser(const std::string request, int clientFd)
     : status(HttpRequestParseStatus::NOT_PARSED),
       hasFile(false),
+      _clientFd(clientFd),
       raw(request) {}
 
 HttpRequestParser::~HttpRequestParser() {}
@@ -47,6 +54,12 @@ int HttpRequestParser::parse() {
     std::cout << "Invalid request line" << std::endl;
     return 400;
   }
+  if (!validateHttpVersion()) {
+    log::Log::getInstance().error(
+        "Invalid HTTP version. expected HTTP/1.1 got " +
+        request.getHttpVersion());
+    return 505;  // HTTP Version Not Supported
+  }
   parseHeaders(ss);
   if (status == HttpRequestParseStatus::INVALID) {
     std::cout << "Invalid headers" << std::endl;
@@ -59,12 +72,15 @@ int HttpRequestParser::parse() {
     request.setUri(request.getUri().substr(0, pos));
     parseQueryParams(query);
   }
-  if (request.getHeader("Content-Type").find("application/json") !=
-      std::string::npos) {
+  std::string contentType = request.getHeader("Content-Type");
+  if (contentType.find("application/json") != std::string::npos) {
     parseBody(ss);
-  } else if (request.getHeader("Content-Type").find("multipart/form-data") !=
+
+  } else if (contentType.find("application/x-www-form-urlencoded") !=
              std::string::npos) {
-    parseFormData(request.getHeader("boundary"), ss);
+    parseFormData(ss);
+  } else if (hasFile && request.getHeader("filename") != "") {
+    handleFileUpload(ss);
   }
   electHandler();
   return 200;
@@ -95,11 +111,6 @@ void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
   }
   j = i + 1;
   request.setHttpVersion(std::string(requestLine + j, len - j));
-  if (!validateHttpVersion()) {
-    std::cout << "Invalid HTTP version" << std::endl;
-    status = HttpRequestParseStatus::INVALID;
-    return;
-  }
 }
 
 void HttpRequestParser::parseHeaders(std::stringstream &ss) {
@@ -128,7 +139,20 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
       if (header.find("\r") != std::string::npos)
         header.erase(header.find("\r"), 1);
       std::string value = header.substr(pos + 2);
-      std::cout << "value " << value << std::endl;
+      if (key == "Content-Disposition") {
+        std::string attr = "filename=";
+        std::size_t filePos = value.find(attr);
+        if (filePos != std::string::npos) {
+          hasFile = true;
+          std::string filename = value.substr(filePos + attr.length());
+          if (filename.front() == '"' && filename.back() == '"') {
+            filename = filename.substr(1, filename.length() - 2);
+          }
+          log::Log::getInstance().debug("File upload detected: " + filename);
+          key = "filename";
+          value = filename;
+        }
+      }
       request.setHeader(key, value);
     } else {
       status = HttpRequestParseStatus::INVALID;
@@ -169,10 +193,127 @@ void HttpRequestParser::parseBody(std::stringstream &ss) {
   request.setBody(body);
 }
 
-void HttpRequestParser::parseFormData(std::string boundary,
-                                      std::stringstream &ss) {
-  (void)boundary;
+std::string decodeUrl(const std::string &url) {
+  std::string decoded;
+  for (size_t i = 0; i < url.length(); i++) {
+    if (url[i] == '%') {
+      int value;
+      sscanf(url.substr(i + 1, 2).c_str(), "%x", &value);
+      decoded += static_cast<char>(value);
+      i += 2;
+    } else {
+      decoded += url[i];
+    }
+  }
+  return decoded;
+}
+
+void HttpRequestParser::parseFormData(std::stringstream &ss) {
+  /*
+  /r/n
+  username=john%20doe&password=mypassword
+  */
+  std::string data;
+  while (std::getline(ss, data)) {
+    if (data == "\r" || data == "") {
+      continue;
+    }
+    std::string fact;
+    std::stringstream facts(decodeUrl(data));
+    while (std::getline(facts, fact, '&')) {
+      if (fact.find("\r") != std::string::npos)
+        fact = fact.erase(data.find("\r"), 1);
+      size_t pos = fact.find("=");
+      if (pos != std::string::npos) {
+        std::string key = fact.substr(0, pos);
+        std::string value = fact.substr(pos + 1);
+        request.addFormData(key, value);
+      } else {
+        request.addFormData(data, "");
+      }
+    }
+  }
+}
+
+bool HttpRequestParser::handleFileUpload(std::stringstream &ss) {
+  std::string contentType = request.getHeader("Content-Type");
+  if (contentType.find("application/octet-stream") != std::string::npos) {
+    return handleOctetStream(ss);
+  } else if (contentType.find("multipart/form-data") != std::string::npos) {
+    return handleMultipartFormData(ss);
+  }
+  return false;
+}
+
+bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
+  std::string data;
+  int contentLength = std::stoi(request.getHeader("Content-Length"));
+  int bytesWritten = 0;
+  std::string filename = request.getHeader("filename");
+  std::string uploadDir = "uploads/";
+  std::ofstream file(uploadDir + filename, std::ios::binary);
+  if (!file.is_open()) {
+    log::Log::getInstance().error("Failed to open file for writing");
+    return false;
+  }
+  while (std::getline(ss, data)) {
+    file << data.data();
+    bytesWritten += data.length();
+    file << "\n";
+    bytesWritten++;
+    if (bytesWritten >= contentLength) {
+      file.close();
+      return true;
+    }
+  }
+
+  int toRead = 4096;
+  if (contentLength < toRead) {
+    toRead = contentLength;
+  }
+  char buffer[toRead + 1];
+  int bytes_read = read(_clientFd, buffer, toRead);
+  while (bytes_read > 0) {
+    file.write(buffer, bytes_read);
+    bytesWritten += bytes_read;
+    if (bytesWritten >= contentLength) {
+      break;
+    }
+    if (contentLength - bytesWritten < toRead) {
+      toRead = contentLength - bytesWritten;
+    }
+    bytes_read = read(_clientFd, buffer, toRead);
+    std::cout << "Bytes read: " << bytes_read << std::endl;
+  }
+  file.close();
+  status = HttpRequestParseStatus::PARSED;
+  std::string expectation = request.getHeader("Expect");
+  std::cout << "Expect: " << expectation << std::endl;
+  if (expectation == "100-continue") {
+    std::string response = "HTTP/1.1 100 Continue\r\n\r\n";
+    status = HttpRequestParseStatus::EXPECT_CONTINUE;
+    if (send(_clientFd, response.c_str(), response.length(), 0) < 0) {
+      log::Log::getInstance().error("Failed to send 100 Continue response");
+      return false;
+    }
+    return true;
+  }
+  return true;
+}
+
+bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   (void)ss;
+  return true;
+}
+
+int HttpRequestParser::handshake() {
+  log::Log::getInstance().debug("Handshake");
+  if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+    request.setHeader("Expect", "");
+    std::stringstream ss("");
+    return handleFileUpload(ss) ? 200 : 400;
+  }
+  return 400;  // TODO: return appropriate status code
 }
 
 bool HttpRequestParser::validateRequestMethod() {
@@ -192,7 +333,11 @@ bool HttpRequestParser::validateHttpVersion() {
       HttpMaps::httpRequestVersionMap.end()) {
     request.setHttpVersion(HttpMaps::httpRequestVersionMap.at(
         HttpMaps::httpRequestVersionMap.find(request.getHttpVersion())->first));
-    return true;
+    if (request.getHttpVersionEnum() == HttpRequestVersion::HTTP_1_1) {
+      return true;
+    } else {
+      return false;
+    }
   } else {
     request.setHttpVersion(HttpRequestVersion::UNKNOWN);
     return false;

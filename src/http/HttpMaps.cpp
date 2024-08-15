@@ -50,6 +50,8 @@ std::set<std::string> HttpMaps::initHeaderSet() {
   set.insert("Cookie");
   set.insert("Set-Cookie");
   set.insert("Authorization");
+  set.insert("Content-Disposition");
+  set.insert("Expect");
   return set;
 }
 

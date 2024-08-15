@@ -36,3 +36,4 @@
 .vscode/
 obj/
 hello.txt
+.DS_Store

@@ -18,19 +18,25 @@ class HttpRequestParser {
   HttpRequestParseStatus status;
   bool hasFile;
 
-  HttpRequestParser(std::string request);
+  HttpRequestParser(std::string request, int clientFd);
+  HttpRequestParser();
   HttpRequest getHttpRequest();
   int parse();
+  int handshake();
   ~HttpRequestParser();
 
  private:
+  int _clientFd;
   HttpRequest request;
   std::string raw;
   void electHandler();
   void parseRequestLine(char *requestLine, size_t len);
   void parseHeaders(std::stringstream &ss);
   void parseBody(std::stringstream &ss);
-  void parseFormData(std::string boundary, std::stringstream &ss);
+  void parseFormData(std::stringstream &ss);
+  bool handleFileUpload(std::stringstream &ss);
+  bool handleOctetStream(std::stringstream &ss);
+  bool handleMultipartFormData(std::stringstream &ss);
   void parseQueryParams(std::string query);
   bool validateRequestMethod();
   bool validateHttpVersion();

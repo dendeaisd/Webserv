@@ -30,6 +30,7 @@ class HttpRequest {
   std::string getHeader(std::string header);
   std::map<std::string, std::string> getHeaders();
   std::map<std::string, std::string> getQueryParams();
+  std::map<std::string, std::string> getFormData();
   void setHandler(HttpRequestHandler handler);
   void setMethod(std::string method);
   void setMethod(HttpRequestMethod httpRequestMethod);
@@ -42,6 +43,7 @@ class HttpRequest {
   void setPort(std::string port);
   void setBody(std::string body);
   void setHeader(std::string header, std::string value);
+  void addFormData(std::string key, std::string value);
   void setHeaders(std::map<std::string, std::string> headers);
   void setQueryParam(std::string key, std::string value);
   std::string toString();

@@ -1,5 +1,7 @@
 #include "../../include/request/HttpRequest.hpp"
 
+#include "../../include/log/Log.hpp"
+
 HttpRequest::HttpRequest()
     : _httpRequestMethod(HttpRequestMethod::UNKNOWN),
       _httpProtocolVersion(HttpRequestVersion::UNKNOWN) {}
@@ -41,6 +43,10 @@ std::map<std::string, std::string> HttpRequest::getHeaders() {
   return _headers;
 }
 
+std::map<std::string, std::string> HttpRequest::getFormData() {
+  return _formData;
+}
+
 std::map<std::string, std::string> HttpRequest::getQueryParams() {
   return _queryParams;
 }
@@ -71,7 +77,19 @@ void HttpRequest::setPort(std::string port) { _port = port; }
 void HttpRequest::setBody(std::string body) { _body = body; }
 
 void HttpRequest::setHeader(std::string header, std::string value) {
+  if (header.empty()) {
+    log::Log::getInstance().debug("Header or value is empty");
+    return;
+  }
   _headers[header] = value;
+}
+
+void HttpRequest::addFormData(std::string key, std::string value) {
+  if (key.empty() || value.empty()) {
+    log::Log::getInstance().debug("FormData Key or value is empty");
+    return;
+  }
+  _formData[key] = value;
 }
 
 void HttpRequest::setHeaders(std::map<std::string, std::string> headers) {

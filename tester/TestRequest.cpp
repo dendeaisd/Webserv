@@ -4,6 +4,7 @@ TestRequest::TestRequest() {
   testGET();
   testPOST();
   testPostWithFile();
+  testPostFormData();
   //   testPUT();
   //   testDELETE();
 }
@@ -45,6 +46,25 @@ void TestRequest::testPOST() {
   assertEqual<std::string>(request.getHost(), "localhost");
   assertEqual<std::string>(request.getPort(), "8080");
   assertEqual<std::string>(request.getBody(), "hello");
+}
+
+void TestRequest::testPostFormData() {
+  std::string req = "POST /login HTTP/1.1\r\n";
+  req += "Host: www.example.com\r\n";
+  req +=
+      "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) "
+      "Gecko/20100101 Firefox/115.0\r\n";
+  req += "Accept: */*\r\n";
+  req += "Accept-Language: en-US,en;q=0.5\r\n";
+  req += "Accept-Encoding: gzip, deflate, br\r\n";
+  req += "Content-Type: application/x-www-form-urlencoded\r\n";
+  req += "Content-Length: 29\r\n";
+  req += "\r\n";
+  req += "username=john%20doe&password=mypassword";
+
+  HttpRequestParser parser(req);
+  int status = parser.parse();
+  assertEqual<int>(status, 200);
 }
 
 void TestRequest::testPostWithFile() {
