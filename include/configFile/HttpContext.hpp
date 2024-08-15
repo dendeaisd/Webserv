@@ -24,12 +24,11 @@ class HttpContext {
   std::string _proxyCacheValue;
   std::string _proxyCacheUseStaleValue;
   std::string _gzipValue;
-  std::string _limitReq_zoneValue;
+  std::string _gzipTypesValue; // got multiple values could be saved seperade!
+  std::string _limitReqZoneValue;
 
   std::vector<std::string> _proxySetHeaderValue;
   std::vector<std::string> _proxyCacheValidValue;
-  std::vector<std::string> _gzipTypesValue;
-  std::vector<std::string> _limitReqValue;
 
   //std::string _indexValue; // Do we need that in the http context?
   //std::string _rootValue; // Do we need that in the http context?

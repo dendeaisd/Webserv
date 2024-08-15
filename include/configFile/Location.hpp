@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <vector>
 
 class Location {
  public:
@@ -15,9 +16,11 @@ class Location {
   std::string _aliasValue;
   std::string _try_filesValue;
   std::string _indexValue;
-  std::string _error_pageValue;
-  std::string _access_logValue;
+  std::string _errorPageValue;
+  std::string _accessLogValue;
   std::string _denyValue;
+  std::vector<std::string> _rewriteValue;
+
 };
 
 #endif  // LOCATION_HPP
