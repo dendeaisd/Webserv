@@ -32,7 +32,7 @@ class HttpRequest {
   std::map<std::string, std::string> getQueryParams();
   std::map<std::string, std::string> getFormData();
   void setHandler(HttpRequestHandler handler);
-  void setMethod(std::string method);
+  bool setMethod(std::string method);
   void setMethod(HttpRequestMethod httpRequestMethod);
   void setUri(std::string uri);
   void setQuery(std::string query);

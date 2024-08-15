@@ -21,7 +21,8 @@ enum class HttpRequestParseStatus {
   PARSED,
   INVALID,
   INCOMPLETE,
-  EXPECT_CONTINUE
+  EXPECT_CONTINUE,
+  INPROGRESS
 };
 
 enum class HttpRequestHandler { CGI, STATIC, REDIRECT };

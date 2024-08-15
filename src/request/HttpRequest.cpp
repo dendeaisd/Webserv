@@ -1,6 +1,9 @@
 #include "../../include/request/HttpRequest.hpp"
 
+#include <iostream>
+
 #include "../../include/log/Log.hpp"
+#include "../../include/request/HttpMaps.hpp"
 
 HttpRequest::HttpRequest()
     : _httpRequestMethod(HttpRequestMethod::UNKNOWN),
@@ -51,7 +54,23 @@ std::map<std::string, std::string> HttpRequest::getQueryParams() {
   return _queryParams;
 }
 
-void HttpRequest::setMethod(std::string method) { _method = method; }
+bool HttpRequest::setMethod(std::string method) {
+  std::cout << "Method: " << method << method << std::endl;
+  if (method.empty()) {
+    log::Log::getInstance().debug("Method is empty");
+    return false;
+  }
+  if (HttpMaps::httpRequestMethodMap.find(method) !=
+      HttpMaps::httpRequestMethodMap.end()) {
+    setMethod(HttpMaps::httpRequestMethodMap.at(
+        HttpMaps::httpRequestMethodMap.find(method)->first));
+    _method = method;
+    return true;
+  } else {
+    setMethod(HttpRequestMethod::UNKNOWN);
+    return false;
+  }
+}
 void HttpRequest::setMethod(HttpRequestMethod httpRequestMethod) {
   _httpRequestMethod = httpRequestMethod;
 }

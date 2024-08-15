@@ -82,6 +82,17 @@ int HttpRequestParser::parse() {
   } else if (hasFile && request.getHeader("filename") != "") {
     handleFileUpload(ss);
   }
+  if (contentType.find("multipart/form-data") != std::string::npos) {
+    boundary = request.getHeader("Content-Type");
+    std::string attr = "boundary=";
+    size_t pos = boundary.find(attr);
+    if (pos == std::string::npos) {
+      log::Log::getInstance().error("Invalid multipart/form-data");
+      return false;
+    }
+    boundary = boundary.substr(pos + attr.length());
+    status = HttpRequestParseStatus::EXPECT_CONTINUE;
+  }
   electHandler();
   return 200;
 }
@@ -90,13 +101,14 @@ void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
   size_t i = 0;
   for (i = 0; i < len; i++) {
     if (requestLine[i] == ' ') {
-      request.setMethod(std::string(requestLine, i));
+      bool valid = request.setMethod(std::string(requestLine, i));
+      if (!valid) {
+        status = HttpRequestParseStatus::INVALID;
+        log::Log::getInstance().error("Invalid request method");
+        return;
+      }
       break;
     }
-  }
-  if (!validateRequestMethod()) {
-    status = HttpRequestParseStatus::INVALID;
-    return;
   }
   size_t j = i + 1;
   for (i = j; i < len; i++) {
@@ -107,6 +119,7 @@ void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
   }
   if (i == len || request.getUri().empty() || request.getUri()[0] != '/') {
     status = HttpRequestParseStatus::INCOMPLETE;
+    log::Log::getInstance().error("Invalid URI");
     return;
   }
   j = i + 1;
@@ -302,7 +315,118 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
 }
 
 bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
-  (void)ss;
+  std::string data;
+  if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+    char buffer[4096];
+    int bytes_read = read(_clientFd, buffer, 4096);
+    if (bytes_read > 0) {
+      buffer[bytes_read] = '\0';
+      ss << buffer;
+      std::cout << "Buffer: " << buffer << std::endl;
+    } else if (bytes_read == 0) {
+      log::Log::getInstance().info("No data received");
+      return true;
+    } else {
+      log::Log::getInstance().error("Failed to read from client");
+      status = HttpRequestParseStatus::INVALID;
+      return false;
+    }
+  }
+  log::Log::getInstance().debug("Boundary: " + boundary);
+  while (std::getline(ss, data)) {
+    if (data.find("\r") != std::string::npos)
+      data = data.erase(data.find("\r"), 1);
+    if (data.find("--" + boundary + "--") != std::string::npos) {
+      status = HttpRequestParseStatus::PARSED;
+      log::Log::getInstance().debug("Multipart form data parsed");
+      break;
+    }
+    if (data.find("--" + boundary) != std::string::npos) {
+      log::Log::getInstance().debug("Boundary found");
+    }
+    std::string attr;
+    std::string filename;
+    std::string key;
+    std::string contentType;
+    while (std::getline(ss, data)) {
+      if (data.find("\r") != std::string::npos)
+        data = data.erase(data.find("\r"), 1);
+      if (data == "") {
+        log::Log::getInstance().debug("Empty line");
+        continue;
+      }
+      if (data.find(boundary) != std::string::npos) {
+        log::Log::getInstance().debug("Boundary found");
+        continue;
+      }
+      log::Log::getInstance().debug("Line: " + data);
+      if (data.find("form-data; ") != std::string::npos &&
+          data.find("filename=") == std::string::npos) {
+        attr = "name=";
+        size_t pos = data.find(attr);
+        key = data.substr(pos + attr.length());
+        if (key.front() == '"' && key.back() == '"') {
+          key = key.substr(1, key.length() - 2);
+        }
+        log::Log::getInstance().debug("Key: " + key);
+      } else if (data.find("filename=") != std::string::npos) {
+        attr = "filename=";
+        size_t pos = data.find(attr);
+        filename = data.substr(pos + attr.length());
+        if (filename.front() == '"' && filename.back() == '"') {
+          filename = filename.substr(1, filename.length() - 2);
+        }
+        log::Log::getInstance().debug("Filename: " + filename);
+        std::getline(ss, data);
+        if (data.find("Content-Type: ") != std::string::npos) {
+          contentType = data.substr(14);
+          log::Log::getInstance().debug("Content-Type: " + contentType);
+        }
+      }
+      if (!key.empty()) {
+        std::getline(ss, data);
+        std::getline(ss, data);
+        if (data.find("--" + boundary + "--") != std::string::npos) {
+          break;
+        }
+        log::Log::getInstance().debug("Adding form data: " + key + " " + data);
+        request.addFormData(key, data);
+        key = "";
+        continue;
+      }
+      if (filename.empty() && key.empty()) {
+        log::Log::getInstance().error("Invalid multipart/form-data");
+        return false;
+      }
+      std::string uploadDir = "uploads/";
+      std::ofstream file(uploadDir + filename, std::ios::binary);
+      if (!file.is_open()) {
+        log::Log::getInstance().error("Failed to open file for writing");
+        return false;
+      }
+      log::Log::getInstance().debug("Writing to file: " + filename);
+      while (std::getline(ss, data)) {
+        if (data.find("\r") != std::string::npos)
+          data = data.erase(data.find("\r"), 1);
+        if (data.empty()) {
+          continue;
+        }
+        log::Log::getInstance().debug("Data: " + data);
+        if (data.find(boundary + "--") != std::string::npos ||
+            data.find(boundary) != std::string::npos) {
+          if (data.find(boundary + "--") != std::string::npos) {
+            status = HttpRequestParseStatus::PARSED;
+            log::Log::getInstance().debug("Multipart form data parsed");
+          }
+          break;
+        }
+        file << data;
+        file << "\n";
+      }
+      file.close();
+      filename.clear();
+    }
+  }
   return true;
 }
 
@@ -314,18 +438,6 @@ int HttpRequestParser::handshake() {
     return handleFileUpload(ss) ? 200 : 400;
   }
   return 400;  // TODO: return appropriate status code
-}
-
-bool HttpRequestParser::validateRequestMethod() {
-  if (HttpMaps::httpRequestMethodMap.find(request.getMethod()) !=
-      HttpMaps::httpRequestMethodMap.end()) {
-    request.setMethod(HttpMaps::httpRequestMethodMap.at(
-        HttpMaps::httpRequestMethodMap.find(request.getMethod())->first));
-    return true;
-  } else {
-    request.setMethod(HttpRequestMethod::UNKNOWN);
-    return false;
-  }
 }
 
 bool HttpRequestParser::validateHttpVersion() {

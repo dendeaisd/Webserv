@@ -29,6 +29,7 @@ class HttpRequestParser {
   int _clientFd;
   HttpRequest request;
   std::string raw;
+  std::string boundary;
   void electHandler();
   void parseRequestLine(char *requestLine, size_t len);
   void parseHeaders(std::stringstream &ss);

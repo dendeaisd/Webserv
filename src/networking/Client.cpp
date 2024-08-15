@@ -34,12 +34,15 @@ bool Client::handleRequest() {
     if (parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
       status = parser.handshake();
       if (status == 200) {
-        std::cout << "Handshake successful" << std::endl;
-        std::cout << "STATIC" << std::endl;
-        send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
+        if (parser.status == HttpRequestParseStatus::PARSED) {
+          send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
+          close(fd);
+        }
         return true;
       } else {
         std::cout << "Handshake failed" << std::endl;
+        std::cout << "Status: " << status << std::endl;
+        close(fd);
         return false;
       }
     }
