@@ -33,6 +33,8 @@ class ConfigFile {
   void mainContextSaveDirective(const std::string &line);
   void saveDirective(const std::string &line, std::string &directive);
   void getValue(const std::string &line, std::string &value);
+  void httpContextSave(const std::string &line);
+  void getKey(const std::string &line, std::string &key);
 
 
   TStoringStates _state;

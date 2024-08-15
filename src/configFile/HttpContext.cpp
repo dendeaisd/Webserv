@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/12 11:37:24 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/15 11:21:25 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/15 22:25:01 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@ HttpContext::addNewEmptyServer() {
   _numberOfServers++;
 }
 
-void HttpContext::httpSaveDirectiveValue(const std::string &value,
-                                         const std::string &directive)
+void HttpContext::httpSaveDirectiveValue(const std::string &directive,
+                                         const std::string &value)
 {
   if (directive == "geoip_country")
     _geoipCountry = value;

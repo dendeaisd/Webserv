@@ -12,8 +12,8 @@ class HttpContext {
   HttpContext();
 
   void addNewEmptyServer();
-  void httpSaveDirectiveValue(const std::string &value,
-                              const std::string &directive);
+  void httpSaveDirectiveValue(const std::string &directive,
+                              const std::string &value);
 
   std::vector<std::unique_ptr<ServerContext>> _serverContext;
   unsigned int _numberOfServers;

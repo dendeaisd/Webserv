@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/14 12:16:16 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/15 22:26:57 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <fstream>
 #include <string>
+#include <cstring>
 
 void ConfigFile::storeConfiguration(const std::string &fileName) {
   std::fstream file;
@@ -25,6 +26,8 @@ void ConfigFile::storeConfiguration(const std::string &fileName) {
     setCurrentState(line);
     possibleNewServerContextSetup(line);
     trackBrackets(line);
+    mainContextSaveDirective(line);
+    httpContextSave(line);
   }
 }
 
@@ -64,7 +67,7 @@ void ConfigFile::trackBrackets(const std::string &line) {
   }
 }
 
-void ConfigFile::transfareStateToBracketStatus(EBracketStatus &status) {
+void ConfigFile::transferStateToBracketStatus(EBracketStatus &status) {
   switch (_state) {
     case MAIN_CONTEXT:
       break;
@@ -112,4 +115,20 @@ void ConfigFile::getValue(const std::string &line, std::string &value)
   value.erase(value.size() - 1, value.size() - 1);
 }
 
+void ConfigFile::httpContextSave(const std::string &line)
+{
+  if (_state != HTTPS_CONTEXT)
+    return ;
+  std::string key;
+  std::string value;
 
+  getKey(line, key);
+  getValue(line, value);
+  _httpContext.httpSaveDirectiveValue(key, value);
+}
+
+void ConfigFile::getKey(const std::string &line, std::string &key)
+{
+  char delimiter = ' ';
+  key = std::strtok(line, delimiter);
+}
