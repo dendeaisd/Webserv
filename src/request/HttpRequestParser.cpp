@@ -405,12 +405,10 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
         return false;
       }
       log::Log::getInstance().debug("Writing to file: " + filename);
+      std::getline(ss, data);  // empty line
       while (std::getline(ss, data)) {
         if (data.find("\r") != std::string::npos)
           data = data.erase(data.find("\r"), 1);
-        if (data.empty()) {
-          continue;
-        }
         log::Log::getInstance().debug("Data: " + data);
         if (data.find(boundary + "--") != std::string::npos ||
             data.find(boundary) != std::string::npos) {
