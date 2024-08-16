@@ -8,6 +8,7 @@
 
 #include "../../include/log/Log.hpp"
 #include "../../include/request/HttpRequestEnums.hpp"
+#define MAX_BUFFER_SIZE 4096
 
 HttpRequestParser::HttpRequestParser()
     : status(HttpRequestParseStatus::NOT_PARSED) {}
@@ -55,9 +56,8 @@ int HttpRequestParser::parse() {
     return 400;
   }
   if (!validateHttpVersion()) {
-    Log::getInstance().error(
-        "Invalid HTTP version. expected HTTP/1.1 got " +
-        request.getHttpVersion());
+    Log::getInstance().error("Invalid HTTP version. expected HTTP/1.1 got " +
+                             request.getHttpVersion());
     return 505;  // HTTP Version Not Supported
   }
   parseHeaders(ss);
@@ -65,6 +65,7 @@ int HttpRequestParser::parse() {
     std::cout << "Invalid headers" << std::endl;
     return 400;
   }
+  electHandler();
   std::string query;
   size_t pos = request.getUri().find("?");
   if (pos != std::string::npos) {
@@ -91,9 +92,14 @@ int HttpRequestParser::parse() {
       return false;
     }
     boundary = boundary.substr(pos + attr.length());
+    if (!askForContinue() &&
+        status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+      return 500;  // Internal Server Error
+    }
+    // set the status to EXPECT_CONTINUE anyways because not every request
+    // library will send the Expect header
     status = HttpRequestParseStatus::EXPECT_CONTINUE;
   }
-  electHandler();
   return 200;
 }
 
@@ -280,7 +286,7 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
     }
   }
 
-  int toRead = 4096;
+  int toRead = MAX_BUFFER_SIZE;
   if (contentLength < toRead) {
     toRead = contentLength;
   }
@@ -296,10 +302,16 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
       toRead = contentLength - bytesWritten;
     }
     bytes_read = read(_clientFd, buffer, toRead);
-    std::cout << "Bytes read: " << bytes_read << std::endl;
   }
   file.close();
   status = HttpRequestParseStatus::PARSED;
+  if (!askForContinue() && status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+    return false;
+  }
+  return true;
+}
+
+bool HttpRequestParser::askForContinue() {
   std::string expectation = request.getHeader("Expect");
   std::cout << "Expect: " << expectation << std::endl;
   if (expectation == "100-continue") {
@@ -311,26 +323,59 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
     }
     return true;
   }
-  return true;
+  return false;
+}
+
+int countRemainingLines(std::stringstream &ss) {
+  int originalPos = ss.tellg();
+  int count = 0;
+  std::string line;
+  while (std::getline(ss, line)) {
+    count++;
+  }
+  ss.clear();
+  ss.seekg(originalPos);
+  return count;
+}
+
+bool boundaryUpcoming(std::stringstream &ss, const std::string &boundary) {
+  int originalPos = ss.tellg();
+  std::string line;
+  int count = 0;
+  while (std::getline(ss, line)) {
+	if (line.find(boundary) != std::string::npos) {
+	  ss.clear();
+	  ss.seekg(originalPos);
+	  return true;
+	}
+	count++;
+	if (count > 1)
+	  break;
+  }
+  ss.clear();
+  ss.seekg(originalPos);
+  return false;
+}
+
+int readMore(std::stringstream &ss, int _clientFd) {
+  char buffer[MAX_BUFFER_SIZE + 1];
+  int bytes_read = read(_clientFd, buffer, MAX_BUFFER_SIZE);
+  if (bytes_read > 0) {
+    buffer[bytes_read] = '\0';
+    ss << buffer;
+    std::cout << "Buffer: " << buffer << std::endl;
+  } else if (bytes_read == 0) {
+    Log::getInstance().info("No data received");
+  } else
+    Log::getInstance().error("Failed to read from client");
+  return bytes_read;
 }
 
 bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   std::string data;
+  int bytes_read = 0;
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-    char buffer[4096];
-    int bytes_read = read(_clientFd, buffer, 4096);
-    if (bytes_read > 0) {
-      buffer[bytes_read] = '\0';
-      ss << buffer;
-      std::cout << "Buffer: " << buffer << std::endl;
-    } else if (bytes_read == 0) {
-      Log::getInstance().info("No data received");
-      return true;
-    } else {
-      Log::getInstance().error("Failed to read from client");
-      status = HttpRequestParseStatus::INVALID;
-      return false;
-    }
+    bytes_read = readMore(ss, _clientFd);
   }
   Log::getInstance().debug("Boundary: " + boundary);
   while (std::getline(ss, data)) {
@@ -405,12 +450,10 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
         return false;
       }
       Log::getInstance().debug("Writing to file: " + filename);
+      std::getline(ss, data);  // skip empty line
       while (std::getline(ss, data)) {
         if (data.find("\r") != std::string::npos)
           data = data.erase(data.find("\r"), 1);
-        if (data.empty()) {
-          continue;
-        }
         Log::getInstance().debug("Data: " + data);
         if (data.find(boundary + "--") != std::string::npos ||
             data.find(boundary) != std::string::npos) {
@@ -421,7 +464,10 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
           break;
         }
         file << data;
-        file << "\n";
+		if (!boundaryUpcoming(ss, boundary))
+		  file << "\n";
+        if (countRemainingLines(ss) <= 2 && bytes_read == MAX_BUFFER_SIZE)
+          bytes_read = readMore(ss, _clientFd);
       }
       file.close();
       filename.clear();
