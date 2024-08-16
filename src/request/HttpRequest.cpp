@@ -57,7 +57,7 @@ std::map<std::string, std::string> HttpRequest::getQueryParams() {
 bool HttpRequest::setMethod(std::string method) {
   std::cout << "Method: " << method << method << std::endl;
   if (method.empty()) {
-    log::Log::getInstance().debug("Method is empty");
+    Log::getInstance().debug("Method is empty");
     return false;
   }
   if (HttpMaps::httpRequestMethodMap.find(method) !=
@@ -97,7 +97,7 @@ void HttpRequest::setBody(std::string body) { _body = body; }
 
 void HttpRequest::setHeader(std::string header, std::string value) {
   if (header.empty()) {
-    log::Log::getInstance().debug("Header or value is empty");
+    Log::getInstance().debug("Header or value is empty");
     return;
   }
   _headers[header] = value;
@@ -105,7 +105,7 @@ void HttpRequest::setHeader(std::string header, std::string value) {
 
 void HttpRequest::addFormData(std::string key, std::string value) {
   if (key.empty() || value.empty()) {
-    log::Log::getInstance().debug("FormData Key or value is empty");
+    Log::getInstance().debug("FormData Key or value is empty");
     return;
   }
   _formData[key] = value;
