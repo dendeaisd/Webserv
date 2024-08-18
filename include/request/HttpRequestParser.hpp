@@ -39,6 +39,6 @@ class HttpRequestParser {
   bool handleOctetStream(std::stringstream &ss);
   bool handleMultipartFormData(std::stringstream &ss);
   void parseQueryParams(std::string query);
-  bool validateRequestMethod();
   bool validateHttpVersion();
+  bool askForContinue();
 };

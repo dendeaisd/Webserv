@@ -49,6 +49,7 @@ bool Client::handleRequest() {
     bytes_read = read(fd, buffer, BUFFER_SIZE);
     if (bytes_read > 0) {
       buffer[bytes_read] = '\0';
+      std::cout << buffer << std::endl;
       parser = HttpRequestParser(buffer, fd);
       status = parser.parse();
       if (status == 200) {

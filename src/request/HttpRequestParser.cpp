@@ -8,6 +8,7 @@
 
 #include "../../include/log/Log.hpp"
 #include "../../include/request/HttpRequestEnums.hpp"
+#define MAX_BUFFER_SIZE 4096
 
 HttpRequestParser::HttpRequestParser()
     : status(HttpRequestParseStatus::NOT_PARSED) {}
@@ -55,9 +56,8 @@ int HttpRequestParser::parse() {
     return 400;
   }
   if (!validateHttpVersion()) {
-    log::Log::getInstance().error(
-        "Invalid HTTP version. expected HTTP/1.1 got " +
-        request.getHttpVersion());
+    Log::getInstance().error("Invalid HTTP version. expected HTTP/1.1 got " +
+                             request.getHttpVersion());
     return 505;  // HTTP Version Not Supported
   }
   parseHeaders(ss);
@@ -65,6 +65,7 @@ int HttpRequestParser::parse() {
     std::cout << "Invalid headers" << std::endl;
     return 400;
   }
+  electHandler();
   std::string query;
   size_t pos = request.getUri().find("?");
   if (pos != std::string::npos) {
@@ -87,13 +88,18 @@ int HttpRequestParser::parse() {
     std::string attr = "boundary=";
     size_t pos = boundary.find(attr);
     if (pos == std::string::npos) {
-      log::Log::getInstance().error("Invalid multipart/form-data");
+      Log::getInstance().error("Invalid multipart/form-data");
       return false;
     }
     boundary = boundary.substr(pos + attr.length());
+    if (!askForContinue() &&
+        status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+      return 500;  // Internal Server Error
+    }
+    // set the status to EXPECT_CONTINUE anyways because not every request
+    // library will send the Expect header
     status = HttpRequestParseStatus::EXPECT_CONTINUE;
   }
-  electHandler();
   return 200;
 }
 
@@ -104,7 +110,7 @@ void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
       bool valid = request.setMethod(std::string(requestLine, i));
       if (!valid) {
         status = HttpRequestParseStatus::INVALID;
-        log::Log::getInstance().error("Invalid request method");
+        Log::getInstance().error("Invalid request method");
         return;
       }
       break;
@@ -119,7 +125,7 @@ void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
   }
   if (i == len || request.getUri().empty() || request.getUri()[0] != '/') {
     status = HttpRequestParseStatus::INCOMPLETE;
-    log::Log::getInstance().error("Invalid URI");
+    Log::getInstance().error("Invalid URI");
     return;
   }
   j = i + 1;
@@ -161,7 +167,7 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
           if (filename.front() == '"' && filename.back() == '"') {
             filename = filename.substr(1, filename.length() - 2);
           }
-          log::Log::getInstance().debug("File upload detected: " + filename);
+          Log::getInstance().debug("File upload detected: " + filename);
           key = "filename";
           value = filename;
         }
@@ -266,7 +272,7 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
   std::string uploadDir = "uploads/";
   std::ofstream file(uploadDir + filename, std::ios::binary);
   if (!file.is_open()) {
-    log::Log::getInstance().error("Failed to open file for writing");
+    Log::getInstance().error("Failed to open file for writing");
     return false;
   }
   while (std::getline(ss, data)) {
@@ -280,7 +286,7 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
     }
   }
 
-  int toRead = 4096;
+  int toRead = MAX_BUFFER_SIZE;
   if (contentLength < toRead) {
     toRead = contentLength;
   }
@@ -296,53 +302,87 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
       toRead = contentLength - bytesWritten;
     }
     bytes_read = read(_clientFd, buffer, toRead);
-    std::cout << "Bytes read: " << bytes_read << std::endl;
   }
   file.close();
   status = HttpRequestParseStatus::PARSED;
+  if (!askForContinue() && status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+    return false;
+  }
+  return true;
+}
+
+bool HttpRequestParser::askForContinue() {
   std::string expectation = request.getHeader("Expect");
   std::cout << "Expect: " << expectation << std::endl;
   if (expectation == "100-continue") {
     std::string response = "HTTP/1.1 100 Continue\r\n\r\n";
     status = HttpRequestParseStatus::EXPECT_CONTINUE;
     if (send(_clientFd, response.c_str(), response.length(), 0) < 0) {
-      log::Log::getInstance().error("Failed to send 100 Continue response");
+      Log::getInstance().error("Failed to send 100 Continue response");
       return false;
     }
     return true;
   }
-  return true;
+  return false;
+}
+
+int countRemainingLines(std::stringstream &ss) {
+  int originalPos = ss.tellg();
+  int count = 0;
+  std::string line;
+  while (std::getline(ss, line)) {
+    count++;
+  }
+  ss.clear();
+  ss.seekg(originalPos);
+  return count;
+}
+
+bool boundaryUpcoming(std::stringstream &ss, const std::string &boundary) {
+  int originalPos = ss.tellg();
+  std::string line;
+  std::getline(ss, line);
+  if (line.find(boundary) != std::string::npos) {
+    ss.clear();
+    ss.seekg(originalPos);
+    return true;
+  }
+  ss.clear();
+  ss.seekg(originalPos);
+  return false;
+}
+
+int readMore(std::stringstream &ss, int _clientFd) {
+  char buffer[MAX_BUFFER_SIZE + 1];
+  int bytes_read = read(_clientFd, buffer, MAX_BUFFER_SIZE);
+  if (bytes_read > 0) {
+    buffer[bytes_read] = '\0';
+    ss << buffer;
+    std::cout << "Buffer: " << buffer << std::endl;
+  } else if (bytes_read == 0) {
+    Log::getInstance().info("No data received");
+  } else
+    Log::getInstance().error("Failed to read from client");
+  return bytes_read;
 }
 
 bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   std::string data;
+  int bytes_read = 0;
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-    char buffer[4096];
-    int bytes_read = read(_clientFd, buffer, 4096);
-    if (bytes_read > 0) {
-      buffer[bytes_read] = '\0';
-      ss << buffer;
-      std::cout << "Buffer: " << buffer << std::endl;
-    } else if (bytes_read == 0) {
-      log::Log::getInstance().info("No data received");
-      return true;
-    } else {
-      log::Log::getInstance().error("Failed to read from client");
-      status = HttpRequestParseStatus::INVALID;
-      return false;
-    }
+    bytes_read = readMore(ss, _clientFd);
   }
-  log::Log::getInstance().debug("Boundary: " + boundary);
+  Log::getInstance().debug("Boundary: " + boundary);
   while (std::getline(ss, data)) {
     if (data.find("\r") != std::string::npos)
       data = data.erase(data.find("\r"), 1);
     if (data.find("--" + boundary + "--") != std::string::npos) {
       status = HttpRequestParseStatus::PARSED;
-      log::Log::getInstance().debug("Multipart form data parsed");
+      Log::getInstance().debug("Multipart form data parsed");
       break;
     }
     if (data.find("--" + boundary) != std::string::npos) {
-      log::Log::getInstance().debug("Boundary found");
+      Log::getInstance().debug("Boundary found");
     }
     std::string attr;
     std::string filename;
@@ -352,14 +392,14 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
       if (data.find("\r") != std::string::npos)
         data = data.erase(data.find("\r"), 1);
       if (data == "") {
-        log::Log::getInstance().debug("Empty line");
+        Log::getInstance().debug("Empty line");
         continue;
       }
       if (data.find(boundary) != std::string::npos) {
-        log::Log::getInstance().debug("Boundary found");
+        Log::getInstance().debug("Boundary found");
         continue;
       }
-      log::Log::getInstance().debug("Line: " + data);
+      Log::getInstance().debug("Line: " + data);
       if (data.find("form-data; ") != std::string::npos &&
           data.find("filename=") == std::string::npos) {
         attr = "name=";
@@ -368,7 +408,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
         if (key.front() == '"' && key.back() == '"') {
           key = key.substr(1, key.length() - 2);
         }
-        log::Log::getInstance().debug("Key: " + key);
+        Log::getInstance().debug("Key: " + key);
       } else if (data.find("filename=") != std::string::npos) {
         attr = "filename=";
         size_t pos = data.find(attr);
@@ -376,11 +416,11 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
         if (filename.front() == '"' && filename.back() == '"') {
           filename = filename.substr(1, filename.length() - 2);
         }
-        log::Log::getInstance().debug("Filename: " + filename);
+        Log::getInstance().debug("Filename: " + filename);
         std::getline(ss, data);
         if (data.find("Content-Type: ") != std::string::npos) {
           contentType = data.substr(14);
-          log::Log::getInstance().debug("Content-Type: " + contentType);
+          Log::getInstance().debug("Content-Type: " + contentType);
         }
       }
       if (!key.empty()) {
@@ -389,37 +429,39 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
         if (data.find("--" + boundary + "--") != std::string::npos) {
           break;
         }
-        log::Log::getInstance().debug("Adding form data: " + key + " " + data);
+        Log::getInstance().debug("Adding form data: " + key + " " + data);
         request.addFormData(key, data);
         key = "";
         continue;
       }
       if (filename.empty() && key.empty()) {
-        log::Log::getInstance().error("Invalid multipart/form-data");
+        Log::getInstance().error("Invalid multipart/form-data");
         return false;
       }
       std::string uploadDir = "uploads/";
       std::ofstream file(uploadDir + filename, std::ios::binary);
       if (!file.is_open()) {
-        log::Log::getInstance().error("Failed to open file for writing");
+        Log::getInstance().error("Failed to open file for writing");
         return false;
       }
-      log::Log::getInstance().debug("Writing to file: " + filename);
-      std::getline(ss, data);  // empty line
+      Log::getInstance().debug("Writing to file: " + filename);
+      std::getline(ss, data);  // skip empty line
       while (std::getline(ss, data)) {
         if (data.find("\r") != std::string::npos)
           data = data.erase(data.find("\r"), 1);
-        log::Log::getInstance().debug("Data: " + data);
+        Log::getInstance().debug("Data: " + data);
         if (data.find(boundary + "--") != std::string::npos ||
             data.find(boundary) != std::string::npos) {
           if (data.find(boundary + "--") != std::string::npos) {
             status = HttpRequestParseStatus::PARSED;
-            log::Log::getInstance().debug("Multipart form data parsed");
+            Log::getInstance().debug("Multipart form data parsed");
           }
           break;
         }
         file << data;
-        file << "\n";
+        if (!boundaryUpcoming(ss, boundary)) file << "\n";
+        if (countRemainingLines(ss) <= 2 && bytes_read == MAX_BUFFER_SIZE)
+          bytes_read = readMore(ss, _clientFd);
       }
       file.close();
       filename.clear();
@@ -429,7 +471,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
 }
 
 int HttpRequestParser::handshake() {
-  log::Log::getInstance().debug("Handshake");
+  Log::getInstance().debug("Handshake");
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
     request.setHeader("Expect", "");
     std::stringstream ss("");

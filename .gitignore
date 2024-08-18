@@ -37,3 +37,4 @@
 obj/
 hello.txt
 .DS_Store
+./logs
