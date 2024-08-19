@@ -1,0 +1,80 @@
+body {
+  font-family: "Arial", sans-serif;
+  background: linear-gradient(135deg, #f9f9f9, #e0e0e0);
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  padding: 0 20px;
+}
+
+h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
+  color: #2c3e50;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  color: #7f8c8d;
+}
+
+.game-container {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.tic-tac-toe {
+  display: grid;
+  grid-template-columns: repeat(3, 120px);
+  gap: 15px;
+}
+
+.tic-tac-toe button {
+  width: 120px;
+  height: 120px;
+  font-size: 36px;
+  background-color: #ecf0f1;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.tic-tac-toe button:hover:not(:disabled) {
+  background-color: #a6cae2;
+  transform: translateY(-3px);
+}
+
+.tic-tac-toe button:disabled {
+  cursor: not-allowed;
+  background-color: #95a5a6;
+}
+
+.home-btn,
+.reset-btn {
+  margin-top: 20px;
+  padding: 12px 25px;
+  background-color: #2980b9;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.home-btn:hover,
+.reset-btn:hover {
+  background-color: #1f5f8a;
+  transform: translateY(-3px);
+}
