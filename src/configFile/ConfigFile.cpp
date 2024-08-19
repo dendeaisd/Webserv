@@ -6,15 +6,18 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/15 22:26:57 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/19 17:06:16 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigFile.hpp"
 
+#include <cstring>
 #include <fstream>
 #include <string>
-#include <cstring>
+
+#include "HttpContext.hpp"
+#include "ServerContext.hpp"
 
 void ConfigFile::storeConfiguration(const std::string &fileName) {
   std::fstream file;
@@ -28,6 +31,8 @@ void ConfigFile::storeConfiguration(const std::string &fileName) {
     trackBrackets(line);
     mainContextSaveDirective(line);
     httpContextSave(line);
+    serverContextSaveContent(line);
+    locationContextSave(line);
   }
 }
 
@@ -49,8 +54,7 @@ void ConfigFile::setCurrentState(const std::string &line) {
     _state = SERVER_CONTEXT_IN_HTTP;
 }
 
-void ConfigFile::possibleNewServerContextSetup(const std::string &line)
-{
+void ConfigFile::possibleNewServerContextSetup(const std::string &line) {
   if (_state == SERVER_CONTEXT_IN_HTTP && line.find("server") != line.npos)
     _httpContext.addNewEmptyServer();
 }
@@ -83,10 +87,8 @@ void ConfigFile::transferStateToBracketStatus(EBracketStatus &status) {
   }
 }
 
-void ConfigFile::mainContextSaveDirective(const std::string &line)
-{
-  if (_state != MAIN_CONTEXT)
-    return ;
+void ConfigFile::mainContextSaveDirective(const std::string &line) {
+  if (_state != MAIN_CONTEXT) return;
   if (line.find("worker_processes") != line.npos)
     saveDirective(line, _workerProcessesValue);
   else if (line.find("pid") != line.npos)
@@ -95,19 +97,17 @@ void ConfigFile::mainContextSaveDirective(const std::string &line)
     saveDirective(line, _errorLogValue);
 }
 
-void ConfigFile::saveDirective(const std::string &line, std::string &directive)
-{
+void ConfigFile::saveDirective(const std::string &line,
+                               std::string &directive) {
   std::string value;
   getValue(line, value);
 
   directive = value;
 }
 
-void ConfigFile::getValue(const std::string &line, std::string &value)
-{
+void ConfigFile::getValue(const std::string &line, std::string &value) {
   int endOfKey;
-  while (line[endOfKey] != ' ' && line[endOfKey] != '\0')
-  {
+  while (line[endOfKey] != ' ' && line[endOfKey] != '\0') {
     endOfKey++;
   }
   value = line;
@@ -115,10 +115,8 @@ void ConfigFile::getValue(const std::string &line, std::string &value)
   value.erase(value.size() - 1, value.size() - 1);
 }
 
-void ConfigFile::httpContextSave(const std::string &line)
-{
-  if (_state != HTTPS_CONTEXT)
-    return ;
+void ConfigFile::httpContextSave(const std::string &line) {
+  if (_state != HTTPS_CONTEXT && line.find("http") == line.npos) return;
   std::string key;
   std::string value;
 
@@ -127,8 +125,29 @@ void ConfigFile::httpContextSave(const std::string &line)
   _httpContext.httpSaveDirectiveValue(key, value);
 }
 
-void ConfigFile::getKey(const std::string &line, std::string &key)
-{
+void ConfigFile::getKey(const std::string &line, std::string &key) {
   char delimiter = ' ';
   key = std::strtok(line, delimiter);
 }
+
+void ConfigFile::serverContextSave(const std::string &line) {
+
+  if (_state != SERVER_CONTEXT_IN_HTTP && line.find("server") == line.npos)
+    return;
+  std::string key;
+  std::string value;
+  getKey(line, key);
+  getValue(line, value);
+  _httpContext.serverSaveContextOrDirective(key, value);
+}
+
+void ConfigFile::locationContextSave(const std::string &line) {
+  if (_state != LOCATION_CONTEXT_IN_SERVER)
+    return ;
+  std::string key;
+  std::string value;
+  getKey(line, key);
+  getValue(line, value);
+  _httpContext._serverContext.back().locationSaveDirectiveValue(key, value);
+}
+

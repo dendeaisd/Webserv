@@ -35,6 +35,8 @@ class ConfigFile {
   void getValue(const std::string &line, std::string &value);
   void httpContextSave(const std::string &line);
   void getKey(const std::string &line, std::string &key);
+  void serverContextSave(const std::string &line);
+  void locationContextSave(const std::string &line);
 
 
   TStoringStates _state;
