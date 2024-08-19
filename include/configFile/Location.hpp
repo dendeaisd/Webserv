@@ -9,18 +9,25 @@ class Location {
  public:
   Location();
 
-  std::unordered_map<std::string, std::string> cgi;
+  void initializeLocation(const std::string &url);
+  void locationSaveDirectiveValue(const std::string &key,
+                                  const std::string &value);
+
   std::string _urlValue;
+
   std::string _rootValue;
-  std::string _proxy_passValue;
+  std::string _proxyPassValue;
   std::string _aliasValue;
-  std::string _try_filesValue;
+  std::string _tryFilesValue;
   std::string _indexValue;
   std::string _errorPageValue;
   std::string _accessLogValue;
   std::string _denyValue;
+  std::unordered_map<std::string, std::string> _cgi;
   std::vector<std::string> _rewriteValue;
 
+ private:
+  void cgiSetSeparatedValue(const std::string &value);
 };
 
 #endif  // LOCATION_HPP
