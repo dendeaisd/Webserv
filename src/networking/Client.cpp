@@ -37,7 +37,9 @@ bool Client::handleRequest() {
         if (parser.status == HttpRequestParseStatus::PARSED) {
           send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
           close(fd);
+          std::cout << "Handshake successful" << std::endl;
         }
+        std::cout << "Upload is yet to be completed" << std::endl;
         return true;
       } else {
         std::cout << "Handshake failed" << std::endl;

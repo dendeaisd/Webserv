@@ -41,5 +41,5 @@ class HttpRequestParser {
   void parseQueryParams(std::string query);
   bool validateHttpVersion();
   bool askForContinue();
-  bool checkForBoundary(std::string line);
+  bool checkForTerminator(std::string line);
 };

@@ -161,6 +161,20 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
       if (header.find("\r") != std::string::npos)
         header.erase(header.find("\r"), 1);
       std::string value = header.substr(pos + 2);
+      if (key == "Content-Disposition") {
+        std::string attr = "filename=";
+        std::size_t filePos = value.find(attr);
+        if (filePos != std::string::npos) {
+          hasFile = true;
+          std::string filename = value.substr(filePos + attr.length());
+          if (filename.front() == '"' && filename.back() == '"') {
+            filename = filename.substr(1, filename.length() - 2);
+          }
+          Log::getInstance().debug("File upload detected: " + filename);
+          key = "filename";
+          value = filename;
+        }
+      }
       request.setHeader(key, value);
     } else {
       status = HttpRequestParseStatus::INVALID;
@@ -201,21 +215,6 @@ void HttpRequestParser::parseBody(std::stringstream &ss) {
   request.setBody(body);
 }
 
-std::string decodeUrl(const std::string &url) {
-  std::string decoded;
-  for (size_t i = 0; i < url.length(); i++) {
-    if (url[i] == '%') {
-      int value;
-      sscanf(url.substr(i + 1, 2).c_str(), "%x", &value);
-      decoded += static_cast<char>(value);
-      i += 2;
-    } else {
-      decoded += url[i];
-    }
-  }
-  return decoded;
-}
-
 void HttpRequestParser::parseFormData(std::stringstream &ss) {
   /*
   /r/n
@@ -227,7 +226,7 @@ void HttpRequestParser::parseFormData(std::stringstream &ss) {
       continue;
     }
     std::string fact;
-    std::stringstream facts(decodeUrl(data));
+    std::stringstream facts(Helpers::decodeUrl(data));
     while (std::getline(facts, fact, '&')) {
       if (fact.find("\r") != std::string::npos)
         fact = fact.erase(data.find("\r"), 1);
@@ -331,14 +330,11 @@ int readMore(std::stringstream &ss, int _clientFd) {
   return bytes_read;
 }
 
-bool HttpRequestParser::checkForBoundary(std::string line) {
-  if (line.find(boundary + "--") != std::string::npos ||
-      line.find(boundary) != std::string::npos) {
-    if (line.find(boundary + "--") != std::string::npos) {
-      status = HttpRequestParseStatus::PARSED;
-      Log::getInstance().debug("Multipart form data parsed for request: " +
-                               request.getUri());
-    }
+bool HttpRequestParser::checkForTerminator(std::string line) {
+  if (line.find(boundary + "--") != std::string::npos) {
+    status = HttpRequestParseStatus::PARSED;
+    Log::getInstance().debug("Multipart form data parsed for request: " +
+                             request.getUri());
     return true;
   }
   return false;
@@ -355,7 +351,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   while (std::getline(ss, data)) {
     if (data.find("\r") != std::string::npos)
       data = data.erase(data.find("\r"), 1);
-    if (checkForBoundary(data)) break;
+    if (checkForTerminator(data)) break;
     std::string filename;
     std::string key;
     std::string contentType;
@@ -375,7 +371,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
       } else {
         std::getline(ss, data);
         std::getline(ss, data);
-        if (checkForBoundary(data)) break;
+        if (checkForTerminator(data)) break;
         Log::getInstance().debug("Adding form data: " + key + " " + data);
         request.addFormData(key, data);
         key = "";
@@ -397,7 +393,9 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
         if (data.find("\r") != std::string::npos)
           data = data.erase(data.find("\r"), 1);
         Log::getInstance().debug("Data: " + data);
-        if (checkForBoundary(data)) break;
+        if (checkForTerminator(data) ||
+            data.find(boundary) != std::string::npos)
+          break;
         file << data;
         if (!Helpers::boundaryUpcoming(ss, boundary)) file << "\n";
         if (Helpers::countRemainingLines(ss) <= 2 &&

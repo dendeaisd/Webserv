@@ -18,4 +18,5 @@ class Helpers {
   static int countRemainingLines(std::stringstream &ss);
   static std::string getFormKeyIfExists(std::string data);
   static std::string getFilenameIfExists(std::string data);
+  static std::string decodeUrl(const std::string &url);
 };

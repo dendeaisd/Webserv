@@ -65,3 +65,18 @@ std::string Helpers::getExtension(const std::string &path) {
   }
   return path.substr(pos + 1);
 }
+
+std::string Helpers::decodeUrl(const std::string &url) {
+  std::string decoded;
+  for (size_t i = 0; i < url.length(); i++) {
+    if (url[i] == '%') {
+      int value;
+      sscanf(url.substr(i + 1, 2).c_str(), "%x", &value);
+      decoded += static_cast<char>(value);
+      i += 2;
+    } else {
+      decoded += url[i];
+    }
+  }
+  return decoded;
+}
