@@ -7,8 +7,10 @@
 #include <utility>
 
 #include "../../include/log/Log.hpp"
+#include "../../include/request/Helpers.hpp"
 #include "../../include/request/HttpRequestEnums.hpp"
 #define MAX_BUFFER_SIZE 4096
+#define UPLOAD_DIR "uploads/"
 
 HttpRequestParser::HttpRequestParser()
     : status(HttpRequestParseStatus::NOT_PARSED) {}
@@ -150,7 +152,8 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
     if (pos != std::string::npos) {
       std::string key = header.substr(0, pos);
       if (HttpMaps::headerSet.find(key) == HttpMaps::headerSet.end()) {
-        std::cout << "Unknown header" << std::endl;
+        Log::getInstance().warning("Unknown header: " + key +
+                                   " found in request " + request.getUri());
         // Unknown headers are ignored to improve server performance and prevent
         // security vulnerabilities
         continue;
@@ -158,20 +161,6 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
       if (header.find("\r") != std::string::npos)
         header.erase(header.find("\r"), 1);
       std::string value = header.substr(pos + 2);
-      if (key == "Content-Disposition") {
-        std::string attr = "filename=";
-        std::size_t filePos = value.find(attr);
-        if (filePos != std::string::npos) {
-          hasFile = true;
-          std::string filename = value.substr(filePos + attr.length());
-          if (filename.front() == '"' && filename.back() == '"') {
-            filename = filename.substr(1, filename.length() - 2);
-          }
-          Log::getInstance().debug("File upload detected: " + filename);
-          key = "filename";
-          value = filename;
-        }
-      }
       request.setHeader(key, value);
     } else {
       status = HttpRequestParseStatus::INVALID;
@@ -269,8 +258,7 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
   int contentLength = std::stoi(request.getHeader("Content-Length"));
   int bytesWritten = 0;
   std::string filename = request.getHeader("filename");
-  std::string uploadDir = "uploads/";
-  std::ofstream file(uploadDir + filename, std::ios::binary);
+  std::ofstream file(UPLOAD_DIR + filename, std::ios::binary);
   if (!file.is_open()) {
     Log::getInstance().error("Failed to open file for writing");
     return false;
@@ -285,7 +273,6 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
       return true;
     }
   }
-
   int toRead = MAX_BUFFER_SIZE;
   if (contentLength < toRead) {
     toRead = contentLength;
@@ -326,44 +313,35 @@ bool HttpRequestParser::askForContinue() {
   return false;
 }
 
-int countRemainingLines(std::stringstream &ss) {
-  int originalPos = ss.tellg();
-  int count = 0;
-  std::string line;
-  while (std::getline(ss, line)) {
-    count++;
-  }
-  ss.clear();
-  ss.seekg(originalPos);
-  return count;
-}
-
-bool boundaryUpcoming(std::stringstream &ss, const std::string &boundary) {
-  int originalPos = ss.tellg();
-  std::string line;
-  std::getline(ss, line);
-  if (line.find(boundary) != std::string::npos) {
-    ss.clear();
-    ss.seekg(originalPos);
-    return true;
-  }
-  ss.clear();
-  ss.seekg(originalPos);
-  return false;
-}
-
 int readMore(std::stringstream &ss, int _clientFd) {
   char buffer[MAX_BUFFER_SIZE + 1];
   int bytes_read = read(_clientFd, buffer, MAX_BUFFER_SIZE);
   if (bytes_read > 0) {
     buffer[bytes_read] = '\0';
     ss << buffer;
-    std::cout << "Buffer: " << buffer << std::endl;
-  } else if (bytes_read == 0) {
-    Log::getInstance().info("No data received");
-  } else
-    Log::getInstance().error("Failed to read from client");
+    return bytes_read;
+  } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+    readMore(ss, _clientFd);
+  } else {
+    if (bytes_read < 0) {
+      Log::getInstance().error(std::strerror(errno));
+    }
+    close(_clientFd);
+  }
   return bytes_read;
+}
+
+bool HttpRequestParser::checkForBoundary(std::string line) {
+  if (line.find(boundary + "--") != std::string::npos ||
+      line.find(boundary) != std::string::npos) {
+    if (line.find(boundary + "--") != std::string::npos) {
+      status = HttpRequestParseStatus::PARSED;
+      Log::getInstance().debug("Multipart form data parsed for request: " +
+                               request.getUri());
+    }
+    return true;
+  }
+  return false;
 }
 
 bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
@@ -371,75 +349,44 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   int bytes_read = 0;
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
     bytes_read = readMore(ss, _clientFd);
+    Log::getInstance().debug("Bytes read: " + std::to_string(bytes_read));
+    if (bytes_read == 0 || bytes_read == -1) return false;
   }
-  Log::getInstance().debug("Boundary: " + boundary);
   while (std::getline(ss, data)) {
     if (data.find("\r") != std::string::npos)
       data = data.erase(data.find("\r"), 1);
-    if (data.find("--" + boundary + "--") != std::string::npos) {
-      status = HttpRequestParseStatus::PARSED;
-      Log::getInstance().debug("Multipart form data parsed");
-      break;
-    }
-    if (data.find("--" + boundary) != std::string::npos) {
-      Log::getInstance().debug("Boundary found");
-    }
-    std::string attr;
+    if (checkForBoundary(data)) break;
     std::string filename;
     std::string key;
     std::string contentType;
     while (std::getline(ss, data)) {
       if (data.find("\r") != std::string::npos)
         data = data.erase(data.find("\r"), 1);
-      if (data == "") {
-        Log::getInstance().debug("Empty line");
-        continue;
-      }
-      if (data.find(boundary) != std::string::npos) {
-        Log::getInstance().debug("Boundary found");
-        continue;
-      }
+      if (data == "" || data.find(boundary) != std::string::npos) continue;
       Log::getInstance().debug("Line: " + data);
-      if (data.find("form-data; ") != std::string::npos &&
-          data.find("filename=") == std::string::npos) {
-        attr = "name=";
-        size_t pos = data.find(attr);
-        key = data.substr(pos + attr.length());
-        if (key.front() == '"' && key.back() == '"') {
-          key = key.substr(1, key.length() - 2);
-        }
-        Log::getInstance().debug("Key: " + key);
-      } else if (data.find("filename=") != std::string::npos) {
-        attr = "filename=";
-        size_t pos = data.find(attr);
-        filename = data.substr(pos + attr.length());
-        if (filename.front() == '"' && filename.back() == '"') {
-          filename = filename.substr(1, filename.length() - 2);
-        }
-        Log::getInstance().debug("Filename: " + filename);
+      key = Helpers::getFormKeyIfExists(data);
+      if (key.empty()) {
+        filename = Helpers::getFilenameIfExists(data);
         std::getline(ss, data);
         if (data.find("Content-Type: ") != std::string::npos) {
           contentType = data.substr(14);
           Log::getInstance().debug("Content-Type: " + contentType);
         }
-      }
-      if (!key.empty()) {
+      } else {
         std::getline(ss, data);
         std::getline(ss, data);
-        if (data.find("--" + boundary + "--") != std::string::npos) {
-          break;
-        }
+        if (checkForBoundary(data)) break;
         Log::getInstance().debug("Adding form data: " + key + " " + data);
         request.addFormData(key, data);
         key = "";
         continue;
       }
       if (filename.empty() && key.empty()) {
+        status = HttpRequestParseStatus::INVALID;
         Log::getInstance().error("Invalid multipart/form-data");
         return false;
       }
-      std::string uploadDir = "uploads/";
-      std::ofstream file(uploadDir + filename, std::ios::binary);
+      std::ofstream file(UPLOAD_DIR + filename, std::ios::binary);
       if (!file.is_open()) {
         Log::getInstance().error("Failed to open file for writing");
         return false;
@@ -450,19 +397,14 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
         if (data.find("\r") != std::string::npos)
           data = data.erase(data.find("\r"), 1);
         Log::getInstance().debug("Data: " + data);
-        if (data.find(boundary + "--") != std::string::npos ||
-            data.find(boundary) != std::string::npos) {
-          if (data.find(boundary + "--") != std::string::npos) {
-            status = HttpRequestParseStatus::PARSED;
-            Log::getInstance().debug("Multipart form data parsed");
-          }
-          break;
-        }
+        if (checkForBoundary(data)) break;
         file << data;
-        if (!boundaryUpcoming(ss, boundary)) file << "\n";
-        if (countRemainingLines(ss) <= 2 && bytes_read == MAX_BUFFER_SIZE)
+        if (!Helpers::boundaryUpcoming(ss, boundary)) file << "\n";
+        if (Helpers::countRemainingLines(ss) <= 2 &&
+            bytes_read == MAX_BUFFER_SIZE)
           bytes_read = readMore(ss, _clientFd);
       }
+      request.addAttachment(filename, contentType);
       file.close();
       filename.clear();
     }
@@ -471,10 +413,13 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
 }
 
 int HttpRequestParser::handshake() {
-  Log::getInstance().debug("Handshake");
+  Log::getInstance().debug("Starting handshake for request: " +
+                           request.getUri());
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
     request.setHeader("Expect", "");
     std::stringstream ss("");
+    Log::getInstance().debug("File upload handler for request: " +
+                             request.getUri());
     return handleFileUpload(ss) ? 200 : 400;
   }
   return 400;  // TODO: return appropriate status code
@@ -485,11 +430,9 @@ bool HttpRequestParser::validateHttpVersion() {
       HttpMaps::httpRequestVersionMap.end()) {
     request.setHttpVersion(HttpMaps::httpRequestVersionMap.at(
         HttpMaps::httpRequestVersionMap.find(request.getHttpVersion())->first));
-    if (request.getHttpVersionEnum() == HttpRequestVersion::HTTP_1_1) {
-      return true;
-    } else {
+    if (request.getHttpVersionEnum() != HttpRequestVersion::HTTP_1_1)
       return false;
-    }
+    return true;
   } else {
     request.setHttpVersion(HttpRequestVersion::UNKNOWN);
     return false;

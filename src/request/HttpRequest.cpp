@@ -176,3 +176,23 @@ std::string HttpRequest::toJson() {
 HttpRequestHandler HttpRequest::getHandler() { return _handler; }
 
 void HttpRequest::setHandler(HttpRequestHandler handler) { _handler = handler; }
+
+void HttpRequest::addAttachment(std::string key, std::string value) {
+  if (key.empty() || value.empty()) {
+    Log::getInstance().debug("Attachment Key or value is empty");
+    return;
+  }
+  _attachments[key] = value;
+}
+
+std::string HttpRequest::getAttachment(std::string key) {
+  if (_attachments.find(key) != _attachments.end()) {
+    return _attachments[key];
+  } else {
+    return "";
+  }
+}
+
+std::map<std::string, std::string> HttpRequest::getAttachments() {
+  return _attachments;
+}

@@ -31,6 +31,8 @@ class HttpRequest {
   std::map<std::string, std::string> getHeaders();
   std::map<std::string, std::string> getQueryParams();
   std::map<std::string, std::string> getFormData();
+  std::string getAttachment(std::string key);
+  std::map<std::string, std::string> getAttachments();
   void setHandler(HttpRequestHandler handler);
   bool setMethod(std::string method);
   void setMethod(HttpRequestMethod httpRequestMethod);
@@ -46,6 +48,7 @@ class HttpRequest {
   void addFormData(std::string key, std::string value);
   void setHeaders(std::map<std::string, std::string> headers);
   void setQueryParam(std::string key, std::string value);
+  void addAttachment(std::string key, std::string value);
   std::string toString();
   std::string toJson();
 
@@ -64,10 +67,10 @@ class HttpRequest {
   std::string _subDomain;
   std::string _domain;
   HttpRequestHandler _handler;
-  // FileUpload file;
   std::map<std::string, std::string> _headers;
   std::map<std::string, std::string> _queryParams;
   std::map<std::string, std::string> _formData;
+  std::map<std::string, std::string> _attachments;
 };
 
 #endif
