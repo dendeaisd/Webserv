@@ -21,7 +21,6 @@
 #include "HttpContext.hpp"
 #include "ServerContext.hpp"
 
-void ConfigFile::storeConfiguration(const std::string &fileName) {
 ConfigFile::ConfigFile()
 {
   _workerProcessesValue.clear();
