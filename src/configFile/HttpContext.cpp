@@ -6,16 +6,24 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/12 11:37:24 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/19 15:03:38 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/21 15:03:53 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpContext.hpp"
 #include <memory>
 
-HttpContext::HttpContext() : _numberOfServers(0) {}
+HttpContext::HttpContext() {
+  _geoipCountry.clear();
+  _proxyCachePathValue.clear();
+  _proxyCacheValue.clear();
+  _proxyCacheUseStaleValue.clear();
+  _gzipValue.clear();
+  _gzipTypesValue.clear();
+  _limitReqZoneValue.clear();
+}
 
-HttpContext::addNewEmptyServer() {
+void HttpContext::addNewEmptyServer() {
   _serverContext.push_back(std::make_unique<ServerContext>());
 }
 
@@ -46,7 +54,7 @@ void HttpContext::serverSaveContextOrDirective(const std::string &key,
                                     const std::string &value)
 {
   if (key == "server")
-    _serverContext.make_unique<ServerContext>();
+    _serverContext.push_back(std::make_unique<ServerContext>());
   _serverContext.back()->serverSaveDirectiveValue(key, value);
 }
 

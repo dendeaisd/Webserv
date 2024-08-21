@@ -6,16 +6,25 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/19 16:41:56 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/21 16:58:04 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
+#include <string.h>
 
 Location::Location()
 {
   _urlValue.clear();
-  _rootValue._urlValueclear();
+  _rootValue.clear();
+  _proxyPassValue.clear();
+  _aliasValue.clear();
+  _tryFilesValue.clear();
+  _indexValue.clear();
+  _errorPageValue.clear();
+  _accessLogValue.clear();
+  _denyValue.clear();
+
 }
 
 void Location::initializeLocation(const std::string &url)
@@ -52,8 +61,11 @@ void Location::cgiSetSeparatedValue(const std::string &value)
   std::string fileType;
   std::string pathToInterpreter;
   char delimiter = ' ';
+  char *tmp_value;
 
-  fileType = std::strtok(value, delimiter);
-  pathToInterpreter = std::strtok(NULL, delimiter);
+  tmp_value = strdup(value.c_str());
+  fileType = std::strtok(tmp_value, &delimiter);
+  pathToInterpreter = std::strtok(NULL, &delimiter);
   _cgi.insert({fileType, pathToInterpreter});
+  free(tmp_value);
 }

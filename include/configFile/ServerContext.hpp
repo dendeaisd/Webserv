@@ -24,7 +24,7 @@ class ServerContext {
   std::string _rootValue;
 
   std::vector<std::string> _listenValue;
-  std::vector<std::unique_ptr<Location>> _locationContext;
+  std::vector<std::unique_ptr<Location> > _locationContext;
 };
 
 #endif

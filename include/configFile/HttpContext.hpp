@@ -28,7 +28,7 @@ class HttpContext {
 
   std::vector<std::string> _proxySetHeaderValue;
   std::vector<std::string> _proxyCacheValidValue;
-  std::vector<std::unique_ptr<ServerContext>> _serverContext;
+  std::vector<std::unique_ptr<ServerContext> > _serverContext;
 
   // std::string _indexValue; // Do we need that in the http context?
   // std::string _rootValue; // Do we need that in the http context?
@@ -37,4 +37,4 @@ class HttpContext {
   // std::string _errorLogValue; // Do we inplement that here??
 };
 
-#endif  // HTTP_CONTEXT_HPP
+#endif // HTTP_CONTEXT_HPP

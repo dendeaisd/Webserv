@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/19 17:04:39 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/21 17:02:00 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,7 @@ void ServerContext::serverSaveDirectiveValue(const std::string &key,
   else if (key == "root")
     _rootValue = value;
   else if (key == "listen")
-    _listenValue.push_pack(value);
-  else if (key == "cgi")
-    cgiSetSeparatedValue(value);
+    _listenValue.push_back(value);
 }
 
 void ServerContext::locationSaveDirectiveValue(const std::string &key,
@@ -47,7 +45,7 @@ void ServerContext::locationSaveDirectiveValue(const std::string &key,
   if (key == "location")
   {
     _locationContext.push_back(std::make_unique<Location>());
-    _locationContext.back()->initializeLocation();
+    _locationContext.back()->initializeLocation(value);
   }
   else
     _locationContext.back()->locationSaveDirectiveValue(key, value);

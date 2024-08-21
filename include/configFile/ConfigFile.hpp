@@ -8,16 +8,17 @@
 #include "states.hpp"
 
 enum EBracketStatus {
-  HTTP_BRACKET = 0,
-  SERVER_BRACKET = 1,
-  LOCATION_BRACKET = 2
+  MAIN_BRACKET = 0,
+  HTTP_BRACKET = 1,
+  SERVER_BRACKET = 2,
+  LOCATION_BRACKET = 3
 };
 
 class ConfigFile {
  public:
   ConfigFile();
 
-  void storeConfiguration(const std::string &fileName);
+  void storeValidConfiguration(const std::string &fileName);
 
   std::string _workerProcessesValue;
   std::string _pidValue;
@@ -40,7 +41,7 @@ class ConfigFile {
 
 
   TStoringStates _state;
-  std::stack<char> _bracketStatus[3];
+  std::stack<char> _bracketStatus[4];
 };
 
 #endif

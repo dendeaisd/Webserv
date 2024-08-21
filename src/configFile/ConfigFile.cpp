@@ -15,11 +15,21 @@
 #include <cstring>
 #include <fstream>
 #include <string>
+#include <cstring>
+#include <string.h>
 
 #include "HttpContext.hpp"
 #include "ServerContext.hpp"
 
 void ConfigFile::storeConfiguration(const std::string &fileName) {
+ConfigFile::ConfigFile()
+{
+  _workerProcessesValue.clear();
+  _pidValue.clear();
+  _errorLogValue.clear();
+}
+
+void ConfigFile::storeValidConfiguration(const std::string &fileName) {
   std::fstream file;
   std::string line;
 
@@ -64,7 +74,9 @@ void ConfigFile::trackBrackets(const std::string &line) {
 
   transferStateToBracketStatus(status);
   for (auto c : line) {
-    if (c == '{')
+    if (c == '#')
+      return ;
+    else if (c == '{')
       _bracketStatus[status].push('{');
     else if (c == '}')
       _bracketStatus[status].pop();
@@ -74,6 +86,7 @@ void ConfigFile::trackBrackets(const std::string &line) {
 void ConfigFile::transferStateToBracketStatus(EBracketStatus &status) {
   switch (_state) {
     case MAIN_CONTEXT:
+      status = MAIN_BRACKET;
       break;
     case HTTPS_CONTEXT:
       status = HTTP_BRACKET;
@@ -107,11 +120,12 @@ void ConfigFile::saveDirective(const std::string &line,
 
 void ConfigFile::getValue(const std::string &line, std::string &value) {
   int endOfKey;
+  endOfKey = 0;
   while (line[endOfKey] != ' ' && line[endOfKey] != '\0') {
     endOfKey++;
   }
   value = line;
-  value.erase(0, endOfKey);
+  value.erase(0, endOfKey + 1);
   value.erase(value.size() - 1, value.size() - 1);
 }
 
@@ -127,7 +141,9 @@ void ConfigFile::httpContextSave(const std::string &line) {
 
 void ConfigFile::getKey(const std::string &line, std::string &key) {
   char delimiter = ' ';
-  key = std::strtok(line, delimiter);
+  char *modified_line = strdup(line.c_str());
+  key = std::strtok(modified_line, &delimiter);
+  free(modified_line);
 }
 
 void ConfigFile::serverContextSave(const std::string &line) {
@@ -148,6 +164,6 @@ void ConfigFile::locationContextSave(const std::string &line) {
   std::string value;
   getKey(line, key);
   getValue(line, value);
-  _httpContext._serverContext.back().locationSaveDirectiveValue(key, value);
+  _httpContext._serverContext.back()->locationSaveDirectiveValue(key, value);
 }
 

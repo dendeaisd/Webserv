@@ -8,4 +8,4 @@ typedef enum EStoringStates {
   LOCATION_CONTEXT_IN_SERVER = 3
 } TStoringStates;
 
-#define  // STATES_HPP
+#endif // STATES_HPP
