@@ -25,6 +25,13 @@ const char* HTTP_RESPONSE =
     "\r\n"
     "Hello, World!";
 
+bool Client::sendDefaultFavicon() {
+  response.setStatusCode(200);
+  response.setFile("./default/favicon-dt.png", "image/x-icon");
+  std::string responseString = response.getResponse();
+  send(fd, responseString.c_str(), responseString.length(), 0);
+  return true;
+}
 bool Client::handleRequest() {
   char buffer[BUFFER_SIZE];
 
@@ -64,6 +71,9 @@ bool Client::handleRequest() {
           CGIFileManager cgiFileManager("./cgi-bin");
           CGI cgi(fd, cgiFileManager, request);
           cgi.run();
+        } else if (request.getHandler() == HttpRequestHandler::FAVICON) {
+          Log::getInstance().debug("Successful request. Favicon");
+          sendDefaultFavicon();
         } else {
           send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
         }

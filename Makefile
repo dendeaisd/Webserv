@@ -10,7 +10,8 @@ SRC_DIR := .
 OBJ_DIR := obj
 
 SRC         :=  $(wildcard src/*.cpp) $(wildcard src/networking/*.cpp) \
-	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp) $(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp)
+	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp) $(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp) \
+	$(wildcard src/response/*.cpp)
 
 OBJ         :=  $(SRC:.cpp=.o)
 

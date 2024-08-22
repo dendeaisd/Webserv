@@ -35,6 +35,10 @@ void HttpRequestParser::electHandler() {
   // TODO: update this to use server configuration
   if (request.getUri().find("cgi-bin") != std::string::npos) {
     request.setHandler(HttpRequestHandler::CGI);
+  } else if (request.getUri().find("favicon.ico") != std::string::npos) {
+    request.setHandler(HttpRequestHandler::FAVICON);
+    Log::getInstance().debug("Favicon handler for request: " +
+                             request.getUri());
   } else {
     request.setHandler(HttpRequestHandler::STATIC);
   }
