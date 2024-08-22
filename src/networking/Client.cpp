@@ -8,6 +8,7 @@
 
 #include "../../include/cgi/CGI.hpp"
 #include "../../include/cgi/CGIFileManager.hpp"
+#include "../../include/log/Log.hpp"
 
 #define BUFFER_SIZE 4096
 
@@ -37,13 +38,15 @@ bool Client::handleRequest() {
         if (parser.status == HttpRequestParseStatus::PARSED) {
           send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
           close(fd);
-          std::cout << "Handshake successful" << std::endl;
+          Log::getInstance().debug(
+              "Successful multipart/octet-stream request with handshake");
         }
-        std::cout << "Upload is yet to be completed" << std::endl;
         return true;
       } else {
-        std::cout << "Handshake failed" << std::endl;
-        std::cout << "Status: " << status << std::endl;
+        Log::getInstance().error(
+            "Something went wrong while processing request: " +
+            parser.getHttpRequest().getHost());
+        // TODO: send response and close connection
         close(fd);
         return false;
       }
@@ -55,18 +58,17 @@ bool Client::handleRequest() {
       parser = HttpRequestParser(buffer, fd);
       status = parser.parse();
       if (status == 200) {
-        std::cout << "Parsed successfully" << std::endl;
         auto request = parser.getHttpRequest();
         if (request.getHandler() == HttpRequestHandler::CGI) {
-          std::cout << "CGI" << std::endl;
+          Log::getInstance().debug("Successful request. CGI");
           CGIFileManager cgiFileManager("./cgi-bin");
           CGI cgi(fd, cgiFileManager, request);
           cgi.run();
         } else {
-          std::cout << "STATIC" << std::endl;
           send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
         }
       } else {
+        // TODO: send response and close connection
         std::cout << "Status: " << status << std::endl;
         auto request = parser.getHttpRequest();
         std::cout << request.getHost() << std::endl;

@@ -31,10 +31,6 @@ HttpRequest HttpRequestParser::getHttpRequest() {
   }
 }
 
-bool isCGI(const std::string &uri) {
-  return uri.find("cgi-bin") != std::string::npos;
-}
-
 void HttpRequestParser::electHandler() {
   // TODO: update this to use server configuration
   if (request.getUri().find("cgi-bin") != std::string::npos) {
@@ -44,17 +40,23 @@ void HttpRequestParser::electHandler() {
   }
 }
 
+std::string getLineSanitized(std::stringstream &ss) {
+  std::string line;
+  std::getline(ss, line);
+  if (line.find("\r") != std::string::npos) {
+    line.erase(line.find("\r"), 1);
+  }
+  return line;
+}
+
 int HttpRequestParser::parse() {
   std::stringstream ss(raw);
-  std::string requestLine;
-  std::getline(ss, requestLine);
-  std::cout << requestLine << std::endl;
-  if (requestLine.find("\r") != std::string::npos)
-    requestLine.erase(requestLine.find("\r"), 1);
+  std::string requestLine = getLineSanitized(ss);
   parseRequestLine((char *)requestLine.c_str(), requestLine.length());
   if (status == HttpRequestParseStatus::INVALID ||
       status == HttpRequestParseStatus::INCOMPLETE) {
-    std::cout << "Invalid request line" << std::endl;
+    Log::getInstance().error("Invalid or incomplete request line: " +
+                             requestLine);
     return 400;
   }
   if (!validateHttpVersion()) {
@@ -63,10 +65,7 @@ int HttpRequestParser::parse() {
     return 505;  // HTTP Version Not Supported
   }
   parseHeaders(ss);
-  if (status == HttpRequestParseStatus::INVALID) {
-    std::cout << "Invalid headers" << std::endl;
-    return 400;
-  }
+  if (status == HttpRequestParseStatus::INVALID) return 400;
   electHandler();
   std::string query;
   size_t pos = request.getUri().find("?");
@@ -136,7 +135,7 @@ void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
 
 void HttpRequestParser::parseHeaders(std::stringstream &ss) {
   std::string header;
-  while (std::getline(ss, header) && (header != "\r" && header != "")) {
+  while ((header = getLineSanitized(ss)).length() > 0) {
     /*
     No whitespace is allowed between the field name and colon.  In the
     past, differences in the handling of such whitespace have led to
@@ -144,7 +143,8 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
     -- src: https://www.rfc-editor.org/rfc/inline-errata/rfc9112.html
     */
     if (header.find(" : ") != std::string::npos) {
-      std::cout << "Invalid header" << std::endl;
+      Log::getInstance().error(
+          "Invalid header with extra space before colon: " + header);
       status = HttpRequestParseStatus::INVALID;
       return;
     }
@@ -158,8 +158,6 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
         // security vulnerabilities
         continue;
       }
-      if (header.find("\r") != std::string::npos)
-        header.erase(header.find("\r"), 1);
       std::string value = header.substr(pos + 2);
       if (key == "Content-Disposition") {
         std::string attr = "filename=";
@@ -177,6 +175,7 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
       }
       request.setHeader(key, value);
     } else {
+      Log::getInstance().error("Invalid header: " + header);
       status = HttpRequestParseStatus::INVALID;
       return;
     }
@@ -299,8 +298,8 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
 
 bool HttpRequestParser::askForContinue() {
   std::string expectation = request.getHeader("Expect");
-  std::cout << "Expect: " << expectation << std::endl;
   if (expectation == "100-continue") {
+    Log::getInstance().debug("Client sent header Expect: 100-continue");
     std::string response = "HTTP/1.1 100 Continue\r\n\r\n";
     status = HttpRequestParseStatus::EXPECT_CONTINUE;
     if (send(_clientFd, response.c_str(), response.length(), 0) < 0) {
@@ -348,17 +347,13 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
     Log::getInstance().debug("Bytes read: " + std::to_string(bytes_read));
     if (bytes_read == 0 || bytes_read == -1) return false;
   }
-  while (std::getline(ss, data)) {
-    if (data.find("\r") != std::string::npos)
-      data = data.erase(data.find("\r"), 1);
+  while ((data = getLineSanitized(ss)).length() > 0) {
     if (checkForTerminator(data)) break;
     std::string filename;
     std::string key;
     std::string contentType;
-    while (std::getline(ss, data)) {
-      if (data.find("\r") != std::string::npos)
-        data = data.erase(data.find("\r"), 1);
-      if (data == "" || data.find(boundary) != std::string::npos) continue;
+    while ((data = getLineSanitized(ss)).length() > 0) {
+      if (data.find(boundary) != std::string::npos) continue;
       Log::getInstance().debug("Line: " + data);
       key = Helpers::getFormKeyIfExists(data);
       if (key.empty()) {
@@ -369,7 +364,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
           Log::getInstance().debug("Content-Type: " + contentType);
         }
       } else {
-        std::getline(ss, data);
+        std::getline(ss, data);  // skip empty line
         std::getline(ss, data);
         if (checkForTerminator(data)) break;
         Log::getInstance().debug("Adding form data: " + key + " " + data);
@@ -389,6 +384,8 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
       }
       Log::getInstance().debug("Writing to file: " + filename);
       std::getline(ss, data);  // skip empty line
+      // getLineSanitized is not used here because we need to write to the file
+      // even if the line is empty
       while (std::getline(ss, data)) {
         if (data.find("\r") != std::string::npos)
           data = data.erase(data.find("\r"), 1);
