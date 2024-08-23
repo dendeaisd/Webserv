@@ -118,13 +118,11 @@ void ConfigFile::saveDirective(const std::string &line,
 }
 
 void ConfigFile::getValue(const std::string &line, std::string &value) {
-  int endOfKey;
-  endOfKey = 0;
-  while (line[endOfKey] != ' ' && line[endOfKey] != '\0') {
-    endOfKey++;
-  }
+  std::string key;
   value = line;
-  value.erase(0, endOfKey + 1);
+  removeWhiteSpaces(value);
+  getKey(line, key);
+  value.erase(0, key.size() + 1);
   value.erase(value.size() - 1, value.size() - 1);
 }
 
@@ -164,5 +162,19 @@ void ConfigFile::locationContextSave(const std::string &line) {
   getKey(line, key);
   getValue(line, value);
   _httpContext._serverContext.back()->locationSaveDirectiveValue(key, value);
+}
+
+void ConfigFile::removeWhiteSpaces(std::string &str)
+{
+  int whiteSpaces;
+
+  if (str[0] != ' ')
+    return ;
+
+  whiteSpaces = 0;
+  while (str[whiteSpaces] != '\0' && str[whiteSpaces] != ' ')
+    whiteSpaces++;
+
+  str.erase(0, whiteSpaces + 1);
 }
 

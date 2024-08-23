@@ -38,6 +38,7 @@ class ConfigFile {
   void getKey(const std::string &line, std::string &key);
   void serverContextSave(const std::string &line);
   void locationContextSave(const std::string &line);
+  void removeWhiteSpaces(std::string &str);
 
 
   TStoringStates _state;
