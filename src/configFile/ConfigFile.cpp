@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/19 17:06:16 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/23 13:58:05 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@ void ConfigFile::storeValidConfiguration(const std::string &fileName) {
     possibleNewServerContextSetup(line);
     mainContextSaveDirective(line);
     httpContextSave(line);
-    serverContextSave(line);
-    locationContextSave(line);
+    //serverContextSave(line);
+    //locationContextSave(line);
   }
 }
 
@@ -120,7 +120,8 @@ void ConfigFile::saveDirective(const std::string &line,
 void ConfigFile::getValue(const std::string &line, std::string &value) {
   std::string key;
   value = line;
-  removeWhiteSpaces(value);
+
+  removeWhiteSpacesFront(value);
   getKey(line, key);
   value.erase(0, key.size() + 1);
   value.erase(value.size() - 1, value.size() - 1);
@@ -164,7 +165,7 @@ void ConfigFile::locationContextSave(const std::string &line) {
   _httpContext._serverContext.back()->locationSaveDirectiveValue(key, value);
 }
 
-void ConfigFile::removeWhiteSpaces(std::string &str)
+void ConfigFile::removeWhiteSpacesFront(std::string &str)
 {
   int whiteSpaces;
 
@@ -172,9 +173,9 @@ void ConfigFile::removeWhiteSpaces(std::string &str)
     return ;
 
   whiteSpaces = 0;
-  while (str[whiteSpaces] != '\0' && str[whiteSpaces] != ' ')
+  while (str[whiteSpaces] != '\0' && str[whiteSpaces] == ' ')
     whiteSpaces++;
 
-  str.erase(0, whiteSpaces + 1);
+  str.erase(0, whiteSpaces);
 }
 
