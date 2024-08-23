@@ -32,6 +32,15 @@ bool Client::sendDefaultFavicon() {
   send(fd, responseString.c_str(), responseString.length(), 0);
   return true;
 }
+
+bool Client::sendDefaultPage() {
+  response.setStatusCode(200);
+  response.setFile("./default/index.html", "text/html", "inline");
+  std::string responseString = response.getResponse();
+  send(fd, responseString.c_str(), responseString.length(), 0);
+  return true;
+}
+
 bool Client::handleRequest() {
   char buffer[BUFFER_SIZE];
 
@@ -74,6 +83,11 @@ bool Client::handleRequest() {
         } else if (request.getHandler() == HttpRequestHandler::FAVICON) {
           Log::getInstance().debug("Successful request. Favicon");
           sendDefaultFavicon();
+        } else if (request.getHandler() == HttpRequestHandler::STATIC &&
+                   request.getMethodEnum() == HttpRequestMethod::GET &&
+                   request.getUri() == "/") {
+          Log::getInstance().debug("Successful request. Static");
+          sendDefaultPage();
         } else {
           send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
         }

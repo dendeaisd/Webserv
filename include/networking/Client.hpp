@@ -16,6 +16,7 @@ class Client {
   int getFd() const;
   bool handleRequest();
   bool sendDefaultFavicon();
+  bool sendDefaultPage();
 
  private:
   int fd;
