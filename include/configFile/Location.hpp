@@ -16,6 +16,7 @@ class Location {
   std::string _urlValue;
 
   std::string _rootValue;
+  std::string _includeValue;
   std::string _proxyPassValue;
   std::string _aliasValue;
   std::string _tryFilesValue;

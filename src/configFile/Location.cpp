@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/21 16:58:04 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/23 13:16:20 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,11 @@ void Location::locationSaveDirectiveValue(const std::string &key,
     _accessLogValue = value;
   else if (key == "deny")
     _denyValue = value;
+  else if (key == "include")
+    _includeValue = value;
   else if (key == "cgi")
     cgiSetSeparatedValue(value);
+
 }
 
 void Location::cgiSetSeparatedValue(const std::string &value)
