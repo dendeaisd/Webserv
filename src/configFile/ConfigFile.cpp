@@ -36,11 +36,11 @@ void ConfigFile::storeValidConfiguration(const std::string &fileName) {
   file.open(fileName.c_str());
   while (std::getline(file, line)) {
     setCurrentState(line);
-    possibleNewServerContextSetup(line);
     trackBrackets(line);
+    possibleNewServerContextSetup(line);
     mainContextSaveDirective(line);
     httpContextSave(line);
-    serverContextSaveContent(line);
+    serverContextSave(line);
     locationContextSave(line);
   }
 }
