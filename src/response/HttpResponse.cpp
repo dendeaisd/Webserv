@@ -11,6 +11,8 @@ HttpResponse::HttpResponse(int status) {
   _reasonPhrase = HttpReason::getReasonPhrase(status);
   _body = "";
   _contentType = "text/html";
+  _headers["Server"] = "Iridescent/0.1 (Unix)";
+  // _headers["Connection"] = "close";
 }
 
 HttpResponse::~HttpResponse() {}

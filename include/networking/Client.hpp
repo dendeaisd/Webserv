@@ -15,12 +15,14 @@ class Client {
 
   int getFd() const;
   bool handleRequest();
-  bool sendDefaultFavicon();
-  bool sendDefaultPage();
 
  private:
   int fd;
   HttpRequestParser parser;
   HttpResponse response;
+  bool sendDefaultFavicon();
+  bool sendDefaultPage();
+  bool handleContinue();
+  bool execute();
 };
 #endif  // CLIENT_H

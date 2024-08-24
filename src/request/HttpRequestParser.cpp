@@ -9,6 +9,7 @@
 #include "../../include/log/Log.hpp"
 #include "../../include/request/Helpers.hpp"
 #include "../../include/request/HttpRequestEnums.hpp"
+#include "../../include/response/HttpResponse.hpp"
 #define MAX_BUFFER_SIZE 4096
 #define UPLOAD_DIR "uploads/"
 
@@ -105,7 +106,7 @@ int HttpRequestParser::parse() {
     // library will send the Expect header
     status = HttpRequestParseStatus::EXPECT_CONTINUE;
   }
-  return 200;
+  return request.getMethodEnum() == HttpRequestMethod::POST ? 201 : 200;
 }
 
 void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
@@ -304,9 +305,12 @@ bool HttpRequestParser::askForContinue() {
   std::string expectation = request.getHeader("Expect");
   if (expectation == "100-continue") {
     Log::getInstance().debug("Client sent header Expect: 100-continue");
-    std::string response = "HTTP/1.1 100 Continue\r\n\r\n";
+    HttpResponse response = HttpResponse(100);
+    response.setHeader("Connection", "keep-alive");
+    std::string responseString = response.getResponse();
     status = HttpRequestParseStatus::EXPECT_CONTINUE;
-    if (send(_clientFd, response.c_str(), response.length(), 0) < 0) {
+    if (send(_clientFd, responseString.c_str(), responseString.length(), 0) <
+        0) {
       Log::getInstance().error("Failed to send 100 Continue response");
       return false;
     }
@@ -419,7 +423,15 @@ int HttpRequestParser::handshake() {
     std::stringstream ss("");
     Log::getInstance().debug("File upload handler for request: " +
                              request.getUri());
-    return handleFileUpload(ss) ? 200 : 400;
+    if (handleFileUpload(ss)) {
+      // TODO: handle when method is PUT and results in creating a new record or
+      // file, should return 201
+      if (request.getMethodEnum() == HttpRequestMethod::POST) {
+        return 201;
+      }
+      return 200;
+    }
+    return 400;
   }
   return 400;  // TODO: return appropriate status code
 }
