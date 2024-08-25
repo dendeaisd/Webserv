@@ -10,6 +10,16 @@ HttpRequest::HttpRequest()
     : _httpRequestMethod(HttpRequestMethod::UNKNOWN),
       _httpProtocolVersion(HttpRequestVersion::UNKNOWN) {
   _requestTime = std::chrono::system_clock::now();
+  _handler = HttpRequestHandler::STATIC;
+  _method = "";
+  _uri = "";
+  _query = "";
+  _httpVersion = "";
+  _host = "";
+  _port = "";
+  _body = "";
+  _subDomain = "";
+  _domain = "";
 }
 
 HttpRequest::~HttpRequest() {
@@ -56,6 +66,8 @@ std::map<std::string, std::string> HttpRequest::getFormData() {
 std::map<std::string, std::string> HttpRequest::getQueryParams() {
   return _queryParams;
 }
+
+std::string HttpRequest::getQuery() { return _query; }
 
 bool HttpRequest::setMethod(std::string method) {
   if (method.empty()) {

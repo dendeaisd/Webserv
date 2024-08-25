@@ -10,6 +10,7 @@
 #include <cerrno>
 #include <ctime>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "../../include/log/Log.hpp"
@@ -48,7 +49,6 @@ void sendInternalErrorResponse(int fd) {
   std::string resp = response.getResponse();
   send(fd, resp.c_str(), resp.length(), 0);
 }
-
 
 void CGI::run() {
   if (_unableToExecute) {
@@ -167,12 +167,29 @@ bool CGI::wait() {
 void CGI::executeCGI() {
   std::vector<char *> args;
   std::vector<char *> envp;
+  std::vector<std::string> env_strs;
 
   args.push_back(const_cast<char *>(_language.c_str()));
   args.push_back(const_cast<char *>(_script.c_str()));
   args.push_back(nullptr);
 
-  envp.push_back(const_cast<char *>("CONTENT_LENGTH=0"));
+  envp.push_back(const_cast<char *>(
+      std::string("CONTENT_LENGTH=" + _request.getHeader("Content-Length"))
+          .c_str()));
+  envp.push_back(const_cast<char *>(
+      std::string("REQUEST_METHOD=" + _request.getMethod()).c_str()));
+  envp.push_back(
+      const_cast<char *>(std::string("HOST=" + _request.getHost()).c_str()));
+  auto qp = _request.getQueryParams();
+  Log::getInstance().info("Query params size: " + std::to_string(qp.size()));
+  for (auto it = qp.begin(); it != qp.end(); ++it) {
+    env_strs.push_back("QS_" + it->first + "=" + it->second);
+  }
+
+  for (auto it = env_strs.begin(); it != env_strs.end(); ++it) {
+    Log::getInstance().info("Adding env: " + *it);
+    envp.push_back(const_cast<char *>(it->c_str()));
+  }
   envp.push_back(nullptr);
 
   execve(_language.c_str(), args.data(), envp.data());
