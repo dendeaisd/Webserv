@@ -11,7 +11,7 @@ class CGI {
   CGI(int fd, CGIFileManager &cgiFileManager, HttpRequest &request);
   ~CGI() {}
   void run();
-  void wait();
+  bool wait();
   void executeCGI();
   int load();
 
@@ -20,11 +20,14 @@ class CGI {
   int pipeInFd_[2];
   int pipeOutFd_[2];
   int pid_;
+  bool _unableToExecute;
   std::string _response;
   std::string _stream;
   std::string _script;
   std::string _language;
   HttpRequest _request;
+
+  void killChild();
 };
 
 #endif

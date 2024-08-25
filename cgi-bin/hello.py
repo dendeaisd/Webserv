@@ -17,11 +17,5 @@ def hello():
 	response += "\r\n"
 	response += content
 	print(response)
-	## touch or append to a file to check if the script is called
-	with open("hello.txt", "a") as f:
-		f.write(f"Hello {datetime.datetime.now()}\n")
-	
-
-# will be called from CGI script
 
 hello()

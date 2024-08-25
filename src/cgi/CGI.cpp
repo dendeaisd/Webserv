@@ -1,6 +1,7 @@
 #include "../../include/cgi/CGI.hpp"
 
 #include <fcntl.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -12,24 +13,48 @@
 #include <vector>
 
 #include "../../include/log/Log.hpp"
+#include "../../include/response/HttpResponse.hpp"
+
 #define BUFFER_SIZE 4096
 #define TIMEOUT 20
 
 CGI::CGI(int fd, CGIFileManager &cgiFileManager, HttpRequest &request) {
   fd_ = fd;
   _request = request;
+  _unableToExecute = false;
   _script = "." + request.getUri();
   _language = cgiFileManager.getExecutor(_script);
   if (_language.empty()) {
     Log::getInstance().error("Failed to get executor for script");
+    _unableToExecute = true;
   }
   // load();
   if (pipe(pipeInFd_) == -1 || pipe(pipeOutFd_) == -1) {
     Log::getInstance().error("Failed to create pipe");
+    _unableToExecute = true;
   }
 }
 
+void sendTimeoutResponse(int fd) {
+  HttpResponse response(408);
+  response.setBody(
+      "Request timed out, we apologize for our slowness and unoptimized code.");
+  std::string resp = response.getResponse();
+  send(fd, resp.c_str(), resp.length(), 0);
+}
+
+void sendInternalErrorResponse(int fd) {
+  HttpResponse response(500);
+  std::string resp = response.getResponse();
+  send(fd, resp.c_str(), resp.length(), 0);
+}
+
+
 void CGI::run() {
+  if (_unableToExecute) {
+    sendInternalErrorResponse(fd_);
+    return;
+  }
   pid_ = fork();
   if (pid_ == -1) {
     throw std::runtime_error("Failed to fork");
@@ -47,12 +72,26 @@ void CGI::run() {
     close(pipeInFd_[0]);
     close(pipeOutFd_[1]);
   }
-  wait();
+  //   wait();
 }
 
-void CGI::wait() {
+void CGI::killChild() {
+  if (pid_ != 0) {
+    kill(pid_, SIGKILL);
+  }
+}
+
+/*
+This function returns false if the child process is still running and true if
+the child process has exited. This return value will be used to decide if we
+should remove the event from the event manager.
+*/
+bool CGI::wait() {
   int status;
 
+  if (_unableToExecute) {
+    return true;
+  }
   int flags = fcntl(pipeOutFd_[0], F_GETFL, 0);
   fcntl(pipeOutFd_[0], F_SETFL, flags | O_NONBLOCK);
   while (true) {
@@ -60,34 +99,42 @@ void CGI::wait() {
       // return request timed out
       Log::getInstance().error("Request timed out");
       // TODO: return request timed out error code 408
+      close(pipeOutFd_[0]);
       // TODO: kill child process
+      killChild();
+      sendTimeoutResponse(fd_);
       // TODO: Move all send calls to client class
-      break;
+      return true;
     }
     pid_t result = waitpid(pid_, &status, WNOHANG);
     if (result == -1) {
       if (errno == EAGAIN || errno == EWOULDBLOCK) {
-        usleep(50000);
-        continue;
+        // still needs time to respond
+        return false;
       }
       Log::getInstance().error("Failed to wait for child process");
-      break;
+      close(pipeOutFd_[0]);
+      sendInternalErrorResponse(fd_);
+      return true;
     }
     if (result == 0) {
-      usleep(50000);
-      continue;
+      return false;
     }
     if (result == pid_) {
       if (WIFEXITED(status)) {
         if (WEXITSTATUS(status) != 0) {
           // TODO: return 500 error
           Log::getInstance().error("Script exited with non-zero status");
-          break;
+          close(pipeOutFd_[0]);
+          sendInternalErrorResponse(fd_);
+          return true;
         }
       } else {
         // TODO: return 500 error
         Log::getInstance().error("Script did not exit normally");
-        break;
+        close(pipeOutFd_[0]);
+        sendInternalErrorResponse(fd_);
+        return true;
       }
     }
     char buffer[BUFFER_SIZE + 1];
@@ -101,18 +148,20 @@ void CGI::wait() {
       if (sent < 0) {
         throw std::runtime_error(std::strerror(errno));
       }
-      break;
+      close(pipeOutFd_[0]);
+      return true;
     } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-      usleep(50000);
-      continue;
+      return false;
     } else {
       if (bytes_read < 0) {
-        throw std::runtime_error(std::strerror(errno));
+        Log::getInstance().error("Failed to read from pipe with error: " +
+                                 std::string(std::strerror(errno)));
       }
-      break;
+      close(pipeOutFd_[0]);
+      return true;
     }
   }
-  close(pipeOutFd_[0]);
+  return false;
 }
 
 void CGI::executeCGI() {

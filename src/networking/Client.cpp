@@ -9,6 +9,7 @@
 #include "../../include/cgi/CGI.hpp"
 #include "../../include/cgi/CGIFileManager.hpp"
 #include "../../include/log/Log.hpp"
+#include "../../include/Event.hpp"
 
 #define BUFFER_SIZE 4096
 
@@ -69,8 +70,9 @@ bool Client::execute() {
   if (request.getHandler() == HttpRequestHandler::CGI) {
     Log::getInstance().debug("Successful request. CGI");
     CGIFileManager cgiFileManager("./cgi-bin");
-    CGI cgi(fd, cgiFileManager, request);
-    cgi.run();
+    CGI *cgi = new CGI(fd, cgiFileManager, request);
+    cgi->run();
+	Event::getInstance().addEvent(fd, cgi);
   } else if (request.getHandler() == HttpRequestHandler::FAVICON) {
     Log::getInstance().debug("Successful request. Favicon");
     sendDefaultFavicon();
