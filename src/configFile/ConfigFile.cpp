@@ -12,17 +12,15 @@
 
 #include "ConfigFile.hpp"
 
+#include <string.h>
 #include <cstring>
 #include <fstream>
 #include <string>
-#include <cstring>
-#include <string.h>
 
 #include "HttpContext.hpp"
 #include "ServerContext.hpp"
 
-ConfigFile::ConfigFile()
-{
+ConfigFile::ConfigFile() {
   _workerProcessesValue.clear();
   _pidValue.clear();
   _errorLogValue.clear();
@@ -74,7 +72,7 @@ void ConfigFile::trackBrackets(const std::string &line) {
   transferStateToBracketStatus(status);
   for (auto c : line) {
     if (c == '#')
-      return ;
+      return;
     else if (c == '{')
       _bracketStatus[status].push('{');
     else if (c == '}')
@@ -111,6 +109,7 @@ void ConfigFile::mainContextSaveDirective(const std::string &line) {
 
 void ConfigFile::saveDirective(const std::string &line,
                                std::string &directive) {
+  if (line.length() <= 0) return;
   std::string value;
   getValue(line, value);
 
@@ -118,6 +117,7 @@ void ConfigFile::saveDirective(const std::string &line,
 }
 
 void ConfigFile::getValue(const std::string &line, std::string &value) {
+  if (line.empty() == true || line.length() == 1) return;
   std::string key;
   value = line;
 
@@ -138,6 +138,7 @@ void ConfigFile::httpContextSave(const std::string &line) {
 }
 
 void ConfigFile::getKey(const std::string &line, std::string &key) {
+  if (line.empty() == true) return;
   char delimiter = ' ';
   char *modified_line = strdup(line.c_str());
   key = std::strtok(modified_line, &delimiter);
@@ -156,8 +157,7 @@ void ConfigFile::serverContextSave(const std::string &line) {
 }
 
 void ConfigFile::locationContextSave(const std::string &line) {
-  if (_state != LOCATION_CONTEXT_IN_SERVER)
-    return ;
+  if (_state != LOCATION_CONTEXT_IN_SERVER) return;
   std::string key;
   std::string value;
   getKey(line, key);
@@ -165,17 +165,13 @@ void ConfigFile::locationContextSave(const std::string &line) {
   _httpContext._serverContext.back()->locationSaveDirectiveValue(key, value);
 }
 
-void ConfigFile::removeWhiteSpacesFront(std::string &str)
-{
+void ConfigFile::removeWhiteSpacesFront(std::string &str) {
   int whiteSpaces;
 
-  if (str[0] != ' ')
-    return ;
+  if (str[0] != ' ') return;
 
   whiteSpaces = 0;
-  while (str[whiteSpaces] != '\0' && str[whiteSpaces] == ' ')
-    whiteSpaces++;
+  while (str[whiteSpaces] != '\0' && str[whiteSpaces] == ' ') whiteSpaces++;
 
   str.erase(0, whiteSpaces);
 }
-
