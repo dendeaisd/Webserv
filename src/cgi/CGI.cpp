@@ -7,26 +7,25 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <ctime>
 #include <iostream>
 #include <vector>
 
-const char *HTTP_RESPONSE_CGI =
-    "HTTP/1.1 200 OK\r\n"
-    "Content-Type: text/html\r\n"
-    "Content-Length: 17\r\n"
-    "\r\n"
-    "Hello, Universe!\n";
+#include "../../include/log/Log.hpp"
+#define BUFFER_SIZE 4096
+#define TIMEOUT 20
 
 CGI::CGI(int fd, CGIFileManager &cgiFileManager, HttpRequest &request) {
   fd_ = fd;
-  script_ = "." + request.getUri();
-  language_ = cgiFileManager.getExecutor(script_);
-  if (language_.empty()) {
-    throw std::runtime_error("Failed to get executor for script");
+  _request = request;
+  _script = "." + request.getUri();
+  _language = cgiFileManager.getExecutor(_script);
+  if (_language.empty()) {
+    Log::getInstance().error("Failed to get executor for script");
   }
   // load();
   if (pipe(pipeInFd_) == -1 || pipe(pipeOutFd_) == -1) {
-    throw std::runtime_error("Failed to create pipe");
+    Log::getInstance().error("Failed to create pipe");
   }
 }
 
@@ -52,42 +51,82 @@ void CGI::run() {
 }
 
 void CGI::wait() {
-  // TODO: make this non-blocking and check if timeout reached return 408
-  // error with timeout message
   int status;
-  waitpid(pid_, &status, 0);  // change to WNOHANG to make it non-blocking and
-                              // update relevant code
-  if (WIFEXITED(status)) {
-    if (WEXITSTATUS(status) != 0) {
-      // TODO: return 500 error
-      throw std::runtime_error("Script exited with non-zero status");
+
+  int flags = fcntl(pipeOutFd_[0], F_GETFL, 0);
+  fcntl(pipeOutFd_[0], F_SETFL, flags | O_NONBLOCK);
+  while (true) {
+    if (_request.checkTimeout()) {
+      // return request timed out
+      Log::getInstance().error("Request timed out");
+      // TODO: return request timed out error code 408
+      // TODO: kill child process
+      // TODO: Move all send calls to client class
+      break;
     }
-    int sent = send(fd_, HTTP_RESPONSE_CGI, strlen(HTTP_RESPONSE_CGI), 0);
-    if (sent < 0) {
-      throw std::runtime_error(std::strerror(errno));
+    pid_t result = waitpid(pid_, &status, WNOHANG);
+    if (result == -1) {
+      if (errno == EAGAIN || errno == EWOULDBLOCK) {
+        usleep(50000);
+        continue;
+      }
+      Log::getInstance().error("Failed to wait for child process");
+      break;
     }
-    if (sent < static_cast<int>(strlen(HTTP_RESPONSE_CGI))) {
-      // TODO: return 500 error
-      throw std::runtime_error("Failed to send full response");
+    if (result == 0) {
+      usleep(50000);
+      continue;
     }
-  } else {
-    // TODO: return 500 error
-    throw std::runtime_error("Script did not exit normally");
+    if (result == pid_) {
+      if (WIFEXITED(status)) {
+        if (WEXITSTATUS(status) != 0) {
+          // TODO: return 500 error
+          Log::getInstance().error("Script exited with non-zero status");
+          break;
+        }
+      } else {
+        // TODO: return 500 error
+        Log::getInstance().error("Script did not exit normally");
+        break;
+      }
+    }
+    char buffer[BUFFER_SIZE + 1];
+    int bytes_read;
+    bytes_read = read(pipeOutFd_[0], buffer, BUFFER_SIZE);
+    Log::getInstance().info("Read " + std::to_string(bytes_read) + " bytes");
+    if (bytes_read > 0) {
+      Log::getInstance().info("Buffer: " + std::string(buffer));
+      int sent = send(fd_, buffer, bytes_read, 0);
+      Log::getInstance().info("Sent " + std::to_string(sent) + " bytes");
+      if (sent < 0) {
+        throw std::runtime_error(std::strerror(errno));
+      }
+      break;
+    } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+      usleep(50000);
+      continue;
+    } else {
+      if (bytes_read < 0) {
+        throw std::runtime_error(std::strerror(errno));
+      }
+      break;
+    }
   }
+  close(pipeOutFd_[0]);
 }
 
 void CGI::executeCGI() {
   std::vector<char *> args;
   std::vector<char *> envp;
 
-  args.push_back(const_cast<char *>(language_.c_str()));
-  args.push_back(const_cast<char *>(script_.c_str()));
+  args.push_back(const_cast<char *>(_language.c_str()));
+  args.push_back(const_cast<char *>(_script.c_str()));
   args.push_back(nullptr);
 
   envp.push_back(const_cast<char *>("CONTENT_LENGTH=0"));
   envp.push_back(nullptr);
 
-  execve(language_.c_str(), args.data(), envp.data());
+  execve(_language.c_str(), args.data(), envp.data());
   // Log here cause execve failed if it gives control back
   std::cerr << "Failed to execute script" << std::endl;
   exit(1);
@@ -99,8 +138,8 @@ int CGI::load() {
   while (true) {
     bytes_read = read(fd_, buffer, 4096);
     if (bytes_read > 0) {
-      request_.append(buffer, bytes_read);
-      if (request_.find("\r\n\r\n") != std::string::npos) {
+      _stream.append(buffer, bytes_read);
+      if (_stream.find("\r\n\r\n") != std::string::npos) {
         break;
       }
     } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
@@ -113,6 +152,6 @@ int CGI::load() {
       return -1;
     }
   }
-  std::cout << request_ << std::endl;
+  std::cout << _stream << std::endl;
   return 0;
 }

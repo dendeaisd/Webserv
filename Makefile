@@ -33,7 +33,12 @@ OBJ := $(addprefix $(OBJ_DIR)/, $(subst /,@,$(SRC:.cpp=.o)))
 OBJ_MAIN := $(addprefix $(OBJ_DIR)/, $(subst /,@,$(SRC_MAIN:.cpp=.o)))
 OBJ_TESTER := $(addprefix $(OBJ_DIR)/, $(subst /,@,$(TESTER_MAIN:.cpp=.o)))
 
-all:
+make_dirs:
+	@if [ ! -d "logs" ]; then mkdir logs; fi
+	@if [ ! -d "default" ]; then mkdir default; fi
+	@if [ ! -d "uploads" ]; then mkdir uploads; fi
+
+all: make_dirs
 	@$(MAKE) $(NAME) -j
 
 $(NAME): $(OBJ) $(OBJ_MAIN)
