@@ -3,10 +3,11 @@
 
 #include <sys/socket.h>
 #include <unistd.h>
+
+#include "../../include/Event.hpp"
 #include "../../include/request/HttpRequestParser.hpp"
 #include "../../include/response/HttpResponse.hpp"
 #include "SocketExceptions.hpp"
-#include "../../include/Event.hpp"
 
 class Client {
  public:
