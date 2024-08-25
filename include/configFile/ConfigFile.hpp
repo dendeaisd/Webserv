@@ -39,6 +39,7 @@ class ConfigFile {
   void serverContextSave(const std::string &line);
   void locationContextSave(const std::string &line);
   void removeWhiteSpacesFront(std::string &str);
+  int numberOfWordsSeperatedBySpaces(const std::string &str);
 
 
   TStoringStates _state;

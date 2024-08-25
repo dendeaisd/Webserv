@@ -38,8 +38,8 @@ void ConfigFile::storeValidConfiguration(const std::string &fileName) {
     possibleNewServerContextSetup(line);
     mainContextSaveDirective(line);
     httpContextSave(line);
-    //serverContextSave(line);
-    //locationContextSave(line);
+    serverContextSave(line);
+    locationContextSave(line);
   }
 }
 
@@ -138,7 +138,7 @@ void ConfigFile::httpContextSave(const std::string &line) {
 }
 
 void ConfigFile::getKey(const std::string &line, std::string &key) {
-  if (line.empty() == true) return;
+  if (line.empty() == true || numberOfWordsSeperatedBySpaces(line) < 2) return;
   char delimiter = ' ';
   char *modified_line = strdup(line.c_str());
   key = std::strtok(modified_line, &delimiter);
@@ -146,8 +146,8 @@ void ConfigFile::getKey(const std::string &line, std::string &key) {
 }
 
 void ConfigFile::serverContextSave(const std::string &line) {
-
-  if (_state != SERVER_CONTEXT_IN_HTTP && line.find("server") == line.npos)
+  if (_state != SERVER_CONTEXT_IN_HTTP || line.find("server") == line.npos ||
+      numberOfWordsSeperatedBySpaces(line) < 2)
     return;
   std::string key;
   std::string value;
@@ -157,7 +157,9 @@ void ConfigFile::serverContextSave(const std::string &line) {
 }
 
 void ConfigFile::locationContextSave(const std::string &line) {
-  if (_state != LOCATION_CONTEXT_IN_SERVER) return;
+  if (_state != LOCATION_CONTEXT_IN_SERVER ||
+      numberOfWordsSeperatedBySpaces(line) < 2)
+    return;
   std::string key;
   std::string value;
   getKey(line, key);
@@ -174,4 +176,15 @@ void ConfigFile::removeWhiteSpacesFront(std::string &str) {
   while (str[whiteSpaces] != '\0' && str[whiteSpaces] == ' ') whiteSpaces++;
 
   str.erase(0, whiteSpaces);
+}
+int ConfigFile::numberOfWordsSeperatedBySpaces(const std::string &str) {
+  std::stringstream stream(str);
+  std::string oneWord;
+  unsigned int numberOfWords;
+
+  numberOfWords = 0;
+  while (stream >> oneWord) {
+    numberOfWords++;
+  }
+  return (numberOfWords);
 }
