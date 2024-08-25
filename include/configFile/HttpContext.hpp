@@ -16,9 +16,9 @@ class HttpContext {
                               const std::string &value);
   void serverSaveContextOrDirective(const std::string &key,
                                     const std::string &value);
+  void printHttpContent();
 
-
-  std::string _geoipCountry;
+  std::string _geoipCountryValue;
   std::string _proxyCachePathValue;
   std::string _proxyCacheValue;
   std::string _proxyCacheUseStaleValue;
@@ -30,6 +30,9 @@ class HttpContext {
   std::vector<std::string> _proxyCacheValidValue;
   std::vector<std::unique_ptr<ServerContext> > _serverContext;
 
+ private:
+  void printVectorOfStrings(const std::vector<std::string> &vec,
+                            const std::string valueType) const;
   // std::string _indexValue; // Do we need that in the http context?
   // std::string _rootValue; // Do we need that in the http context?
   // std::string _upstreamValue; // Do we inplement that???
@@ -37,4 +40,4 @@ class HttpContext {
   // std::string _errorLogValue; // Do we inplement that here??
 };
 
-#endif // HTTP_CONTEXT_HPP
+#endif  // HTTP_CONTEXT_HPP

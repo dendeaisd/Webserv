@@ -15,6 +15,8 @@ class ServerContext {
                                 const std::string &value);
   void locationSaveDirectiveValue(const std::string &key,
                                   const std::string &value);
+  void printServerContent() const;
+
   std::string _serverNameValue;  // A separation of the values can be
                                  // implemented if wanted!
 

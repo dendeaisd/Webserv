@@ -18,6 +18,7 @@ class ConfigFile {
  public:
   ConfigFile();
 
+  void printConfigFileContent();
   void storeValidConfiguration(const std::string &fileName);
 
   std::string _workerProcessesValue;

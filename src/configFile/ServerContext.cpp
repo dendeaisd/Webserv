@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/21 17:02:00 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/25 21:38:03 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,3 +50,28 @@ void ServerContext::locationSaveDirectiveValue(const std::string &key,
   else
     _locationContext.back()->locationSaveDirectiveValue(key, value);
 }
+
+void ServerContext::printServerContent() const
+{
+  std::cout << "ssl certificate: " << _sslCertificateValue << std::endl
+            << "ssl certificate key: " << _sslCertificateKeyValue << std::endl
+            << "index: " << _indexValue << std::endl
+            << "root: " << _rootValue << std::endl;
+
+  auto listen_it = _listenValue.begin();
+  while (listen_it != _listenValue.end())
+  {
+    std::cout << "listen: " << *listen_it << std::endl;
+    listen_it++;
+  }
+
+   auto it_location = _locationContext.begin();
+
+   while (it_location != _locationContext.end())
+   {
+     (*it_location)->printLocation();
+     it_location++;
+   }
+
+}
+

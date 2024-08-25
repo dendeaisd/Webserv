@@ -12,6 +12,7 @@ class Location {
   void initializeLocation(const std::string &url);
   void locationSaveDirectiveValue(const std::string &key,
                                   const std::string &value);
+  void printLocation();
 
   std::string _urlValue;
 

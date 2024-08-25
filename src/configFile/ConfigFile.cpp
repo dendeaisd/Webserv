@@ -6,15 +6,17 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/23 13:58:05 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/25 19:06:40 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigFile.hpp"
 
 #include <string.h>
+
 #include <cstring>
 #include <fstream>
+#include <sstream>
 #include <string>
 
 #include "HttpContext.hpp"
@@ -26,13 +28,23 @@ ConfigFile::ConfigFile() {
   _errorLogValue.clear();
 }
 
+void ConfigFile::printConfigFileContent() {
+  std::cout << "worker process: " << _workerProcessesValue << std::endl
+            << "pid: " << _pidValue << std::endl
+            << "error log: " << _errorLogValue << std::endl;
+}
+
 void ConfigFile::storeValidConfiguration(const std::string &fileName) {
   std::fstream file;
   std::string line;
+  int i;
 
+  i = 0;
   _state = MAIN_CONTEXT;
   file.open(fileName.c_str());
   while (std::getline(file, line)) {
+    std::cout << i << std::endl;
+    i++;
     setCurrentState(line);
     trackBrackets(line);
     possibleNewServerContextSetup(line);
@@ -177,6 +189,7 @@ void ConfigFile::removeWhiteSpacesFront(std::string &str) {
 
   str.erase(0, whiteSpaces);
 }
+
 int ConfigFile::numberOfWordsSeperatedBySpaces(const std::string &str) {
   std::stringstream stream(str);
   std::string oneWord;

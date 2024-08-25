@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/23 13:16:20 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/25 21:37:29 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,3 +72,36 @@ void Location::cgiSetSeparatedValue(const std::string &value)
   _cgi.insert({fileType, pathToInterpreter});
   free(tmp_value);
 }
+
+void Location::printLocation()
+{
+  std::cout << "\n-LOCATION-\n\n";
+  std::cout << "url: " << _urlValue << std::endl
+            << "root: " <<  _rootValue << std::endl
+            << "include: " << _includeValue << std::endl
+            << "proxy pass: " << _proxyPassValue << std::endl
+            << "alias: " << _aliasValue << std::endl
+            << _tryFilesValue << std::endl
+            << _indexValue << std::endl
+            << _errorPageValue << std::endl
+            << _accessLogValue << std::endl
+            << _denyValue << std::endl;
+
+  auto it_rewrite = _rewriteValue.begin();
+
+  while (it_rewrite != _rewriteValue.end())
+  {
+    std::cout << "rewrite: " << *it_rewrite << std::endl;
+    it_rewrite++;
+  }
+
+  auto it_cgi = _cgi.begin();
+
+  while (it_cgi != _cgi.end())
+  {
+    std::cout << "file type: " << (*it_cgi).first
+              << "path to interpreter: " << (*it_cgi).second
+              << std::endl;
+  }
+}
+
