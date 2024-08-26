@@ -42,4 +42,8 @@ class HttpRequestParser {
   bool validateHttpVersion();
   bool askForContinue();
   bool checkForTerminator(std::string line);
+
+  bool isCgiRequest();
+  bool isFaviconRequest();
+  bool isDirectoryRequest(const std::string &path);
 };

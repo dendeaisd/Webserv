@@ -25,6 +25,12 @@ enum class HttpRequestParseStatus {
   INPROGRESS
 };
 
-enum class HttpRequestHandler { CGI, STATIC, REDIRECT, FAVICON };
+enum class HttpRequestHandler {
+  CGI,
+  STATIC,
+  REDIRECT,
+  FAVICON,
+  DIRECTORY_LISTING
+};
 
 #endif
