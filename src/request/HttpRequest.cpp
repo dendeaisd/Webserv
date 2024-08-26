@@ -4,10 +4,23 @@
 
 #include "../../include/log/Log.hpp"
 #include "../../include/request/HttpMaps.hpp"
+#define TIMEOUT 30
 
 HttpRequest::HttpRequest()
     : _httpRequestMethod(HttpRequestMethod::UNKNOWN),
-      _httpProtocolVersion(HttpRequestVersion::UNKNOWN) {}
+      _httpProtocolVersion(HttpRequestVersion::UNKNOWN) {
+  _requestTime = std::chrono::system_clock::now();
+  _handler = HttpRequestHandler::STATIC;
+  _method = "";
+  _uri = "";
+  _query = "";
+  _httpVersion = "";
+  _host = "";
+  _port = "";
+  _body = "";
+  _subDomain = "";
+  _domain = "";
+}
 
 HttpRequest::~HttpRequest() {
   _queryParams.clear();
@@ -53,6 +66,8 @@ std::map<std::string, std::string> HttpRequest::getFormData() {
 std::map<std::string, std::string> HttpRequest::getQueryParams() {
   return _queryParams;
 }
+
+std::string HttpRequest::getQuery() { return _query; }
 
 bool HttpRequest::setMethod(std::string method) {
   if (method.empty()) {
@@ -195,4 +210,19 @@ std::string HttpRequest::getAttachment(std::string key) {
 
 std::map<std::string, std::string> HttpRequest::getAttachments() {
   return _attachments;
+}
+
+std::string HttpRequest::getRequestTime() {
+  std::time_t time = std::chrono::system_clock::to_time_t(_requestTime);
+  return std::ctime(&time);
+}
+
+bool HttpRequest::checkTimeout() {
+  std::chrono::system_clock::time_point currentTime =
+      std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = currentTime - _requestTime;
+  if (elapsed_seconds.count() > TIMEOUT) {
+    return true;
+  }
+  return false;
 }
