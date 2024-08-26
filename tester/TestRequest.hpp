@@ -9,6 +9,7 @@ class TestRequest : public TestCase {
   void testGET();
   void testPOST();
   void testPostWithFile();
+  void testPostFormData();
   void testPUT();
   void testDELETE();
 

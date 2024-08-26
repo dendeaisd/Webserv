@@ -1,8 +1,26 @@
 #include "../../include/request/HttpRequest.hpp"
 
+#include <iostream>
+
+#include "../../include/log/Log.hpp"
+#include "../../include/request/HttpMaps.hpp"
+#define TIMEOUT 30
+
 HttpRequest::HttpRequest()
     : _httpRequestMethod(HttpRequestMethod::UNKNOWN),
-      _httpProtocolVersion(HttpRequestVersion::UNKNOWN) {}
+      _httpProtocolVersion(HttpRequestVersion::UNKNOWN) {
+  _requestTime = std::chrono::system_clock::now();
+  _handler = HttpRequestHandler::STATIC;
+  _method = "";
+  _uri = "";
+  _query = "";
+  _httpVersion = "";
+  _host = "";
+  _port = "";
+  _body = "";
+  _subDomain = "";
+  _domain = "";
+}
 
 HttpRequest::~HttpRequest() {
   _queryParams.clear();
@@ -41,11 +59,32 @@ std::map<std::string, std::string> HttpRequest::getHeaders() {
   return _headers;
 }
 
+std::map<std::string, std::string> HttpRequest::getFormData() {
+  return _formData;
+}
+
 std::map<std::string, std::string> HttpRequest::getQueryParams() {
   return _queryParams;
 }
 
-void HttpRequest::setMethod(std::string method) { _method = method; }
+std::string HttpRequest::getQuery() { return _query; }
+
+bool HttpRequest::setMethod(std::string method) {
+  if (method.empty()) {
+    Log::getInstance().debug("Method is empty");
+    return false;
+  }
+  if (HttpMaps::httpRequestMethodMap.find(method) !=
+      HttpMaps::httpRequestMethodMap.end()) {
+    setMethod(HttpMaps::httpRequestMethodMap.at(
+        HttpMaps::httpRequestMethodMap.find(method)->first));
+    _method = method;
+    return true;
+  } else {
+    setMethod(HttpRequestMethod::UNKNOWN);
+    return false;
+  }
+}
 void HttpRequest::setMethod(HttpRequestMethod httpRequestMethod) {
   _httpRequestMethod = httpRequestMethod;
 }
@@ -71,7 +110,19 @@ void HttpRequest::setPort(std::string port) { _port = port; }
 void HttpRequest::setBody(std::string body) { _body = body; }
 
 void HttpRequest::setHeader(std::string header, std::string value) {
+  if (header.empty()) {
+    Log::getInstance().debug("Header is empty");
+    return;
+  }
   _headers[header] = value;
+}
+
+void HttpRequest::addFormData(std::string key, std::string value) {
+  if (key.empty() || value.empty()) {
+    Log::getInstance().debug("FormData Key or value is empty");
+    return;
+  }
+  _formData[key] = value;
 }
 
 void HttpRequest::setHeaders(std::map<std::string, std::string> headers) {
@@ -140,3 +191,38 @@ std::string HttpRequest::toJson() {
 HttpRequestHandler HttpRequest::getHandler() { return _handler; }
 
 void HttpRequest::setHandler(HttpRequestHandler handler) { _handler = handler; }
+
+void HttpRequest::addAttachment(std::string key, std::string value) {
+  if (key.empty() || value.empty()) {
+    Log::getInstance().debug("Attachment Key or value is empty");
+    return;
+  }
+  _attachments[key] = value;
+}
+
+std::string HttpRequest::getAttachment(std::string key) {
+  if (_attachments.find(key) != _attachments.end()) {
+    return _attachments[key];
+  } else {
+    return "";
+  }
+}
+
+std::map<std::string, std::string> HttpRequest::getAttachments() {
+  return _attachments;
+}
+
+std::string HttpRequest::getRequestTime() {
+  std::time_t time = std::chrono::system_clock::to_time_t(_requestTime);
+  return std::ctime(&time);
+}
+
+bool HttpRequest::checkTimeout() {
+  std::chrono::system_clock::time_point currentTime =
+      std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = currentTime - _requestTime;
+  if (elapsed_seconds.count() > TIMEOUT) {
+    return true;
+  }
+  return false;
+}

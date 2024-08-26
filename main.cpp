@@ -13,14 +13,8 @@
 
 int main() {
   try {
-    log::Log::getInstance().info("test info...");
-    log::Log::getInstance().error("test error...");
-    log::Log::getInstance().warning("test warning...");
-    log::Log::getInstance().debug("test debug...");
-
     net::Server server(PORT);
     server.run();
-
   } catch (const net::socketException& e) {
     std::cerr << "Socket error: " << e.what() << std::endl;
   } catch (const net::pollManagerException& e) {

@@ -16,8 +16,15 @@ enum class HttpRequestMethod {
 
 enum class HttpRequestVersion { HTTP_1_0, HTTP_1_1, HTTP_2_0, UNKNOWN };
 
-enum class HttpRequestParseStatus { NOT_PARSED, PARSED, INVALID, INCOMPLETE };
+enum class HttpRequestParseStatus {
+  NOT_PARSED,
+  PARSED,
+  INVALID,
+  INCOMPLETE,
+  EXPECT_CONTINUE,
+  INPROGRESS
+};
 
-enum class HttpRequestHandler { CGI, STATIC, REDIRECT };
+enum class HttpRequestHandler { CGI, STATIC, REDIRECT, FAVICON };
 
 #endif

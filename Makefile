@@ -1,6 +1,6 @@
 NAME        :=  webserv
 CC          :=  c++
-CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g
+CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g -fsanitize=address
 
 INCLUDE_DIRS := -I./include -I./tester
 TESTER_MAIN := tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
@@ -10,7 +10,8 @@ SRC_DIR := .
 OBJ_DIR := obj
 
 SRC         :=  $(wildcard src/*.cpp) $(wildcard src/networking/*.cpp) \
-	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp) $(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp)
+	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp) $(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp) \
+	$(wildcard src/response/*.cpp)
 
 OBJ         :=  $(SRC:.cpp=.o)
 
@@ -34,6 +35,11 @@ OBJ_TESTER := $(addprefix $(OBJ_DIR)/, $(subst /,@,$(TESTER_MAIN:.cpp=.o)))
 
 all:
 	@$(MAKE) $(NAME) -j
+
+dirs:
+	@if [ ! -d "logs" ]; then mkdir logs; fi
+	@if [ ! -d "default" ]; then mkdir default; fi
+	@if [ ! -d "uploads" ]; then mkdir uploads; fi
 
 $(NAME): $(OBJ) $(OBJ_MAIN)
 	@$(CC) $(OBJ) $(OBJ_MAIN) -o $(NAME) $(CFLAGS) $(INCLUDE_DIRS) && echo "Compiled $(NAME) successfully..!"

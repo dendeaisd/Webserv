@@ -4,7 +4,6 @@
 #include <mutex>
 #include <string>
 
-namespace log {
 class Log {
   enum class LogLevel { NOLOG, INFO, WARNING, ERROR, DEBUG };
 
@@ -30,8 +29,7 @@ class Log {
   std::mutex mutex_;
   std::string logFile_ = "logs/server.log";
   std::string errorFile_ = "logs/error.log";
-  LogLevel logLevel_ = LogLevel::INFO;
+  LogLevel logLevel_ = LogLevel::DEBUG;
 };
-}  // namespace log
 
 #endif

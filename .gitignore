@@ -36,3 +36,7 @@
 .vscode/
 obj/
 hello.txt
+.DS_Store
+./logs/error_*
+./logs/server_*
+*.log
