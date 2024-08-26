@@ -26,7 +26,7 @@ class CGI {
   std::string _language;
   HttpRequest _request;
 
-void executeCGI();
+  void executeCGI();
   void killChild();
   bool handleTimeout();
   bool handleError(std::string logMessage);

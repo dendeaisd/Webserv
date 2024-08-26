@@ -71,8 +71,7 @@ bool Client::execute() {
     Log::getInstance().debug("Successful request. CGI");
     CGIFileManager cgiFileManager("./cgi-bin");
     CGI* cgi = new CGI(fd, cgiFileManager, request);
-    if (cgi->run())
-    	Event::getInstance().addEvent(fd, cgi);
+    if (cgi->run()) Event::getInstance().addEvent(fd, cgi);
   } else if (request.getHandler() == HttpRequestHandler::FAVICON) {
     Log::getInstance().debug("Successful request. Favicon");
     sendDefaultFavicon();
