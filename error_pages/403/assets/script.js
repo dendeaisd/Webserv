@@ -42,6 +42,8 @@ document.getElementById("submit-button").addEventListener("click", function () {
 });
 
 function unlockVault() {
-  alert("You entered the correct code! However...");
-  window.location.href = "../403_success/success.html";
+  alert(
+    "You entered the correct code! However..."
+  );
+  window.location.href = "../403_success/success.html"
 }
