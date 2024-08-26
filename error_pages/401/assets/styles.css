@@ -87,20 +87,13 @@ p3 {
 
 .loader {
   position: absolute;
+  animation: l3 1s infinite alternate ease-in;
   mask: radial-gradient(50% 100%, #000 95%, #0000) 0 100% / 50% 100% repeat-x;
-  animation: l1 1s infinite alternate ease-in;
 }
 
 .loader1 {
   display: grid;
   animation: l2 1.5s infinite linear;
-}
-
-.loader1::before {
-  content: "";
-  background: inherit;
-  opacity: 0.6;
-  animation: glow 1s infinite;
 }
 
 @keyframes l2 {
@@ -122,7 +115,7 @@ p3 {
   }
 }
 
-@keyframes l1 {
+@keyframes l3 {
   0%,
   70%,
   100% {
@@ -130,12 +123,5 @@ p3 {
   }
   85% {
     mask-size: 50% 0;
-  }
-}
-
-@keyframes glow {
-  to {
-    transform: scale(3);
-    opacity: 0;
   }
 }
