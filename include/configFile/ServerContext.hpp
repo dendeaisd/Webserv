@@ -15,6 +15,7 @@ class ServerContext {
                                 const std::string &value);
   void locationSaveDirectiveValue(const std::string &key,
                                   const std::string &value);
+  void createNewLocation(const std::string &url);
   void printServerContent() const;
 
   std::string _serverNameValue;  // A separation of the values can be
@@ -27,6 +28,7 @@ class ServerContext {
 
   std::vector<std::string> _listenValue;
   std::vector<std::unique_ptr<Location> > _locationContext;
+ private:
 };
 
 #endif

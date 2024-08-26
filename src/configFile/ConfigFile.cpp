@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/26 17:44:53 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/26 18:26:49 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,8 @@ void ConfigFile::getValue(const std::string &line, std::string &value) {
   value = value + oneValue;
   while (stream >> oneValue)
     value = value + " " + oneValue;
-  value.erase(value.size() - 1);
+  if (value[value.size() - 1] == ';')
+    value.erase(value.size() - 1);
   //I don't like that way, will change it later, but it works for now
 }
 
@@ -172,7 +173,8 @@ void ConfigFile::serverContextSave(const std::string &line) {
 
 void ConfigFile::locationContextSave(const std::string &line) {
   if (_state != LOCATION_CONTEXT_IN_SERVER ||
-      numberOfWordsSeparatedBySpaces(line) < 2)
+      numberOfWordsSeparatedBySpaces(line) < 2
+      || isStoringState(line, LOCATION_CONTEXT_IN_SERVER) == true)
     return;
   std::string key;
   std::string value;
@@ -182,9 +184,8 @@ void ConfigFile::locationContextSave(const std::string &line) {
 }
 
 void ConfigFile::removeWhiteSpacesFront(std::string &str) {
-  int whiteSpaces;
-
   if (str[0] != ' ') return;
+  int whiteSpaces;
 
   whiteSpaces = 0;
   while (str[whiteSpaces] != '\0' && str[whiteSpaces] == ' ') whiteSpaces++;

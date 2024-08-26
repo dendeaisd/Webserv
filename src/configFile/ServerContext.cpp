@@ -6,11 +6,12 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/26 17:28:57 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/26 18:20:59 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerContext.hpp"
+
 #include <cstring>
 #include <memory>
 
@@ -40,19 +41,16 @@ void ServerContext::serverSaveDirectiveValue(const std::string &key,
 }
 
 void ServerContext::locationSaveDirectiveValue(const std::string &key,
-                                                    const std::string &value)
-{
-  if (key == "location")
-  {
-    _locationContext.push_back(std::make_unique<Location>());
-    _locationContext.back()->initializeLocation(value);
-  }
-  else
-    _locationContext.back()->locationSaveDirectiveValue(key, value);
+                                               const std::string &value) {
+  _locationContext.back()->locationSaveDirectiveValue(key, value);
 }
 
-void ServerContext::printServerContent() const
-{
+void ServerContext::createNewLocation(const std::string &url) {
+  _locationContext.push_back(std::make_unique<Location>());
+  _locationContext.back()->initializeLocation(url);
+}
+
+void ServerContext::printServerContent() const {
   std::cout << "-Server-\n"
             << "ssl certificate: [" << _sslCertificateValue << "]" << std::endl
             << "ssl certificate key: [" << _sslCertificateKeyValue << "]"
@@ -61,19 +59,16 @@ void ServerContext::printServerContent() const
             << "root: [" << _rootValue << "]" << std::endl;
 
   auto listen_it = _listenValue.begin();
-  while (listen_it != _listenValue.end())
-  {
+  while (listen_it != _listenValue.end()) {
     std::cout << "listen: [" << *listen_it << "]" << std::endl;
     listen_it++;
   }
 
-   auto it_location = _locationContext.begin();
+  auto it_location = _locationContext.begin();
 
-   std::cout << std::endl;
-   while (it_location != _locationContext.end())
-   {
-     (*it_location)->printLocation();
-     it_location++;
-   }
+  std::cout << std::endl;
+  while (it_location != _locationContext.end()) {
+    (*it_location)->printLocation();
+    it_location++;
+  }
 }
-
