@@ -43,7 +43,7 @@ class ConfigFile {
   int numberOfWordsSeparatedBySpaces(const std::string &str);
   bool isStoringState(const std::string &line, EStoringStates state);
   void getStateAsString(std::string &stateStr, EStoringStates &state);
-
+  void possibleNewLocationSetup(std::string &line);
 
   TStoringStates _state;
   std::stack<char> _bracketStatus[4];

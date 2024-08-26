@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/26 18:26:49 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/26 20:58:39 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ void ConfigFile::storeValidConfiguration(const std::string &fileName) {
     mainContextSaveDirective(line);
     httpContextSave(line);
     serverContextSave(line);
+    possibleNewLocationSetup(line);
     locationContextSave(line);
   }
 }
@@ -232,4 +233,15 @@ void ConfigFile::getStateAsString(std::string &stateStr,
     default:
       stateStr = "";
   }
+}
+
+void ConfigFile::possibleNewLocationSetup(std::string &line) {
+  if (isStoringState(line, LOCATION_CONTEXT_IN_SERVER) == false)
+    return;
+  std::istringstream stream(line);
+  std::string url;
+
+  stream >> url;
+  stream >> url;
+  _httpContext._serverContext.back()->createNewLocation(url);
 }
