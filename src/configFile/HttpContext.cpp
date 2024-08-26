@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/12 11:37:24 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/25 21:36:18 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/26 08:32:30 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,13 +52,12 @@ void HttpContext::httpSaveDirectiveValue(const std::string &directive,
 
 void HttpContext::serverSaveContextOrDirective(const std::string &key,
                                                const std::string &value) {
-  if (key == "server")
-    _serverContext.push_back(std::make_unique<ServerContext>());
   _serverContext.back()->serverSaveDirectiveValue(key, value);
 }
 
 void HttpContext::printHttpContent() {
-  std::cout << "geo ip country: " << _geoipCountryValue << std::endl
+  std::cout << "-Http-\n"
+            << "geo ip country: " << _geoipCountryValue << std::endl
             << "proxy chache path: " << _proxyCachePathValue << std::endl
             << "proxy chache: " << _proxyCacheValue << std::endl
             << "proxy chache use stale: " << _proxyCacheUseStaleValue
@@ -69,6 +68,7 @@ void HttpContext::printHttpContent() {
   printVectorOfStrings(_proxySetHeaderValue, "proxy set header");
   printVectorOfStrings(_proxyCacheValidValue, "proxy chache valid");
 
+  std::cout << "\n";
   auto it = _serverContext.begin();
 
   while (it != _serverContext.end()) {

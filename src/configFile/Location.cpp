@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/25 21:37:29 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/26 07:58:42 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,17 +75,17 @@ void Location::cgiSetSeparatedValue(const std::string &value)
 
 void Location::printLocation()
 {
-  std::cout << "\n-LOCATION-\n\n";
+  std::cout << "-LOCATION-\n";
   std::cout << "url: " << _urlValue << std::endl
             << "root: " <<  _rootValue << std::endl
             << "include: " << _includeValue << std::endl
             << "proxy pass: " << _proxyPassValue << std::endl
             << "alias: " << _aliasValue << std::endl
-            << _tryFilesValue << std::endl
-            << _indexValue << std::endl
-            << _errorPageValue << std::endl
-            << _accessLogValue << std::endl
-            << _denyValue << std::endl;
+            << "try files: " <<_tryFilesValue << std::endl
+            << "index: " << _indexValue << std::endl
+            << "error page: " << _errorPageValue << std::endl
+            << "access log: " << _accessLogValue << std::endl
+            << "deny: " << _denyValue << "\n";
 
   auto it_rewrite = _rewriteValue.begin();
 
@@ -99,9 +99,12 @@ void Location::printLocation()
 
   while (it_cgi != _cgi.end())
   {
-    std::cout << "file type: " << (*it_cgi).first
-              << "path to interpreter: " << (*it_cgi).second
+    std::cout << "GCI: "
+              << "file type: [" << (*it_cgi).first
+              << "] path to interpreter: " << (*it_cgi).second
               << std::endl;
+    it_cgi++;
   }
+  std::cout << std::endl;
 }
 
