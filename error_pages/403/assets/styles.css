@@ -5,23 +5,25 @@ html {
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #2c3e50;
+  background-color: #333;
+  color: white;
   font-family: "Arial", sans-serif;
+  overflow: hidden;
 }
 
 .vault-container {
-  position: relative;
+  text-align: center;
 }
 
 .vault-door-outer {
   position: relative;
   width: 500px;
   height: 500px;
-  background: #3a4b61;
+  background: rgb(235, 235, 235);
   border-radius: 6%;
-  transition: transform 0.3s ease;
 }
 
 .vault-door-inner {
@@ -29,34 +31,8 @@ html {
   margin: 52px;
   width: 390px;
   height: 390px;
-  background: #778ca3;
+  background: rgb(219, 219, 219);
   border-radius: 25%;
-}
-
-.hover-message {
-  position: absolute;
-  bottom: 87%;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 2em;
-  color: #fff;
-  background-color: rgba(44, 62, 80, 0.8);
-  border-radius: 20px;
-  opacity: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-  box-sizing: 0 8px 30px;
-  text-align: center;
-}
-
-/* Slight movement when hovering */
-.vault-door-outer:hover ~ .hover-message {
-  opacity: 1;
-  transform: translateX(-50%) translateY(-10px);
-}
-
-.vault-door-outer:hover ~ .hover-message {
-  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.3), 0 0 15px rgb(36, 55, 75);
 }
 
 .vault-door-lock-shadow {
@@ -160,8 +136,7 @@ html {
   transform: rotate(135deg);
 }
 
-/* for now its redundant */
-/* .vault-sign {
+.vault-sign {
   position: absolute;
   top: -40px;
   left: 50%;
@@ -169,7 +144,7 @@ html {
   font-size: 1.5em;
   color: #ff4f4f;
   text-align: center;
-} */
+}
 
 .message {
   margin: 20px 0;
@@ -186,7 +161,6 @@ html {
 #code-input {
   font-size: 1.2em;
   padding: 10px;
-  margin-top: 15px;
   margin-bottom: 10px;
   text-align: center;
   width: 150px;
@@ -194,7 +168,6 @@ html {
   border-radius: 5px;
   background-color: #222;
   color: white;
-  z-index: 0;
 }
 
 #submit-button {
@@ -221,18 +194,9 @@ html {
 }
 
 #error-message {
-  color: #e74c3c;
-  background-color: rgba(231, 76, 60, 0.1); 
-  padding: 10px 15px;
-  margin-top: 15px;
-  border: 1px solid #e74c3c;
-  border-radius: 8px;
-  font-size: 1.1em;
-  text-align: center;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  transition: all 0.4s ease;
+  color: red;
+  margin-top: 10px;
 }
-
 
 .vault-door-outer:hover .vault-door-lock-shadow {
   width: 300px;
