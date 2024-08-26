@@ -10,9 +10,8 @@ class CGI {
  public:
   CGI(int fd, CGIFileManager &cgiFileManager, HttpRequest &request);
   ~CGI() {}
-  void run();
+  bool run();
   bool wait();
-  void executeCGI();
   int load();
 
  private:
@@ -27,7 +26,11 @@ class CGI {
   std::string _language;
   HttpRequest _request;
 
+void executeCGI();
   void killChild();
+  bool handleTimeout();
+  bool handleError(std::string logMessage);
+  bool tunnelData();
 };
 
 #endif
