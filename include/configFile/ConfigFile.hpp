@@ -5,7 +5,6 @@
 #include <stack>
 
 #include "HttpContext.hpp"
-#include "states.hpp"
 
 enum EBracketStatus {
   MAIN_BRACKET = 0,
@@ -13,6 +12,13 @@ enum EBracketStatus {
   SERVER_BRACKET = 2,
   LOCATION_BRACKET = 3
 };
+
+typedef enum EStoringStates {
+  MAIN_CONTEXT = 0,
+  HTTPS_CONTEXT = 1,
+  SERVER_CONTEXT_IN_HTTP = 2,
+  LOCATION_CONTEXT_IN_SERVER = 3
+} TStoringStates;
 
 class ConfigFile {
  public:
