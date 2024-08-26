@@ -38,7 +38,7 @@ void PollManager::removeSocket(int fd) {
 }
 
 void PollManager::pollSockets() {
-  int poll_count = poll(&fds_[0], fds_.size(), -1);
+  int poll_count = poll(&fds_[0], fds_.size(), 0);
   if (poll_count < 0) {
     throw pollFailed(std::strerror(errno));
   }

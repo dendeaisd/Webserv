@@ -72,12 +72,11 @@ int HttpRequestParser::parse() {
   parseHeaders(ss);
   if (status == HttpRequestParseStatus::INVALID) return 400;
   electHandler();
-  std::string query;
   size_t pos = request.getUri().find("?");
   if (pos != std::string::npos) {
     request.setQuery(request.getUri().substr(pos + 1));
     request.setUri(request.getUri().substr(0, pos));
-    parseQueryParams(query);
+    parseQueryParams(request.getQuery());
   }
   std::string contentType = request.getHeader("Content-Type");
   if (contentType.find("application/json") != std::string::npos) {
@@ -453,6 +452,7 @@ bool HttpRequestParser::validateHttpVersion() {
 void HttpRequestParser::parseQueryParams(std::string query) {
   std::stringstream ss(query);
   std::string param;
+  std::cout << "Query: " << query << std::endl;
   while (std::getline(ss, param, '&')) {
     size_t pos = param.find("=");
     if (pos != std::string::npos) {

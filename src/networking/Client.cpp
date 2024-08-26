@@ -6,6 +6,7 @@
 #include <cstring>
 #include <iostream>
 
+#include "../../include/Event.hpp"
 #include "../../include/cgi/CGI.hpp"
 #include "../../include/cgi/CGIFileManager.hpp"
 #include "../../include/log/Log.hpp"
@@ -69,8 +70,9 @@ bool Client::execute() {
   if (request.getHandler() == HttpRequestHandler::CGI) {
     Log::getInstance().debug("Successful request. CGI");
     CGIFileManager cgiFileManager("./cgi-bin");
-    CGI cgi(fd, cgiFileManager, request);
-    cgi.run();
+    CGI* cgi = new CGI(fd, cgiFileManager, request);
+    cgi->run();
+    Event::getInstance().addEvent(fd, cgi);
   } else if (request.getHandler() == HttpRequestHandler::FAVICON) {
     Log::getInstance().debug("Successful request. Favicon");
     sendDefaultFavicon();

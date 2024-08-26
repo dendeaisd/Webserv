@@ -36,6 +36,11 @@ OBJ_TESTER := $(addprefix $(OBJ_DIR)/, $(subst /,@,$(TESTER_MAIN:.cpp=.o)))
 all:
 	@$(MAKE) $(NAME) -j
 
+dirs:
+	@if [ ! -d "logs" ]; then mkdir logs; fi
+	@if [ ! -d "default" ]; then mkdir default; fi
+	@if [ ! -d "uploads" ]; then mkdir uploads; fi
+
 $(NAME): $(OBJ) $(OBJ_MAIN)
 	@$(CC) $(OBJ) $(OBJ_MAIN) -o $(NAME) $(CFLAGS) $(INCLUDE_DIRS) && echo "Compiled $(NAME) successfully..!"
 

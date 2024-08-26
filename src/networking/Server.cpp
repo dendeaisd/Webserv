@@ -7,12 +7,15 @@
 #include <cstring>
 #include <iostream>
 
+#include "../../include/Event.hpp"
+#include "../../include/log/Log.hpp"
+
 using namespace net;
 
 Server::Server(int port) : serverSocket_(AF_INET, SOCK_STREAM, 0) {
   serverSocket_.setSocketOption(SOL_SOCKET, SO_REUSEADDR, 1);
   serverSocket_.bindSocket(port);
-  serverSocket_.listenSocket(3);
+  serverSocket_.listenSocket(SOMAXCONN);
   serverSocket_.setNonBlocking();
   pollManager_.addSocket(serverSocket_.getSocketFd());
 }
@@ -42,6 +45,17 @@ void Server::handleEvents() {
         handleClientRequest(fds[i].fd);
       }
     }
+  }
+  std::vector<int> eventsToRemove;
+  for (auto it = Event::getInstance().getEvents().begin();
+       it != Event::getInstance().getEvents().end(); ++it) {
+    if (it->second->wait()) {
+      Log::getInstance().info("Removing CGI event");
+      eventsToRemove.push_back(it->first);
+    }
+  }
+  for (auto it = eventsToRemove.begin(); it != eventsToRemove.end(); ++it) {
+    Event::getInstance().removeEvent(*it);
   }
 }
 
