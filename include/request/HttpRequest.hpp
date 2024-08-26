@@ -1,13 +1,12 @@
 #ifndef HTTPREQUEST_HPP
 #define HTTPREQUEST_HPP
+#include <chrono>
 #include <exception>
 #include <map>
 #include <set>
-#include <string>
-// you are not using the sstream header direcly anywhere here
 #include <sstream>
+#include <string>
 
-// #include "../FileUpload.hpp"  // path was not correct, i changed it
 #include "HttpRequestEnums.hpp"
 
 class HttpRequest {
@@ -31,6 +30,10 @@ class HttpRequest {
   std::map<std::string, std::string> getHeaders();
   std::map<std::string, std::string> getQueryParams();
   std::map<std::string, std::string> getFormData();
+  std::string getAttachment(std::string key);
+  std::map<std::string, std::string> getAttachments();
+  std::string getRequestTime();
+  bool checkTimeout();
   void setHandler(HttpRequestHandler handler);
   bool setMethod(std::string method);
   void setMethod(HttpRequestMethod httpRequestMethod);
@@ -46,6 +49,7 @@ class HttpRequest {
   void addFormData(std::string key, std::string value);
   void setHeaders(std::map<std::string, std::string> headers);
   void setQueryParam(std::string key, std::string value);
+  void addAttachment(std::string key, std::string value);
   std::string toString();
   std::string toJson();
 
@@ -64,10 +68,11 @@ class HttpRequest {
   std::string _subDomain;
   std::string _domain;
   HttpRequestHandler _handler;
-  // FileUpload file;
+  std::chrono::system_clock::time_point _requestTime;
   std::map<std::string, std::string> _headers;
   std::map<std::string, std::string> _queryParams;
   std::map<std::string, std::string> _formData;
+  std::map<std::string, std::string> _attachments;
 };
 
 #endif

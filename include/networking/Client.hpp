@@ -4,7 +4,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "../../include/Event.hpp"
 #include "../../include/request/HttpRequestParser.hpp"
+#include "../../include/response/HttpResponse.hpp"
 #include "SocketExceptions.hpp"
 
 class Client {
@@ -18,5 +20,11 @@ class Client {
  private:
   int fd;
   HttpRequestParser parser;
+  HttpResponse response;
+  std::unique_ptr<Event> _events;
+  bool sendDefaultFavicon();
+  bool sendDefaultPage();
+  bool handleContinue();
+  bool execute();
 };
 #endif  // CLIENT_H

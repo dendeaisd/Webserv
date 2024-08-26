@@ -37,4 +37,6 @@
 obj/
 hello.txt
 .DS_Store
-./logs
+./logs/error_*
+./logs/server_*
+*.log
