@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/12 11:37:24 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/26 08:32:30 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/26 17:20:26 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,16 +57,16 @@ void HttpContext::serverSaveContextOrDirective(const std::string &key,
 
 void HttpContext::printHttpContent() {
   std::cout << "-Http-\n"
-            << "geo ip country: " << _geoipCountryValue << std::endl
-            << "proxy chache path: " << _proxyCachePathValue << std::endl
-            << "proxy chache: " << _proxyCacheValue << std::endl
-            << "proxy chache use stale: " << _proxyCacheUseStaleValue
-            << std::endl
-            << "gyip " << _gzipValue << std::endl
-            << "gzip types: " << _gzipTypesValue << std::endl
-            << "limit req zone: " << _limitReqZoneValue << std::endl;
+            << "geo ip country: [" << _geoipCountryValue << "]" << std::endl
+            << "proxy cache path: [" << _proxyCachePathValue << "]" << std::endl
+            << "proxy cache: [" << _proxyCacheValue << "]" << std::endl
+            << "proxy cache use stale: [" << _proxyCacheUseStaleValue
+            << "]" << std::endl
+            << "gzip: [" << _gzipValue << "]"<< std::endl
+            << "gzip types: [" << _gzipTypesValue << "]" << std::endl
+            << "limit req zone: [" << _limitReqZoneValue << "]" << std::endl;
   printVectorOfStrings(_proxySetHeaderValue, "proxy set header");
-  printVectorOfStrings(_proxyCacheValidValue, "proxy chache valid");
+  printVectorOfStrings(_proxyCacheValidValue, "proxy cache valid");
 
   std::cout << "\n";
   auto it = _serverContext.begin();

@@ -40,7 +40,9 @@ class ConfigFile {
   void serverContextSave(const std::string &line);
   void locationContextSave(const std::string &line);
   void removeWhiteSpacesFront(std::string &str);
-  int numberOfWordsSeperatedBySpaces(const std::string &str);
+  int numberOfWordsSeparatedBySpaces(const std::string &str);
+  bool isStoringState(const std::string &line, EStoringStates state);
+  void getStateAsString(std::string &stateStr, EStoringStates &state);
 
 
   TStoringStates _state;

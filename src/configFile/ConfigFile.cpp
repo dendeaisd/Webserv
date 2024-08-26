@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/26 07:56:25 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/26 17:44:53 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,9 @@ ConfigFile::ConfigFile() {
 
 void ConfigFile::printConfigFileContent() {
   std::cout << "-Main-\n"
-            << "worker process: " << _workerProcessesValue << std::endl
-            << "pid: " << _pidValue << std::endl
-            << "error log: " << _errorLogValue << "\n\n";
+            << "worker process: [" << _workerProcessesValue << "]"<< std::endl
+            << "pid: [" << _pidValue << "]" << std::endl
+            << "error log: [" << _errorLogValue << "]\n\n";
   _httpContext.printHttpContent();
 }
 
@@ -72,7 +72,7 @@ void ConfigFile::setCurrentState(const std::string &line) {
 }
 
 void ConfigFile::possibleNewServerContextSetup(const std::string &line) {
-  if (_state == SERVER_CONTEXT_IN_HTTP && line.find("server") != line.npos)
+  if (isStoringState(line, SERVER_CONTEXT_IN_HTTP) == true)
     _httpContext.addNewEmptyServer();
 }
 
@@ -128,17 +128,21 @@ void ConfigFile::saveDirective(const std::string &line,
 
 void ConfigFile::getValue(const std::string &line, std::string &value) {
   if (line.empty() == true || line.length() == 1) return;
-  std::string key;
-  value = line;
+  std::istringstream stream(line);
+  std::string oneValue;
 
-  removeWhiteSpacesFront(value);
-  getKey(line, key);
-  value.erase(0, key.size() + 1);
-  value.erase(value.size() - 1, value.size() - 1);
+  stream >> oneValue;
+  stream >> oneValue;
+  value = value + oneValue;
+  while (stream >> oneValue)
+    value = value + " " + oneValue;
+  value.erase(value.size() - 1);
+  //I don't like that way, will change it later, but it works for now
 }
 
 void ConfigFile::httpContextSave(const std::string &line) {
-  if (_state != HTTPS_CONTEXT && line.find("http") == line.npos) return;
+  if (_state != HTTPS_CONTEXT || isStoringState(line, HTTPS_CONTEXT) == true)
+    return;
   std::string key;
   std::string value;
 
@@ -148,16 +152,16 @@ void ConfigFile::httpContextSave(const std::string &line) {
 }
 
 void ConfigFile::getKey(const std::string &line, std::string &key) {
-  if (line.empty() == true || numberOfWordsSeperatedBySpaces(line) < 2) return;
-  char delimiter = ' ';
-  char *modified_line = strdup(line.c_str());
-  key = std::strtok(modified_line, &delimiter);
-  free(modified_line);
+  if (line.empty() == true || numberOfWordsSeparatedBySpaces(line) < 2) return;
+  std::istringstream stream(line);
+
+  stream >> key;
 }
 
 void ConfigFile::serverContextSave(const std::string &line) {
-  if (_state != SERVER_CONTEXT_IN_HTTP || line.find("server") == line.npos ||
-      numberOfWordsSeperatedBySpaces(line) < 2)
+  if (_state != SERVER_CONTEXT_IN_HTTP ||
+      isStoringState(line, SERVER_CONTEXT_IN_HTTP) == true ||
+      numberOfWordsSeparatedBySpaces(line) < 2)
     return;
   std::string key;
   std::string value;
@@ -168,7 +172,7 @@ void ConfigFile::serverContextSave(const std::string &line) {
 
 void ConfigFile::locationContextSave(const std::string &line) {
   if (_state != LOCATION_CONTEXT_IN_SERVER ||
-      numberOfWordsSeperatedBySpaces(line) < 2)
+      numberOfWordsSeparatedBySpaces(line) < 2)
     return;
   std::string key;
   std::string value;
@@ -188,7 +192,7 @@ void ConfigFile::removeWhiteSpacesFront(std::string &str) {
   str.erase(0, whiteSpaces);
 }
 
-int ConfigFile::numberOfWordsSeperatedBySpaces(const std::string &str) {
+int ConfigFile::numberOfWordsSeparatedBySpaces(const std::string &str) {
   std::stringstream stream(str);
   std::string oneWord;
   unsigned int numberOfWords;
@@ -198,4 +202,33 @@ int ConfigFile::numberOfWordsSeperatedBySpaces(const std::string &str) {
     numberOfWords++;
   }
   return (numberOfWords);
+}
+
+bool ConfigFile::isStoringState(const std::string &line, EStoringStates state) {
+  std::istringstream stream(line);
+  std::string onState;
+  std::string stateAsStr;
+
+  getStateAsString(stateAsStr, state);
+  while (stream >> onState) {
+    if (onState == stateAsStr) return (true);
+  }
+  return (false);
+}
+
+void ConfigFile::getStateAsString(std::string &stateStr,
+                                  EStoringStates &state) {
+  switch (state) {
+    case HTTPS_CONTEXT:
+      stateStr = "http";
+      break;
+    case SERVER_CONTEXT_IN_HTTP:
+      stateStr = "server";
+      break;
+    case LOCATION_CONTEXT_IN_SERVER:
+      stateStr = "location";
+      break;
+    default:
+      stateStr = "";
+  }
 }
