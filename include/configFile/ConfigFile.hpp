@@ -40,10 +40,9 @@ class ConfigFile {
   void trackBrackets(const std::string &line);
   EBracketStatus transferStateToBracketStatus();
   void mainContextSaveDirective(const std::string &line);
-  void saveDirective(const std::string &line, std::string &directive);
-  void getValue(const std::string &line, std::string &value);
+  std::string getValue(const std::string &line);
   void httpContextSave(const std::string &line);
-  void getKey(const std::string &line, std::string &key);
+  std::string getKey(const std::string &line);
   void serverContextSave(const std::string &line);
   void locationContextSave(const std::string &line);
   void removeWhiteSpacesFront(std::string &str);

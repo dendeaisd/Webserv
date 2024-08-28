@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/28 13:17:43 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/28 13:35:03 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,52 +108,42 @@ EBracketStatus ConfigFile::transferStateToBracketStatus() {
 void ConfigFile::mainContextSaveDirective(const std::string &line) {
   if (_state != StoringStates::MAIN_CONTEXT) return;
   if (line.find("worker_processes") != line.npos)
-    saveDirective(line, _workerProcessesValue);
+    _workerProcessesValue = getValue(line);
   else if (line.find("pid") != line.npos)
-    saveDirective(line, _pidValue);
+    _pidValue = getValue(line);
   else if (line.find("error_log") != line.npos)
-    saveDirective(line, _errorLogValue);
+    _errorLogValue = getValue(line);
 }
 
-void ConfigFile::saveDirective(const std::string &line,
-                               std::string &directive) {
-  if (line.length() <= 0) return;
-  std::string value;
-  getValue(line, value);
-
-  directive = value;
-}
-
-void ConfigFile::getValue(const std::string &line, std::string &value) {
-  if (line.empty() == true || line.length() == 1) return;
+std::string ConfigFile::getValue(const std::string &line) {
   std::istringstream stream(line);
   std::string oneValue;
+  std::string value;
 
   stream >> oneValue;
   stream >> oneValue;
   value = value + oneValue;
   while (stream >> oneValue) value = value + " " + oneValue;
   if (value[value.size() - 1] == ';') value.erase(value.size() - 1);
-  // I don't like that way, will change it later, but it works for now
+  return (value);
 }
 
 void ConfigFile::httpContextSave(const std::string &line) {
   if (_state != StoringStates::HTTPS_CONTEXT ||
       isStoringState(line, StoringStates::HTTPS_CONTEXT) == true)
     return;
-  std::string key;
-  std::string value;
+  std::string key = getKey(line);
+  std::string value = getValue(line);
 
-  getKey(line, key);
-  getValue(line, value);
   _httpContext.httpSaveDirectiveValue(key, value);
 }
 
-void ConfigFile::getKey(const std::string &line, std::string &key) {
-  if (line.empty() == true || numberOfWordsSeparatedBySpaces(line) < 2) return;
+std::string ConfigFile::getKey(const std::string &line) {
   std::istringstream stream(line);
+  std::string key;
 
   stream >> key;
+  return (key);
 }
 
 void ConfigFile::serverContextSave(const std::string &line) {
@@ -161,10 +151,8 @@ void ConfigFile::serverContextSave(const std::string &line) {
       isStoringState(line, StoringStates::SERVER_CONTEXT_IN_HTTP) == true ||
       numberOfWordsSeparatedBySpaces(line) < 2)
     return;
-  std::string key;
-  std::string value;
-  getKey(line, key);
-  getValue(line, value);
+  std::string key = getKey(line);
+  std::string value = getValue(line);
   _httpContext.serverSaveContextOrDirective(key, value);
 }
 
@@ -173,10 +161,8 @@ void ConfigFile::locationContextSave(const std::string &line) {
       numberOfWordsSeparatedBySpaces(line) < 2 ||
       isStoringState(line, StoringStates::LOCATION_CONTEXT_IN_SERVER) == true)
     return;
-  std::string key;
-  std::string value;
-  getKey(line, key);
-  getValue(line, value);
+  std::string key = getKey(line);
+  std::string value = getValue(line);
   _httpContext._serverContext.back()->locationSaveDirectiveValue(key, value);
 }
 
