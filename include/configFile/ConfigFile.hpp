@@ -38,7 +38,7 @@ class ConfigFile {
   void setCurrentState(const std::string &line);
   void possibleNewServerContextSetup(const std::string &line);
   void trackBrackets(const std::string &line);
-  void transferStateToBracketStatus(EBracketStatus &status);
+  EBracketStatus transferStateToBracketStatus();
   void mainContextSaveDirective(const std::string &line);
   void saveDirective(const std::string &line, std::string &directive);
   void getValue(const std::string &line, std::string &value);
