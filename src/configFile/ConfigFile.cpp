@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/28 11:27:29 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/28 11:47:21 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void ConfigFile::printConfigFileContent() {
   _httpContext.printHttpContent();
 }
 
-void ConfigFile::storeValidConfiguration(const std::string &fileName) {
+void ConfigFile::parseConfiguration(const std::string &fileName) {
   std::fstream file;
   std::string line;
 

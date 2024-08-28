@@ -26,7 +26,7 @@ class ConfigFile {
   ConfigFile();
 
   void printConfigFileContent();
-  void storeValidConfiguration(const std::string &fileName);
+  void parseConfiguration(const std::string &fileName);
 
   std::string _workerProcessesValue;
   std::string _pidValue;
