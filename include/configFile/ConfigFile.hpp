@@ -6,6 +6,13 @@
 
 #include "HttpContext.hpp"
 
+enum class StoringStates {
+  MAIN_CONTEXT = 0,
+  HTTPS_CONTEXT = 1,
+  SERVER_CONTEXT_IN_HTTP = 2,
+  LOCATION_CONTEXT_IN_SERVER = 3
+};
+
 enum EBracketStatus {
   MAIN_BRACKET = 0,
   HTTP_BRACKET = 1,
@@ -13,12 +20,6 @@ enum EBracketStatus {
   LOCATION_BRACKET = 3
 };
 
-typedef enum EStoringStates {
-  MAIN_CONTEXT = 0,
-  HTTPS_CONTEXT = 1,
-  SERVER_CONTEXT_IN_HTTP = 2,
-  LOCATION_CONTEXT_IN_SERVER = 3
-} TStoringStates;
 
 class ConfigFile {
  public:
@@ -47,11 +48,11 @@ class ConfigFile {
   void locationContextSave(const std::string &line);
   void removeWhiteSpacesFront(std::string &str);
   int numberOfWordsSeparatedBySpaces(const std::string &str);
-  bool isStoringState(const std::string &line, EStoringStates state);
-  void getStateAsString(std::string &stateStr, EStoringStates &state);
+  bool isStoringState(const std::string &line, StoringStates state);
+  void getStateAsString(std::string &stateStr, StoringStates &state);
   void possibleNewLocationSetup(std::string &line);
 
-  TStoringStates _state;
+  StoringStates _state;
   std::stack<char> _bracketStatus[4];
 };
 

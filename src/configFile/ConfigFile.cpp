@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/26 20:58:39 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/28 11:27:29 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void ConfigFile::storeValidConfiguration(const std::string &fileName) {
   std::fstream file;
   std::string line;
 
-  _state = MAIN_CONTEXT;
+  _state = StoringStates::MAIN_CONTEXT;
   file.open(fileName.c_str());
   while (std::getline(file, line)) {
     setCurrentState(line);
@@ -55,25 +55,25 @@ void ConfigFile::storeValidConfiguration(const std::string &fileName) {
 }
 
 void ConfigFile::setCurrentState(const std::string &line) {
-  if (_state == MAIN_CONTEXT && line.find("http") != line.npos)
-    _state = HTTPS_CONTEXT;
-  else if (_state == HTTPS_CONTEXT && line.find("server") != line.npos)
-    _state = SERVER_CONTEXT_IN_HTTP;
-  else if (_state == SERVER_CONTEXT_IN_HTTP &&
+  if (_state == StoringStates::MAIN_CONTEXT && line.find("http") != line.npos)
+    _state = StoringStates::HTTPS_CONTEXT;
+  else if (_state == StoringStates::HTTPS_CONTEXT && line.find("server") != line.npos)
+    _state = StoringStates::SERVER_CONTEXT_IN_HTTP;
+  else if (_state == StoringStates::SERVER_CONTEXT_IN_HTTP &&
            line.find("location") != line.npos)
-    _state = LOCATION_CONTEXT_IN_SERVER;
-  else if (_state == HTTPS_CONTEXT && _bracketStatus[HTTP_BRACKET].size() == 0)
-    _state = MAIN_CONTEXT;
-  else if (_state == SERVER_CONTEXT_IN_HTTP &&
+    _state = StoringStates::LOCATION_CONTEXT_IN_SERVER;
+  else if (_state == StoringStates::HTTPS_CONTEXT && _bracketStatus[HTTP_BRACKET].size() == 0)
+    _state = StoringStates::MAIN_CONTEXT;
+  else if (_state == StoringStates::SERVER_CONTEXT_IN_HTTP &&
            _bracketStatus[SERVER_BRACKET].size() == 0)
-    _state = HTTPS_CONTEXT;
-  else if (_state == LOCATION_CONTEXT_IN_SERVER &&
+    _state = StoringStates::HTTPS_CONTEXT;
+  else if (_state == StoringStates::LOCATION_CONTEXT_IN_SERVER &&
            _bracketStatus[LOCATION_BRACKET].size() == 0)
-    _state = SERVER_CONTEXT_IN_HTTP;
+    _state = StoringStates::SERVER_CONTEXT_IN_HTTP;
 }
 
 void ConfigFile::possibleNewServerContextSetup(const std::string &line) {
-  if (isStoringState(line, SERVER_CONTEXT_IN_HTTP) == true)
+  if (isStoringState(line, StoringStates::SERVER_CONTEXT_IN_HTTP) == true)
     _httpContext.addNewEmptyServer();
 }
 
@@ -93,23 +93,23 @@ void ConfigFile::trackBrackets(const std::string &line) {
 
 void ConfigFile::transferStateToBracketStatus(EBracketStatus &status) {
   switch (_state) {
-    case MAIN_CONTEXT:
+    case StoringStates::MAIN_CONTEXT:
       status = MAIN_BRACKET;
       break;
-    case HTTPS_CONTEXT:
+    case StoringStates::HTTPS_CONTEXT:
       status = HTTP_BRACKET;
       break;
-    case SERVER_CONTEXT_IN_HTTP:
+    case StoringStates::SERVER_CONTEXT_IN_HTTP:
       status = SERVER_BRACKET;
       break;
-    case LOCATION_CONTEXT_IN_SERVER:
+    case StoringStates::LOCATION_CONTEXT_IN_SERVER:
       status = LOCATION_BRACKET;
       break;
   }
 }
 
 void ConfigFile::mainContextSaveDirective(const std::string &line) {
-  if (_state != MAIN_CONTEXT) return;
+  if (_state != StoringStates::MAIN_CONTEXT) return;
   if (line.find("worker_processes") != line.npos)
     saveDirective(line, _workerProcessesValue);
   else if (line.find("pid") != line.npos)
@@ -143,7 +143,7 @@ void ConfigFile::getValue(const std::string &line, std::string &value) {
 }
 
 void ConfigFile::httpContextSave(const std::string &line) {
-  if (_state != HTTPS_CONTEXT || isStoringState(line, HTTPS_CONTEXT) == true)
+  if (_state != StoringStates::HTTPS_CONTEXT || isStoringState(line, StoringStates::HTTPS_CONTEXT) == true)
     return;
   std::string key;
   std::string value;
@@ -161,8 +161,8 @@ void ConfigFile::getKey(const std::string &line, std::string &key) {
 }
 
 void ConfigFile::serverContextSave(const std::string &line) {
-  if (_state != SERVER_CONTEXT_IN_HTTP ||
-      isStoringState(line, SERVER_CONTEXT_IN_HTTP) == true ||
+  if (_state != StoringStates::SERVER_CONTEXT_IN_HTTP ||
+      isStoringState(line, StoringStates::SERVER_CONTEXT_IN_HTTP) == true ||
       numberOfWordsSeparatedBySpaces(line) < 2)
     return;
   std::string key;
@@ -173,9 +173,9 @@ void ConfigFile::serverContextSave(const std::string &line) {
 }
 
 void ConfigFile::locationContextSave(const std::string &line) {
-  if (_state != LOCATION_CONTEXT_IN_SERVER ||
+  if (_state != StoringStates::LOCATION_CONTEXT_IN_SERVER ||
       numberOfWordsSeparatedBySpaces(line) < 2
-      || isStoringState(line, LOCATION_CONTEXT_IN_SERVER) == true)
+      || isStoringState(line, StoringStates::LOCATION_CONTEXT_IN_SERVER) == true)
     return;
   std::string key;
   std::string value;
@@ -206,7 +206,7 @@ int ConfigFile::numberOfWordsSeparatedBySpaces(const std::string &str) {
   return (numberOfWords);
 }
 
-bool ConfigFile::isStoringState(const std::string &line, EStoringStates state) {
+bool ConfigFile::isStoringState(const std::string &line, StoringStates state) {
   std::istringstream stream(line);
   std::string onState;
   std::string stateAsStr;
@@ -219,15 +219,15 @@ bool ConfigFile::isStoringState(const std::string &line, EStoringStates state) {
 }
 
 void ConfigFile::getStateAsString(std::string &stateStr,
-                                  EStoringStates &state) {
+                                  StoringStates &state) {
   switch (state) {
-    case HTTPS_CONTEXT:
+    case StoringStates::HTTPS_CONTEXT:
       stateStr = "http";
       break;
-    case SERVER_CONTEXT_IN_HTTP:
+    case StoringStates::SERVER_CONTEXT_IN_HTTP:
       stateStr = "server";
       break;
-    case LOCATION_CONTEXT_IN_SERVER:
+    case StoringStates::LOCATION_CONTEXT_IN_SERVER:
       stateStr = "location";
       break;
     default:
@@ -236,7 +236,7 @@ void ConfigFile::getStateAsString(std::string &stateStr,
 }
 
 void ConfigFile::possibleNewLocationSetup(std::string &line) {
-  if (isStoringState(line, LOCATION_CONTEXT_IN_SERVER) == false)
+  if (isStoringState(line, StoringStates::LOCATION_CONTEXT_IN_SERVER) == false)
     return;
   std::istringstream stream(line);
   std::string url;
