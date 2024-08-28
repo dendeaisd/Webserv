@@ -8,7 +8,7 @@
 
 class CGI {
  public:
-  CGI(int fd, CGIFileManager &cgiFileManager, HttpRequest &request);
+  CGI(int fd, HttpRequest &request);
   ~CGI() {}
   bool run();
   bool wait();

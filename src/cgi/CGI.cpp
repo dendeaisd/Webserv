@@ -15,16 +15,17 @@
 
 #include "../../include/log/Log.hpp"
 #include "../../include/response/HttpResponse.hpp"
+#include "../../include/cgi/CGIFileManager.hpp"
 
 #define BUFFER_SIZE 4096
 #define TIMEOUT 20
 
-CGI::CGI(int fd, CGIFileManager &cgiFileManager, HttpRequest &request) {
+CGI::CGI(int fd, HttpRequest &request) {
   fd_ = fd;
   _request = request;
   _unableToExecute = false;
   _script = "." + request.getUri();
-  _language = cgiFileManager.getExecutor(_script);
+  _language = CGIFileManager::getInstance().getExecutor(_script);
   if (_language.empty()) {
     Log::getInstance().error("Failed to get executor for script");
     _unableToExecute = true;

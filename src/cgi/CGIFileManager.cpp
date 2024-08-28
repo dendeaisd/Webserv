@@ -5,13 +5,18 @@
 
 namespace fs = std::filesystem;
 
-CGIFileManager::CGIFileManager(std::string cgiDir) : cgiDir_(cgiDir) {
+void CGIFileManager::configure(std::string cgiDir) {
   // TEMP map for cgi executors
+  if (_configured) {
+	std::cout << "CGIFileManager is already configured" << std::endl;
+	return;
+  }
   cgiExecutors_[".php"] = "/usr/bin/php";
   cgiExecutors_[".py"] = "/usr/bin/python3";
   cgiExecutors_[".pl"] = "/usr/bin/perl";
   cgiExecutors_[".rb"] = "/usr/bin/ruby";
   cgiExecutors_[".sh"] = "/bin/bash";
+  cgiDir_ = cgiDir;
   mapCGIDir();
   for (auto &file : cgiFiles_) {
     std::cout << file.path << " " << file.executor << std::endl;
