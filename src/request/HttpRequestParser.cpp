@@ -14,6 +14,8 @@
 #define MAX_BUFFER_SIZE 4096
 #define UPLOAD_DIR "uploads/"
 
+#define DIR_LIST_ON 0
+
 using namespace std::filesystem;
 HttpRequestParser::HttpRequestParser()
     : status(HttpRequestParseStatus::NOT_PARSED) {}
@@ -34,20 +36,17 @@ HttpRequest HttpRequestParser::getHttpRequest() {
   }
 }
 
-/*extend this with a new status(http request handle status)*/
 void HttpRequestParser::electHandler() {
   // TODO: update this to use server configuration
   if (isCgiRequest()) {
     request.setHandler(HttpRequestHandler::CGI);
-
   } else if (isFaviconRequest()) {
     request.setHandler(HttpRequestHandler::FAVICON);
     Log::getInstance().debug("Favicon handler for request: " +
                              request.getUri());
-
-  } else if (isDirectoryRequest("./default" + request.getUri())) {
+  } else if (isDirectoryRequest("./default" + request.getUri()) &&
+             DIR_LIST_ON) {
     request.setHandler(HttpRequestHandler::DIRECTORY_LISTING);
-
   } else {
     request.setHandler(HttpRequestHandler::STATIC);
   }
