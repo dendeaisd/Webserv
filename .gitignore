@@ -40,3 +40,4 @@ hello.txt
 ./logs/error_*
 ./logs/server_*
 *.log
+./webserv
