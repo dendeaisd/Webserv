@@ -1,6 +1,7 @@
 #ifndef CGI_HPP
 #define CGI_HPP
 
+#include <cstring>
 #include <string>
 
 #include "../request/HttpRequest.hpp"

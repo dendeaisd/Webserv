@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 // you are not using the sstream header direcly anywhere here
+#include <cstring>
 #include <iostream>
 #include <sstream>
 
@@ -42,4 +43,8 @@ class HttpRequestParser {
   bool validateHttpVersion();
   bool askForContinue();
   bool checkForTerminator(std::string line);
+
+  bool isCgiRequest();
+  bool isFaviconRequest();
+  bool isDirectoryRequest(const std::string &path);
 };
