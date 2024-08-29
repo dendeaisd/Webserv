@@ -34,14 +34,14 @@ std::string CGIFileManager::getExecutor(std::string path) {
 
 void CGIFileManager::mapCGIDir(std::string cgiDir) {
   for (const auto &entry : fs::directory_iterator(cgiDir)) {
-	if (entry.is_regular_file()) {
-	  std::string path = entry.path().string();
-	  std::string extension = path.substr(path.find_last_of('.'));
-	  if (cgiExecutors_.find(extension) != cgiExecutors_.end()) {
-		cgiFiles_.push_back(CGIFile(path, cgiExecutors_[extension]));
-	  }
-	} else if (entry.is_directory()) {
-	  mapCGIDir(entry.path().string());
-	}
+    if (entry.is_regular_file()) {
+      std::string path = entry.path().string();
+      std::string extension = path.substr(path.find_last_of('.'));
+      if (cgiExecutors_.find(extension) != cgiExecutors_.end()) {
+        cgiFiles_.push_back(CGIFile(path, cgiExecutors_[extension]));
+      }
+    } else if (entry.is_directory()) {
+      mapCGIDir(entry.path().string());
+    }
   }
 }
