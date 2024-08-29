@@ -1,0 +1,431 @@
+2024-08-29 13:07:26 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:07:26 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:07:26 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:07:26 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:07:26 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:07:26 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:07:26 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:07:26 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:07:26 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:07:26 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:07:26 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:07:26 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:07:26 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:07:26 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:07:26 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:07:26 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:07:29 [ WARNING ] Unknown header: sec-ch-ua found in request /index.html
+2024-08-29 13:07:29 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /index.html
+2024-08-29 13:07:29 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /index.html
+2024-08-29 13:07:29 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /index.html
+2024-08-29 13:07:29 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /index.html
+2024-08-29 13:07:29 [ WARNING ] Unknown header: Sec-Fetch-User found in request /index.html
+2024-08-29 13:07:29 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /index.html
+2024-08-29 13:07:32 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages
+2024-08-29 13:07:32 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages
+2024-08-29 13:07:32 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages
+2024-08-29 13:07:32 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages
+2024-08-29 13:07:32 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages
+2024-08-29 13:07:32 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages
+2024-08-29 13:07:32 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages
+2024-08-29 13:07:32 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:07:46 [ WARNING ] Unknown header: sec-ch-ua found in request /index.html
+2024-08-29 13:07:46 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /index.html
+2024-08-29 13:07:46 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /index.html
+2024-08-29 13:07:46 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /index.html
+2024-08-29 13:07:46 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /index.html
+2024-08-29 13:07:46 [ WARNING ] Unknown header: Sec-Fetch-User found in request /index.html
+2024-08-29 13:07:46 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /index.html
+2024-08-29 13:07:48 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages
+2024-08-29 13:07:48 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages
+2024-08-29 13:07:48 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages
+2024-08-29 13:07:48 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages
+2024-08-29 13:07:48 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages
+2024-08-29 13:07:48 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages
+2024-08-29 13:07:48 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages
+2024-08-29 13:07:48 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:07:50 [ WARNING ] Unknown header: sec-ch-ua found in request /403_success
+2024-08-29 13:07:50 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /403_success
+2024-08-29 13:07:50 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /403_success
+2024-08-29 13:07:50 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /403_success
+2024-08-29 13:07:50 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /403_success
+2024-08-29 13:07:50 [ WARNING ] Unknown header: Sec-Fetch-User found in request /403_success
+2024-08-29 13:07:50 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /403_success
+2024-08-29 13:07:52 [ WARNING ] Unknown header: sec-ch-ua found in request /504
+2024-08-29 13:07:52 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /504
+2024-08-29 13:07:52 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /504
+2024-08-29 13:07:52 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /504
+2024-08-29 13:07:52 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /504
+2024-08-29 13:07:52 [ WARNING ] Unknown header: Sec-Fetch-User found in request /504
+2024-08-29 13:07:52 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /504
+2024-08-29 13:07:54 [ WARNING ] Unknown header: sec-ch-ua found in request /500
+2024-08-29 13:07:54 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /500
+2024-08-29 13:07:54 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /500
+2024-08-29 13:07:54 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /500
+2024-08-29 13:07:54 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /500
+2024-08-29 13:07:54 [ WARNING ] Unknown header: Sec-Fetch-User found in request /500
+2024-08-29 13:07:54 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /500
+2024-08-29 13:08:11 [ WARNING ] Unknown header: sec-ch-ua found in request /401
+2024-08-29 13:08:11 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /401
+2024-08-29 13:08:11 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /401
+2024-08-29 13:08:11 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /401
+2024-08-29 13:08:11 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /401
+2024-08-29 13:08:11 [ WARNING ] Unknown header: Sec-Fetch-User found in request /401
+2024-08-29 13:08:11 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /401
+2024-08-29 13:08:13 [ WARNING ] Unknown header: sec-ch-ua found in request /403
+2024-08-29 13:08:13 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /403
+2024-08-29 13:08:13 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /403
+2024-08-29 13:08:13 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /403
+2024-08-29 13:08:13 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /403
+2024-08-29 13:08:13 [ WARNING ] Unknown header: Sec-Fetch-User found in request /403
+2024-08-29 13:08:13 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /403
+2024-08-29 13:08:17 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages
+2024-08-29 13:08:17 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages
+2024-08-29 13:08:17 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages
+2024-08-29 13:08:17 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages
+2024-08-29 13:08:17 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages
+2024-08-29 13:08:17 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages
+2024-08-29 13:08:17 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages
+2024-08-29 13:08:17 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:08:18 [ WARNING ] Unknown header: sec-ch-ua found in request /403_success
+2024-08-29 13:08:18 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /403_success
+2024-08-29 13:08:18 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /403_success
+2024-08-29 13:08:18 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /403_success
+2024-08-29 13:08:18 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /403_success
+2024-08-29 13:08:18 [ WARNING ] Unknown header: Sec-Fetch-User found in request /403_success
+2024-08-29 13:08:18 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /403_success
+2024-08-29 13:08:28 [ WARNING ] Unknown header: sec-ch-ua found in request /globe-dt.png
+2024-08-29 13:08:28 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /globe-dt.png
+2024-08-29 13:08:28 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /globe-dt.png
+2024-08-29 13:08:28 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /globe-dt.png
+2024-08-29 13:08:28 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /globe-dt.png
+2024-08-29 13:08:28 [ WARNING ] Unknown header: Sec-Fetch-User found in request /globe-dt.png
+2024-08-29 13:08:28 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /globe-dt.png
+2024-08-29 13:08:30 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon-dt.png
+2024-08-29 13:08:30 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon-dt.png
+2024-08-29 13:08:30 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon-dt.png
+2024-08-29 13:08:30 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon-dt.png
+2024-08-29 13:08:30 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon-dt.png
+2024-08-29 13:08:30 [ WARNING ] Unknown header: Sec-Fetch-User found in request /favicon-dt.png
+2024-08-29 13:08:30 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon-dt.png
+2024-08-29 13:08:40 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages
+2024-08-29 13:08:40 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages
+2024-08-29 13:08:40 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages
+2024-08-29 13:08:40 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages
+2024-08-29 13:08:40 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages
+2024-08-29 13:08:40 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages
+2024-08-29 13:08:40 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages
+2024-08-29 13:08:40 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:08:44 [ WARNING ] Unknown header: sec-ch-ua found in request /404
+2024-08-29 13:08:44 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /404
+2024-08-29 13:08:44 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /404
+2024-08-29 13:08:44 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /404
+2024-08-29 13:08:44 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /404
+2024-08-29 13:08:44 [ WARNING ] Unknown header: Sec-Fetch-User found in request /404
+2024-08-29 13:08:44 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /404
+2024-08-29 13:08:47 [ WARNING ] Unknown header: sec-ch-ua found in request /500
+2024-08-29 13:08:47 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /500
+2024-08-29 13:08:47 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /500
+2024-08-29 13:08:47 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /500
+2024-08-29 13:08:47 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /500
+2024-08-29 13:08:47 [ WARNING ] Unknown header: Sec-Fetch-User found in request /500
+2024-08-29 13:08:47 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /500
+2024-08-29 13:09:02 [ WARNING ] Unknown header: sec-ch-ua found in request /404
+2024-08-29 13:09:02 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /404
+2024-08-29 13:09:02 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /404
+2024-08-29 13:09:02 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /404
+2024-08-29 13:09:02 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /404
+2024-08-29 13:09:02 [ WARNING ] Unknown header: Sec-Fetch-User found in request /404
+2024-08-29 13:09:02 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /404
+2024-08-29 13:14:21 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages
+2024-08-29 13:14:21 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages
+2024-08-29 13:14:21 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages
+2024-08-29 13:14:21 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages
+2024-08-29 13:14:21 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages
+2024-08-29 13:14:21 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages
+2024-08-29 13:14:21 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages
+2024-08-29 13:14:21 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:14:21 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:14:21 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:14:21 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:14:21 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:14:21 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:14:21 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:14:21 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:14:21 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:14:22 [ WARNING ] Unknown header: sec-ch-ua found in request /default/error_pages/500/
+2024-08-29 13:14:22 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /default/error_pages/500/
+2024-08-29 13:14:22 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /default/error_pages/500/
+2024-08-29 13:14:22 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /default/error_pages/500/
+2024-08-29 13:14:22 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /default/error_pages/500/
+2024-08-29 13:14:22 [ WARNING ] Unknown header: Sec-Fetch-User found in request /default/error_pages/500/
+2024-08-29 13:14:22 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /default/error_pages/500/
+2024-08-29 13:14:24 [ WARNING ] Unknown header: sec-ch-ua found in request /default/error_pages/401/
+2024-08-29 13:14:24 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /default/error_pages/401/
+2024-08-29 13:14:24 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /default/error_pages/401/
+2024-08-29 13:14:24 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /default/error_pages/401/
+2024-08-29 13:14:24 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /default/error_pages/401/
+2024-08-29 13:14:24 [ WARNING ] Unknown header: Sec-Fetch-User found in request /default/error_pages/401/
+2024-08-29 13:14:24 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /default/error_pages/401/
+2024-08-29 13:14:26 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:14:26 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:14:26 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:14:26 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:14:26 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:14:26 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:14:26 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:14:26 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:14:27 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:14:27 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:14:27 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:14:27 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:14:27 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:14:27 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:14:27 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:14:27 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:14:27 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:14:27 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:14:28 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:14:28 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:14:28 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:14:28 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:14:28 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:14:28 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:14:28 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:14:28 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:14:28 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:14:28 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:14:28 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:14:28 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:14:28 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:14:28 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:14:28 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:14:28 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:14:28 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:14:28 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:14:28 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:14:28 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:14:28 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:14:28 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:14:28 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:14:28 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:14:29 [ WARNING ] Unknown header: sec-ch-ua found in request /default//error_pages/
+2024-08-29 13:14:29 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /default//error_pages/
+2024-08-29 13:14:29 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /default//error_pages/
+2024-08-29 13:14:29 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /default//error_pages/
+2024-08-29 13:14:29 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /default//error_pages/
+2024-08-29 13:14:29 [ WARNING ] Unknown header: Sec-Fetch-User found in request /default//error_pages/
+2024-08-29 13:14:29 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /default//error_pages/
+2024-08-29 13:14:31 [ WARNING ] Unknown header: sec-ch-ua found in request /default//error_pages/
+2024-08-29 13:14:31 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /default//error_pages/
+2024-08-29 13:14:31 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /default//error_pages/
+2024-08-29 13:14:31 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /default//error_pages/
+2024-08-29 13:14:31 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /default//error_pages/
+2024-08-29 13:14:31 [ WARNING ] Unknown header: Sec-Fetch-User found in request /default//error_pages/
+2024-08-29 13:14:31 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /default//error_pages/
+2024-08-29 13:16:50 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:16:50 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:16:50 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:16:50 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:16:50 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:16:50 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:16:50 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:16:50 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:16:50 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:16:50 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:16:50 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:16:50 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:16:50 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:16:50 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:16:50 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:16:50 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:16:51 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:16:51 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:16:51 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:16:51 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:16:51 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:16:51 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:16:51 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:16:51 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:16:51 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:16:51 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:16:51 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:16:51 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:16:51 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:16:51 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:16:51 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:16:51 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:17:07 [ WARNING ] Unknown header: sec-ch-ua found in request /default//error_pages/
+2024-08-29 13:17:07 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /default//error_pages/
+2024-08-29 13:17:07 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /default//error_pages/
+2024-08-29 13:17:07 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /default//error_pages/
+2024-08-29 13:17:07 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /default//error_pages/
+2024-08-29 13:17:07 [ WARNING ] Unknown header: Sec-Fetch-User found in request /default//error_pages/
+2024-08-29 13:17:07 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /default//error_pages/
+2024-08-29 13:17:09 [ WARNING ] Unknown header: sec-ch-ua found in request /default//error_pages/
+2024-08-29 13:17:09 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /default//error_pages/
+2024-08-29 13:17:09 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /default//error_pages/
+2024-08-29 13:17:09 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /default//error_pages/
+2024-08-29 13:17:09 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /default//error_pages/
+2024-08-29 13:17:09 [ WARNING ] Unknown header: Sec-Fetch-User found in request /default//error_pages/
+2024-08-29 13:17:09 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /default//error_pages/
+2024-08-29 13:17:11 [ WARNING ] Unknown header: sec-ch-ua found in request /default//index.html
+2024-08-29 13:17:11 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /default//index.html
+2024-08-29 13:17:11 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /default//index.html
+2024-08-29 13:17:11 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /default//index.html
+2024-08-29 13:17:11 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /default//index.html
+2024-08-29 13:17:11 [ WARNING ] Unknown header: Sec-Fetch-User found in request /default//index.html
+2024-08-29 13:17:11 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /default//index.html
+2024-08-29 13:17:13 [ WARNING ] Unknown header: sec-ch-ua found in request /default//favicon-dt.png
+2024-08-29 13:17:13 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /default//favicon-dt.png
+2024-08-29 13:17:13 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /default//favicon-dt.png
+2024-08-29 13:17:13 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /default//favicon-dt.png
+2024-08-29 13:17:13 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /default//favicon-dt.png
+2024-08-29 13:17:13 [ WARNING ] Unknown header: Sec-Fetch-User found in request /default//favicon-dt.png
+2024-08-29 13:17:13 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /default//favicon-dt.png
+2024-08-29 13:26:25 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:26:25 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:26:25 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:26:25 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:26:25 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:26:25 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:26:25 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:26:25 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:26:25 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:26:25 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:26:25 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:26:25 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:26:25 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:26:25 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:26:25 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:26:25 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:26:27 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages/
+2024-08-29 13:26:27 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages/
+2024-08-29 13:26:27 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages/
+2024-08-29 13:26:27 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages/
+2024-08-29 13:26:27 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages/
+2024-08-29 13:26:27 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages/
+2024-08-29 13:26:27 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages/
+2024-08-29 13:26:27 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:26:29 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages/500/
+2024-08-29 13:26:29 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages/500/
+2024-08-29 13:26:29 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages/500/
+2024-08-29 13:26:29 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages/500/
+2024-08-29 13:26:29 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages/500/
+2024-08-29 13:26:29 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages/500/
+2024-08-29 13:26:29 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages/500/
+2024-08-29 13:26:29 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:26:30 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages/500/assets/
+2024-08-29 13:26:30 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages/500/assets/
+2024-08-29 13:26:30 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages/500/assets/
+2024-08-29 13:26:30 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages/500/assets/
+2024-08-29 13:26:30 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages/500/assets/
+2024-08-29 13:26:30 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages/500/assets/
+2024-08-29 13:26:30 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages/500/assets/
+2024-08-29 13:26:30 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:26:56 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages/403_success/
+2024-08-29 13:26:56 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages/403_success/
+2024-08-29 13:26:56 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages/403_success/
+2024-08-29 13:26:56 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages/403_success/
+2024-08-29 13:26:56 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages/403_success/
+2024-08-29 13:26:56 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages/403_success/
+2024-08-29 13:26:56 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages/403_success/
+2024-08-29 13:26:56 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:26:58 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages/403_success/assets/
+2024-08-29 13:26:58 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages/403_success/assets/
+2024-08-29 13:26:58 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages/403_success/assets/
+2024-08-29 13:26:58 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages/403_success/assets/
+2024-08-29 13:26:58 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages/403_success/assets/
+2024-08-29 13:26:58 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages/403_success/assets/
+2024-08-29 13:26:58 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages/403_success/assets/
+2024-08-29 13:26:58 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:27:00 [ WARNING ] Unknown header: sec-ch-ua found in request /error_pages/403_success/assets/script.js
+2024-08-29 13:27:00 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /error_pages/403_success/assets/script.js
+2024-08-29 13:27:00 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /error_pages/403_success/assets/script.js
+2024-08-29 13:27:00 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /error_pages/403_success/assets/script.js
+2024-08-29 13:27:00 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /error_pages/403_success/assets/script.js
+2024-08-29 13:27:00 [ WARNING ] Unknown header: Sec-Fetch-User found in request /error_pages/403_success/assets/script.js
+2024-08-29 13:27:00 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /error_pages/403_success/assets/script.js
+2024-08-29 13:27:04 [ WARNING ] Unknown header: sec-ch-ua found in request /globe-dt.png
+2024-08-29 13:27:04 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /globe-dt.png
+2024-08-29 13:27:04 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /globe-dt.png
+2024-08-29 13:27:04 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /globe-dt.png
+2024-08-29 13:27:04 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /globe-dt.png
+2024-08-29 13:27:04 [ WARNING ] Unknown header: Sec-Fetch-User found in request /globe-dt.png
+2024-08-29 13:27:04 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /globe-dt.png
+2024-08-29 13:27:19 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:27:19 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:27:19 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:27:19 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:27:19 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:27:19 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:27:19 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:27:19 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:27:19 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:27:19 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:27:19 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:27:19 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:27:19 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:27:19 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:27:19 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:27:19 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:27:22 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:27:22 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:27:22 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:27:22 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:27:22 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:27:22 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:27:22 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:27:22 [ DEBUG ] Successful request. Directory Listing
+2024-08-29 13:27:22 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:27:22 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:27:22 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:27:22 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:27:22 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:27:22 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:27:22 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:27:22 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:27:41 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:27:41 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:27:41 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:27:41 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:27:41 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:27:41 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:27:41 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:27:41 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:27:41 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:27:41 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:27:41 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:27:41 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:27:41 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:27:41 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:27:41 [ DEBUG ] Successful request. Favicon
+2024-08-29 13:27:46 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-08-29 13:27:46 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-08-29 13:27:46 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-08-29 13:27:46 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-08-29 13:27:46 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-08-29 13:27:46 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-08-29 13:27:46 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-08-29 13:27:46 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-08-29 13:27:46 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-08-29 13:27:46 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-08-29 13:27:46 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-08-29 13:27:46 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-08-29 13:27:46 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-08-29 13:27:46 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-08-29 13:27:46 [ DEBUG ] Successful request. Favicon
