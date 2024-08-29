@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>Todo App</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
 </head>
+
 <body>
 	<div id="app">
 		<h1>Todo App</h1>
@@ -11,5 +13,65 @@
 		<button id="addTodoButton">Add Todo</button>
 		<ul id="todoList"></ul>
 	</div>
-	<script src="./app.js"></script>
+	<script>
+		// Function to send a POST request to the server
+		function addTodo() {
+			const input = document.getElementById("newTodoInput");
+			const todo = input.value;
+			input.value = "";
+
+			fetch("http://localhost:8080/cgi-bin/todo_app.py", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded"
+				},
+				body: JSON.stringify({ todo })
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						const todoList = document.getElementById("todoList");
+						const li = document.createElement("li");
+						li.textContent = todo;
+						todoList.appendChild(li);
+					} else {
+						alert("Failed to add todo");
+					}
+				})
+				.catch(error => {
+					console.error("Error:", error);
+					alert("Failed to add todo");
+				});
+		}
+
+		// Function to fetch and display all todo items
+		function displayTodos() {
+			fetch("http://localhost:8080/cgi-bin/todo_app.py", {
+				method: "GET"
+			})
+				.then(response => response.json())
+				.then(data => {
+					const todoList = document.getElementById("todoList");
+					todoList.innerHTML = ""; // Clear the existing list
+					data.forEach(todo => {
+						const li = document.createElement("li");
+						li.textContent = todo;
+						todoList.appendChild(li);
+					});
+				})
+				.catch(error => {
+					console.error("Error:", error);
+					alert("Failed to fetch todos");
+				});
+		}
+
+		document.getElementById("addTodoButton").addEventListener("click", function (event) {
+			event.preventDefault();
+			addTodo();
+		});
+
+		// document.addEventListener("DOMContentLoaded", displayTodos);
+	</script>
+</body>
+
 </html>

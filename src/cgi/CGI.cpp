@@ -56,6 +56,8 @@ bool CGI::run() {
     sendInternalErrorResponse(fd_);
     return false;
   }
+
+  Log::getInstance().debug("Request: " + _request.toJson());
   pid_ = fork();
   if (pid_ == -1) {
     throw std::runtime_error("Failed to fork");
@@ -72,6 +74,13 @@ bool CGI::run() {
   } else {
     close(pipeInFd_[0]);
     close(pipeOutFd_[1]);
+
+    if (!_request.getBody().empty()) {
+      Log::getInstance().debug("Writing to pipe " + _request.getBody());
+      write(pipeInFd_[1], _request.getBody().c_str(),
+            _request.getBody().length());
+      close(pipeInFd_[1]);
+    }
   }
   return true;
 }
@@ -106,12 +115,16 @@ bool CGI::tunnelData() {
   bytes_read = read(pipeOutFd_[0], buffer, BUFFER_SIZE);
   Log::getInstance().debug("Read " + std::to_string(bytes_read) + " bytes");
   if (bytes_read > 0) {
+    std::cout << buffer << std::endl;
     int sent = send(fd_, buffer, bytes_read, 0);
     Log::getInstance().debug("Sent " + std::to_string(sent) + " bytes");
     if (sent < 0) {
       Log::getInstance().error("Failed to send response");
     }
     close(pipeOutFd_[0]);
+    if (_request.getHeader("Connection") == "close") {
+      close(fd_);
+    }
     return true;
   } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
     return false;

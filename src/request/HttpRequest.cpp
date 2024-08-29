@@ -107,7 +107,12 @@ void HttpRequest::setSubDomain(std::string subDomain) {
 
 void HttpRequest::setPort(std::string port) { _port = port; }
 
-void HttpRequest::setBody(std::string body) { _body = body; }
+void HttpRequest::setBody(std::string body) {
+  _body = body;
+  if (getHeader("Content-Length") == "") {
+    setHeader("Content-Length", std::to_string(body.length()));
+  }
+}
 
 void HttpRequest::setHeader(std::string header, std::string value) {
   if (header.empty()) {
