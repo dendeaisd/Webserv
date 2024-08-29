@@ -6,13 +6,15 @@
 
 #include <iostream>
 
-#include "../include/log/Log.hpp"
-#include "../include/networking/Server.hpp"
+#include "./include/cgi/CGIFileManager.hpp"
+#include "./include/log/Log.hpp"
+#include "./include/networking/Server.hpp"
 
 #define PORT 8080
 
 int main() {
   try {
+    CGIFileManager::getInstance().configure("./cgi-bin");
     net::Server server(PORT);
     server.run();
   } catch (const net::socketException& e) {

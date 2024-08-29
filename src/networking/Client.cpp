@@ -6,6 +6,7 @@
 #include <cstring>
 #include <filesystem>
 #include <iostream>
+#include <memory>
 
 #include "../../include/Event.hpp"
 #include "../../include/cgi/CGI.hpp"
@@ -103,10 +104,8 @@ bool Client::execute() {
   auto request = parser.getHttpRequest();
   if (request.getHandler() == HttpRequestHandler::CGI) {
     Log::getInstance().debug("Successful request. CGI");
-    CGIFileManager cgiFileManager("./cgi-bin");
-    CGI* cgi = new CGI(fd, cgiFileManager, request);
-    cgi->run();
-    Event::getInstance().addEvent(fd, cgi);
+    auto cgi = std::make_shared<CGI>(fd, request);
+    if (cgi->run()) Event::getInstance().addEvent(fd, cgi);
   } else if (request.getHandler() == HttpRequestHandler::FAVICON) {
     Log::getInstance().debug("Successful request. Favicon");
     sendDefaultFavicon();
