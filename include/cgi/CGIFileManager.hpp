@@ -18,7 +18,7 @@ class CGIFileManager {
   CGIFileManager &operator=(const CGIFileManager &) = delete;
   std::string getExecutor(std::string path);
   static CGIFileManager &getInstance() {
-	static CGIFileManager _instance;
+    static CGIFileManager _instance;
     return _instance;
   }
   void configure(std::string cgiDir);

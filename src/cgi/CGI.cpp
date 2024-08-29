@@ -13,9 +13,9 @@
 #include <string>
 #include <vector>
 
+#include "../../include/cgi/CGIFileManager.hpp"
 #include "../../include/log/Log.hpp"
 #include "../../include/response/HttpResponse.hpp"
-#include "../../include/cgi/CGIFileManager.hpp"
 
 #define BUFFER_SIZE 4096
 #define TIMEOUT 20

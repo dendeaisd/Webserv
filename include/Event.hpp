@@ -2,8 +2,8 @@
 #pragma once
 #ifndef _EVENT_HPP_
 #define _EVENT_HPP_
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
 
 #include "cgi/CGI.hpp"
 
@@ -15,9 +15,7 @@ class Event {
   }
   void addEvent(int fd, std::shared_ptr<CGI> cgi) { _events[fd] = cgi; }
 
-  void removeEvent(int fd) {
-    _events.erase(fd);
-  }
+  void removeEvent(int fd) { _events.erase(fd); }
 
   std::shared_ptr<CGI> getEvent(int fd) { return _events[fd]; }
 
