@@ -1,0 +1,28 @@
+/* Style for the todo list */
+.todo-list {
+	list-style-type: none;
+	padding: 0;
+}
+
+/* Style for each todo item */
+.todo-item {
+	display: flex;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+/* Style for the checkbox */
+.todo-item input[type="checkbox"] {
+	margin-right: 10px;
+}
+
+/* Style for the todo text */
+.todo-item .todo-text {
+	flex-grow: 1;
+}
+
+/* Style for completed todo items */
+.todo-item.completed {
+	text-decoration: line-through;
+	opacity: 0.5;
+}
