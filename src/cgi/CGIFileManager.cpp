@@ -17,7 +17,7 @@ void CGIFileManager::configure(std::string cgiDir) {
   cgiExecutors_[".rb"] = "/usr/bin/ruby";
   cgiExecutors_[".sh"] = "/bin/bash";
   cgiDir_ = cgiDir;
-  mapCGIDir();
+  mapCGIDir(cgiDir_);
   for (auto &file : cgiFiles_) {
     std::cout << file.path << " " << file.executor << std::endl;
   }
@@ -32,12 +32,16 @@ std::string CGIFileManager::getExecutor(std::string path) {
   return "";
 }
 
-void CGIFileManager::mapCGIDir() {
-  for (const auto &entry : fs::directory_iterator(cgiDir_)) {
-    std::string path = entry.path().string();
-    std::string extension = path.substr(path.find_last_of('.'));
-    if (cgiExecutors_.find(extension) != cgiExecutors_.end()) {
-      cgiFiles_.push_back(CGIFile(path, cgiExecutors_[extension]));
-    }
+void CGIFileManager::mapCGIDir(std::string cgiDir) {
+  for (const auto &entry : fs::directory_iterator(cgiDir)) {
+	if (entry.is_regular_file()) {
+	  std::string path = entry.path().string();
+	  std::string extension = path.substr(path.find_last_of('.'));
+	  if (cgiExecutors_.find(extension) != cgiExecutors_.end()) {
+		cgiFiles_.push_back(CGIFile(path, cgiExecutors_[extension]));
+	  }
+	} else if (entry.is_directory()) {
+	  mapCGIDir(entry.path().string());
+	}
   }
 }

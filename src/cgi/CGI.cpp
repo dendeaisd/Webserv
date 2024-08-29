@@ -115,6 +115,7 @@ bool CGI::tunnelData() {
   bytes_read = read(pipeOutFd_[0], buffer, BUFFER_SIZE);
   Log::getInstance().debug("Read " + std::to_string(bytes_read) + " bytes");
   if (bytes_read > 0) {
+    buffer[bytes_read] = '\0';
     std::cout << buffer << std::endl;
     int sent = send(fd_, buffer, bytes_read, 0);
     Log::getInstance().debug("Sent " + std::to_string(sent) + " bytes");
@@ -122,9 +123,9 @@ bool CGI::tunnelData() {
       Log::getInstance().error("Failed to send response");
     }
     close(pipeOutFd_[0]);
-    if (_request.getHeader("Connection") == "close") {
-      close(fd_);
-    }
+    // if (_request.getHeader("Connection") != "keep-alive") {
+    //   close(fd_);
+    // }
     return true;
   } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
     return false;
@@ -191,9 +192,15 @@ void CGI::executeCGI() {
       std::string("REQUEST_METHOD=" + _request.getMethod()).c_str()));
   envp.push_back(
       const_cast<char *>(std::string("HOST=" + _request.getHost()).c_str()));
+  envp.push_back(const_cast<char *>(
+      std::string("ORIGIN=" + _request.getHeader("Origin")).c_str()));
   auto qp = _request.getQueryParams();
   for (auto it = qp.begin(); it != qp.end(); ++it) {
     env_strs.push_back("QS_" + it->first + "=" + it->second);
+  }
+  auto form = _request.getFormData();
+  for (auto it = form.begin(); it != form.end(); ++it) {
+    env_strs.push_back("FORM_" + it->first + "=" + it->second);
   }
 
   for (auto it = env_strs.begin(); it != env_strs.end(); ++it) {

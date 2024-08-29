@@ -6,71 +6,71 @@
 	<!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
 </head>
 
-<body>
+<body style="background-color:cadetblue">
 	<div id="app">
 		<h1>Todo App</h1>
 		<input type="text" id="newTodoInput">
-		<button id="addTodoButton">Add Todo</button>
+		<input type="button" id="addTodoButton" value="Add Todo"/>
 		<ul id="todoList"></ul>
 	</div>
 	<script>
 		// Function to send a POST request to the server
-		function addTodo() {
+		async function addTodo() {
 			const input = document.getElementById("newTodoInput");
-			const todo = input.value;
+			const item = input.value;
 			input.value = "";
 
-			fetch("http://localhost:8080/cgi-bin/todo_app.py", {
+			const response = await fetch("/cgi-bin/todo/crud.py", {
 				method: "POST",
 				headers: {
-					"Content-Type": "application/x-www-form-urlencoded"
+					"Content-Type": "text/plain"
 				},
-				body: JSON.stringify({ todo })
-			})
-				.then(response => response.json())
-				.then(data => {
-					if (data.success) {
-						const todoList = document.getElementById("todoList");
-						const li = document.createElement("li");
-						li.textContent = todo;
-						todoList.appendChild(li);
-					} else {
-						alert("Failed to add todo");
-					}
-				})
-				.catch(error => {
-					console.error("Error:", error);
+				body: JSON.stringify({ item })
+			});
+			if (response.ok) {
+				const data = await response.json();
+				console.log(data);
+				if (data.success) {
+					const todoList = document.getElementById("todoList");
+					const li = document.createElement("li");
+					li.textContent = item;
+					todoList.appendChild(li);
+				} else {
 					alert("Failed to add todo");
-				});
+				}
+			} else {
+				console.log(response);
+			}
 		}
 
 		// Function to fetch and display all todo items
-		function displayTodos() {
-			fetch("http://localhost:8080/cgi-bin/todo_app.py", {
+		async function displayTodos() {
+			const response = await fetch("/cgi-bin/todo/crud.py", {
 				method: "GET"
-			})
-				.then(response => response.json())
-				.then(data => {
-					const todoList = document.getElementById("todoList");
-					todoList.innerHTML = ""; // Clear the existing list
-					data.forEach(todo => {
-						const li = document.createElement("li");
-						li.textContent = todo;
-						todoList.appendChild(li);
-					});
-				})
-				.catch(error => {
-					console.error("Error:", error);
-					alert("Failed to fetch todos");
-				});
+			});
+			if (!response.ok) {
+				console.error("Error:", response);
+				// alert("Failed to fetch todos");
+				return;
+			}
+			const data = await response.json();
+			console.log(data);
+			const todoList = document.getElementById("todoList");
+			todoList.innerHTML = ""; // Clear the existing list
+			console.log(data);
+			data.forEach(todo => {
+				const li = document.createElement("li");
+				li.textContent = todo;
+				todoList.appendChild(li);
+			});
 		}
 
-		document.getElementById("addTodoButton").addEventListener("click", function (event) {
+		document.getElementById("addTodoButton").addEventListener("click", async function (event) {
 			event.preventDefault();
-			addTodo();
+			await addTodo();
 		});
 
-		// document.addEventListener("DOMContentLoaded", displayTodos);
+		document.addEventListener("DOMContentLoaded", await displayTodos);
 	</script>
 </body>
 
