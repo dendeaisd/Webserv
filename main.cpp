@@ -6,6 +6,7 @@
 
 #include <iostream>
 
+#include "../include/log/Log.hpp"
 #include "../include/networking/Server.hpp"
 
 #define PORT 8080

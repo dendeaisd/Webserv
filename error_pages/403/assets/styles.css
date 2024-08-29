@@ -1,0 +1,302 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #2c3e50;
+  font-family: "Arial", sans-serif;
+}
+
+.vault-container {
+  position: relative;
+}
+
+.vault-door-outer {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  background: #3a4b61;
+  border-radius: 6%;
+  transition: transform 0.3s ease;
+}
+
+.vault-door-inner {
+  position: absolute;
+  margin: 52px;
+  width: 390px;
+  height: 390px;
+  background: #778ca3;
+  border-radius: 25%;
+}
+
+.hover-message {
+  position: absolute;
+  bottom: 87%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2em;
+  color: #fff;
+  background-color: rgba(44, 62, 80, 0.8);
+  border-radius: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+  box-sizing: 0 8px 30px;
+  text-align: center;
+}
+
+/* Slight movement when hovering */
+.vault-door-outer:hover ~ .hover-message {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-10px);
+}
+
+.vault-door-outer:hover ~ .hover-message {
+  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.3), 0 0 15px rgb(36, 55, 75);
+}
+
+.vault-door-lock-shadow {
+  position: absolute;
+  width: 340px;
+  height: 180px;
+  background: linear-gradient(rgba(160, 160, 160, 0.2), transparent);
+  margin: 170px 90px;
+  transform: rotate(-45deg);
+  transition: all 0.05s ease-out;
+}
+
+.vault-door-lock-wrapper {
+  position: absolute;
+  width: 190px;
+  height: 190px;
+}
+
+.vault-door-lock {
+  background: rgb(185, 185, 185);
+}
+
+.vault-door-circle {
+  position: absolute;
+  width: 310px;
+  height: 310px;
+  margin: 40px;
+  border-radius: 50%;
+}
+
+.vault-door-pistons {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  margin: 180px 25px;
+  background: none;
+}
+
+.piston {
+  position: absolute;
+  background: rgb(185, 185, 185);
+  width: 340px;
+  height: 30px;
+  border-radius: 8px;
+  transition: all 0.05s ease-out;
+}
+
+.piston2 {
+  transform: rotate(45deg);
+}
+
+.piston3 {
+  transform: rotate(90deg);
+}
+
+.piston4 {
+  transform: rotate(135deg);
+}
+
+.vault-door-handle-shadow {
+  position: absolute;
+  background: rgb(160, 160, 160);
+  width: 150px;
+  height: 150px;
+  margin: 120px;
+  border-radius: 50%;
+}
+
+.vault-door-handle-long-shadow {
+  position: absolute;
+  background: linear-gradient(rgb(160, 160, 160), transparent);
+  width: 186px;
+  height: 186px;
+  margin: 165px;
+  transform: rotate(-45deg);
+}
+
+.vault-door-handle {
+  position: absolute;
+  border: solid 23px rgb(214, 214, 214);
+  width: 140px;
+  height: 140px;
+  margin: 102px;
+  border-radius: 50%;
+  transition: all 0.3s ease-in-out;
+}
+
+.handle-bar {
+  position: absolute;
+  background: rgb(214, 214, 214);
+  height: 22px;
+  width: 140px;
+  margin: 59px 0;
+}
+
+.bar1 {
+  transform: rotate(45deg);
+}
+
+.bar2 {
+  transform: rotate(135deg);
+}
+
+.message {
+  margin: 20px 0;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.keypad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#code-input {
+  font-size: 1.2em;
+  padding: 10px;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  text-align: center;
+  width: 150px;
+  border: 2px solid #444;
+  border-radius: 5px;
+  background-color: #222;
+  color: white;
+  z-index: 0;
+}
+
+#submit-button {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  background-color: #444;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+#submit-button:hover {
+  background-color: #555;
+}
+
+#submit-button:active {
+  background-color: #666;
+}
+
+.hidden {
+  display: none;
+}
+
+#error-message {
+  color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+  padding: 10px 15px;
+  margin-top: 15px;
+  border: 1px solid #e74c3c;
+  border-radius: 8px;
+  font-size: 1.1em;
+  text-align: center;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s ease;
+}
+
+.vault-door-outer:hover .vault-door-lock-shadow {
+  width: 300px;
+  margin: 150px 90px;
+  transition: all 0.2s ease-out;
+}
+
+.vault-door-outer:hover .piston {
+  width: 310px;
+  margin-left: 15px;
+  margin-right: 15px;
+  transition: all 0.2s ease-out;
+}
+
+.vault-door-outer:hover .vault-door-handle {
+  transform: rotate(-180deg);
+  transition: all 0.7s ease-in-out;
+}
+
+.question-mark-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.question-mark-container:hover {
+  transform: scale(1.1);
+}
+
+.question-mark {
+  font-size: 50px;
+  font-weight: bold;
+  background-color: #fff;
+  color: #2c3e50;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s ease, background-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.question-mark-container:hover .question-mark {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  background-color: #f0f0f0;
+  transform: rotate(360deg);
+}
+
+.tooltip {
+  display: none;
+  background-color: rgb(58, 75, 97, 0.9);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  max-width: 300px;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  position: absolute;
+  bottom: 60px;
+  right: 10px;
+  transform: translateY(-10px);
+}
+
+.question-mark-container:hover .tooltip {
+  display: block;
+  opacity: 1;
+}

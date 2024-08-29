@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>403 Forbidden</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="vault-container">
+      <div class="vault-door-outer">
+        <div class="vault-door-inner">
+          <div class="vault-door-lock-shadow"></div>
+          <div class="vault-door-lock-wrapper">
+            <div class="vault-door-lock vault-door-circle"></div>
+            <div class="vault-door-lock vault-door-pistons">
+              <div class="piston piston1"></div>
+              <div class="piston piston2"></div>
+              <div class="piston piston3"></div>
+              <div class="piston piston4"></div>
+            </div>
+          </div>
+          <div class="vault-door-handle-shadow"></div>
+          <div class="vault-door-handle-long-shadow"></div>
+          <div class="vault-door-handle">
+            <div class="handle-bar bar1"></div>
+            <div class="handle-bar bar2"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hover-message">Sorry but the vault is locked tight</div>
+
+      <div class="keypad">
+        <input
+          type="text"
+          id="code-input"
+          placeholder="Enter Code"
+          maxlength="4"
+        />
+        <button id="submit-button">Unlock</button>
+        <p id="error-message" class="hidden">Access Denied! Wrong Code.</p>
+      </div>
+    </div>
+    <div class="question-mark-container">
+      <div class="question-mark">?</div>
+      <div class="tooltip">
+        403 Forbidden...<br />
+        Try a simple 4-digit code to unlock the vault.<br />
+        Remember, sometimes the answer is <br />hidden in plain sight.
+      </div>
+    </div>
+    <script src="assets/script.js"></script>
+  </body>
+</html>
