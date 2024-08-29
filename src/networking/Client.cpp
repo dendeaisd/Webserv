@@ -14,7 +14,6 @@
 #include "../../include/log/Log.hpp"
 
 #define BUFFER_SIZE 4096
-#define DIR_LISTING_ON 01
 
 Client::Client(int fd) : fd(fd) { fcntl(fd, F_SETFL, O_NONBLOCK); }
 
@@ -109,18 +108,14 @@ bool Client::execute() {
   } else if (request.getHandler() == HttpRequestHandler::FAVICON) {
     Log::getInstance().debug("Successful request. Favicon");
     sendDefaultFavicon();
-  }
-#if DIR_LISTING_ON
-  else if (request.getHandler() == HttpRequestHandler::DIRECTORY_LISTING) {
-    Log::getInstance().debug("Successful request. Directory Listing");
-    sendDirectoryListings("./default" + request.getUri());
-  }
-#endif
-  else if (request.getHandler() == HttpRequestHandler::STATIC &&
-           request.getMethodEnum() == HttpRequestMethod::GET &&
-           request.getUri() == "/") {
+  } else if (request.getHandler() == HttpRequestHandler::STATIC &&
+             request.getMethodEnum() == HttpRequestMethod::GET &&
+             request.getUri() == "/") {
     Log::getInstance().debug("Successful request. Static");
     sendDefaultPage();
+  } else if (request.getHandler() == HttpRequestHandler::DIRECTORY_LISTING) {
+    Log::getInstance().debug("Successful request. Directory Listing");
+    sendDirectoryListings("./default" + request.getUri());
   } else {
     send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
   }
