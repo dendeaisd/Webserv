@@ -13,7 +13,7 @@
 #include "../../include/log/Log.hpp"
 
 #define BUFFER_SIZE 4096
-#define DIR_LISTING_ON 1
+#define DIR_LISTING_ON 01
 
 Client::Client(int fd) : fd(fd) { fcntl(fd, F_SETFL, O_NONBLOCK); }
 
@@ -29,10 +29,13 @@ const char* HTTP_RESPONSE =
     "Hello, World!";
 
 bool Client::sendDirectoryListings(const std::string& path) {
+  std::string requestUri = parser.getHttpRequest().getUri();
+  std::string dirListingHtml = generateDirectoryListing(path, requestUri);
+
   response.setStatusCode(200);
-  std::string dirListingHtml = generateDirectoryListing(path);
   response.setBody(dirListingHtml);
   response.setContentType("text/html");
+
   std::string responseString = response.getResponse();
   send(fd, responseString.c_str(), responseString.length(), 0);
   return true;
@@ -54,13 +57,20 @@ bool Client::sendDefaultPage() {
   return true;
 }
 
-std::string Client::generateDirectoryListing(const std::string& path) {
+std::string Client::generateDirectoryListing(const std::string& path,
+                                             const std::string& requestUri) {
   std::stringstream ss;
-
-  ss << "<html><body><h1>Direcotry Listing for " << path << "</h1><ul>";
-  for (auto& entry : std::filesystem::directory_iterator(path)) {
+  ss << "<html><body><h1>Directory Listing for " << path << "</h1><ul>";
+  for (const auto& entry : std::filesystem::directory_iterator(path)) {
     std::string fileName = entry.path().filename().string();
-    ss << "<li><a href=\"" << fileName << "\">" << fileName << "</a></li>";
+    std::string relativePath = requestUri + fileName;
+    std::string displayName = fileName;
+    if (std::filesystem::is_directory(entry.path())) {
+      relativePath += "/";
+      displayName += "/";
+    }
+    ss << "<li><a href=\"" << relativePath << "\">" << displayName
+       << "</a></li>";
   }
   ss << "</ul></body></html>";
   return ss.str();

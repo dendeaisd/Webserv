@@ -30,7 +30,8 @@ class Client {
   bool sendDefaultPage();
   bool sendDirectoryListings(const std::string& path);
 
-  std::string generateDirectoryListing(const std::string& path);
+  std::string generateDirectoryListing(const std::string& path,
+                                       const std::string& requestUri);
   bool handleContinue();
   bool execute();
 };
