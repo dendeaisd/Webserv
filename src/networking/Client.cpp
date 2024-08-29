@@ -4,6 +4,7 @@
 
 #include <cerrno>
 #include <cstring>
+#include <filesystem>
 #include <iostream>
 
 #include "../../include/Event.hpp"
@@ -12,6 +13,7 @@
 #include "../../include/log/Log.hpp"
 
 #define BUFFER_SIZE 4096
+#define DIR_LISTING_ON 1
 
 Client::Client(int fd) : fd(fd) { fcntl(fd, F_SETFL, O_NONBLOCK); }
 
@@ -25,6 +27,16 @@ const char* HTTP_RESPONSE =
     "Content-Length: 13\r\n"
     "\r\n"
     "Hello, World!";
+
+bool Client::sendDirectoryListings(const std::string& path) {
+  response.setStatusCode(200);
+  std::string dirListingHtml = generateDirectoryListing(path);
+  response.setBody(dirListingHtml);
+  response.setContentType("text/html");
+  std::string responseString = response.getResponse();
+  send(fd, responseString.c_str(), responseString.length(), 0);
+  return true;
+}
 
 bool Client::sendDefaultFavicon() {
   response.setStatusCode(200);
@@ -40,6 +52,18 @@ bool Client::sendDefaultPage() {
   std::string responseString = response.getResponse();
   send(fd, responseString.c_str(), responseString.length(), 0);
   return true;
+}
+
+std::string Client::generateDirectoryListing(const std::string& path) {
+  std::stringstream ss;
+
+  ss << "<html><body><h1>Direcotry Listing for " << path << "</h1><ul>";
+  for (auto& entry : std::filesystem::directory_iterator(path)) {
+    std::string fileName = entry.path().filename().string();
+    ss << "<li><a href=\"" << fileName << "\">" << fileName << "</a></li>";
+  }
+  ss << "</ul></body></html>";
+  return ss.str();
 }
 
 bool Client::handleContinue() {
@@ -76,9 +100,16 @@ bool Client::execute() {
   } else if (request.getHandler() == HttpRequestHandler::FAVICON) {
     Log::getInstance().debug("Successful request. Favicon");
     sendDefaultFavicon();
-  } else if (request.getHandler() == HttpRequestHandler::STATIC &&
-             request.getMethodEnum() == HttpRequestMethod::GET &&
-             request.getUri() == "/") {
+  }
+#if DIR_LISTING_ON
+  else if (request.getHandler() == HttpRequestHandler::DIRECTORY_LISTING) {
+    Log::getInstance().debug("Successful request. Directory Listing");
+    sendDirectoryListings("./default" + request.getUri());
+  }
+#endif
+  else if (request.getHandler() == HttpRequestHandler::STATIC &&
+           request.getMethodEnum() == HttpRequestMethod::GET &&
+           request.getUri() == "/") {
     Log::getInstance().debug("Successful request. Static");
     sendDefaultPage();
   } else {
