@@ -24,7 +24,20 @@ CGI::CGI(int fd, HttpRequest &request) {
   fd_ = fd;
   _request = request;
   _unableToExecute = false;
-  _script = "." + request.getUri();
+  std::string uri = request.getUri();
+  size_t dotPos = uri.find(".");
+  if (dotPos == std::string::npos) {
+    _unableToExecute = true;
+    return;
+  }
+  _urlArg = "";
+  size_t slashPos = uri.find("/", dotPos);
+  if (slashPos != std::string::npos) {
+    _urlArg = uri.substr(slashPos + 1);
+    _script = "." + uri.substr(0, slashPos);
+  } else {
+    _script = "." + uri;
+  }
   _language = CGIFileManager::getInstance().getExecutor(_script);
   if (_language.empty()) {
     Log::getInstance().error("Failed to get executor for script");
@@ -121,8 +134,13 @@ bool CGI::tunnelData() {
     Log::getInstance().debug("Sent " + std::to_string(sent) + " bytes");
     if (sent < 0) {
       Log::getInstance().error("Failed to send response");
+      close(fd_);
     }
-    close(pipeOutFd_[0]);
+    if (bytes_read == BUFFER_SIZE) {
+      return tunnelData();
+    } else {
+      close(pipeOutFd_[0]);
+    }
     // if (_request.getHeader("Connection") != "keep-alive") {
     //   close(fd_);
     // }
@@ -194,6 +212,7 @@ void CGI::executeCGI() {
       const_cast<char *>(std::string("HOST=" + _request.getHost()).c_str()));
   envp.push_back(const_cast<char *>(
       std::string("ORIGIN=" + _request.getHeader("Origin")).c_str()));
+  envp.push_back(const_cast<char *>(std::string("URL_ARG=" + _urlArg).c_str()));
   auto qp = _request.getQueryParams();
   for (auto it = qp.begin(); it != qp.end(); ++it) {
     env_strs.push_back("QS_" + it->first + "=" + it->second);

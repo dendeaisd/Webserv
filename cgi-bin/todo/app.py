@@ -1,10 +1,7 @@
 import cgitb
-import cgi
-import logging
 import os
 
 cgitb.enable()
-logging.basicConfig(filename="todo.log", level=logging.DEBUG)
 def get_todo_app():
 	envp = os.environ
 	method = envp['REQUEST_METHOD']
