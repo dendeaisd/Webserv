@@ -35,6 +35,10 @@
 .vscode
 .vscode/
 obj/
+
+# Config files
+.ccls
+.ccls-cache
 hello.txt
 .DS_Store
 ./logs/error_*
