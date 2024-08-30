@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <filesystem>
 #include <fstream>
 #include <utility>
 
@@ -13,6 +14,9 @@
 #define MAX_BUFFER_SIZE 4096
 #define UPLOAD_DIR "uploads/"
 
+#define DIR_LIST_ON 0
+
+using namespace std::filesystem;
 HttpRequestParser::HttpRequestParser()
     : status(HttpRequestParseStatus::NOT_PARSED) {}
 
@@ -34,15 +38,30 @@ HttpRequest HttpRequestParser::getHttpRequest() {
 
 void HttpRequestParser::electHandler() {
   // TODO: update this to use server configuration
-  if (request.getUri().find("cgi-bin") != std::string::npos) {
+  if (isCgiRequest()) {
     request.setHandler(HttpRequestHandler::CGI);
-  } else if (request.getUri().find("favicon.ico") != std::string::npos) {
+  } else if (isFaviconRequest()) {
     request.setHandler(HttpRequestHandler::FAVICON);
     Log::getInstance().debug("Favicon handler for request: " +
                              request.getUri());
+  } else if (isDirectoryRequest("./default" + request.getUri()) &&
+             DIR_LIST_ON) {
+    request.setHandler(HttpRequestHandler::DIRECTORY_LISTING);
   } else {
     request.setHandler(HttpRequestHandler::STATIC);
   }
+}
+
+bool HttpRequestParser::isCgiRequest() {
+  return request.getUri().find("cgi-bin") != std::string::npos;
+}
+
+bool HttpRequestParser::isFaviconRequest() {
+  return request.getUri().find("favicon.ico") != std::string::npos;
+}
+
+bool HttpRequestParser::isDirectoryRequest(const std::string &path) {
+  return is_directory(path);
 }
 
 std::string getLineSanitized(std::stringstream &ss) {

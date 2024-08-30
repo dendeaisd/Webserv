@@ -2,6 +2,7 @@
 #pragma once
 #ifndef _EVENT_HPP_
 #define _EVENT_HPP_
+#include <memory>
 #include <unordered_map>
 
 #include "cgi/CGI.hpp"
@@ -12,25 +13,21 @@ class Event {
     static Event instance;
     return instance;
   }
-  void addEvent(int fd, CGI *cgi) { _events[fd] = cgi; }
+  void addEvent(int fd, std::shared_ptr<CGI> cgi) { _events[fd] = cgi; }
 
-  void removeEvent(int fd) {
-    CGI *cgi = _events[fd];
-    delete cgi;
-    _events.erase(fd);
-  }
+  void removeEvent(int fd) { _events.erase(fd); }
 
-  CGI *getEvent(int fd) { return _events[fd]; }
+  std::shared_ptr<CGI> getEvent(int fd) { return _events[fd]; }
 
   bool hasEvent(int fd) { return _events.find(fd) != _events.end(); }
 
-  std::unordered_map<int, CGI *> &getEvents() { return _events; }
+  std::unordered_map<int, std::shared_ptr<CGI>> &getEvents() { return _events; }
 
  private:
   Event() {}
   Event(const Event &) = delete;
   Event &operator=(const Event &) = delete;
-  std::unordered_map<int, CGI *> _events;
+  std::unordered_map<int, std::shared_ptr<CGI>> _events;
 };
 
 #endif  // _EVENT_HPP_
