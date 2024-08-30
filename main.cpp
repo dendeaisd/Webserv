@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
     auto config = ConfigFile();
     config.parseConfiguration(configFile);
     config.printConfigFileContent();
+    Log::getInstance().configure("ERROR");
     CGIFileManager::getInstance().configure("./cgi-bin");
     net::Server server(PORT);
     server.run();

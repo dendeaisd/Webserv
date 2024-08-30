@@ -33,6 +33,22 @@ Log& Log::getInstance() {
   return instance;
 }
 
+void Log::configure(const std::string& logLevel) {
+  if (logLevel == "NOLOG") {
+    logLevel_ = LogLevel::NOLOG;
+  } else if (logLevel == "INFO") {
+    logLevel_ = LogLevel::INFO;
+  } else if (logLevel == "WARNING") {
+    logLevel_ = LogLevel::WARNING;
+  } else if (logLevel == "ERROR") {
+    logLevel_ = LogLevel::ERROR;
+  } else if (logLevel == "DEBUG") {
+    logLevel_ = LogLevel::DEBUG;
+  } else {
+    std::cerr << "Invalid log level: " << logLevel << std::endl;
+  }
+}
+
 void Log::error(const std::string& message) {
   if (logLevel_ < LogLevel::ERROR) return;
   std::lock_guard<std::mutex> lock(mutex_);

@@ -17,6 +17,7 @@ class Log {
   void warning(const std::string& message);
   void info(const std::string& message);
   void debug(const std::string& message);
+  void configure(const std::string& logLevel);
 
  private:
   Log() = default;
@@ -29,7 +30,7 @@ class Log {
   std::mutex mutex_;
   std::string logFile_ = "logs/server.log";
   std::string errorFile_ = "logs/error.log";
-  LogLevel logLevel_ = LogLevel::DEBUG;
+  LogLevel logLevel_ = LogLevel::INFO;
 };
 
 #endif

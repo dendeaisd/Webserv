@@ -33,6 +33,7 @@ class HttpRequest {
   std::string getAttachment(std::string key);
   std::map<std::string, std::string> getAttachments();
   std::string getRequestTime();
+  size_t getContentLength();
   bool checkTimeout();
   void setHandler(HttpRequestHandler handler);
   bool setMethod(std::string method);

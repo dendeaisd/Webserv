@@ -69,6 +69,15 @@ std::map<std::string, std::string> HttpRequest::getQueryParams() {
 
 std::string HttpRequest::getQuery() { return _query; }
 
+size_t HttpRequest::getContentLength() {
+  std::string contentLength = getHeader("Content-Length");
+  if (contentLength != "") {
+    size_t length = static_cast<int>(std::stoul(contentLength));
+    return length;
+  }
+  return 0;
+}
+
 bool HttpRequest::setMethod(std::string method) {
   if (method.empty()) {
     Log::getInstance().debug("Method is empty");

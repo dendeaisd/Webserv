@@ -13,6 +13,7 @@
 #include "../../include/response/HttpResponse.hpp"
 #define MAX_BUFFER_SIZE 4096
 #define UPLOAD_DIR "uploads/"
+#define MAX_HEADER_SIZE 4096
 
 #define DIR_LIST_ON 0
 
@@ -73,6 +74,17 @@ std::string getLineSanitized(std::stringstream &ss) {
   return line;
 }
 
+bool HttpRequestParser::isAllowedMethod(const std::string &method) {
+  // TODO: update this to use server configuration
+  return method == "GET" || method == "POST" || method == "DELETE" ||
+         method == "PUT" || method == "OPTIONS";
+}
+
+bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
+  // TODO: update this to use server configuration
+  return true;
+}
+
 int HttpRequestParser::parse() {
   std::stringstream ss(raw);
   std::string requestLine = getLineSanitized(ss);
@@ -83,6 +95,10 @@ int HttpRequestParser::parse() {
                              requestLine);
     return 400;
   }
+  if (!isAllowedMethod(request.getMethod())) {
+    Log::getInstance().error("Invalid method: " + request.getMethod());
+    return 405;  // Method Not Allowed
+  }
   if (!validateHttpVersion()) {
     Log::getInstance().error("Invalid HTTP version. expected HTTP/1.1 got " +
                              request.getHttpVersion());
@@ -90,6 +106,10 @@ int HttpRequestParser::parse() {
   }
   parseHeaders(ss);
   if (status == HttpRequestParseStatus::INVALID) return 400;
+  if (!isAllowedContentLength(request.getContentLength())) {
+    Log::getInstance().error("Invalid content length");
+    return 413;  // Payload Too Large
+  }
   electHandler();
   size_t pos = request.getUri().find("?");
   if (pos != std::string::npos) {
@@ -124,6 +144,10 @@ int HttpRequestParser::parse() {
     // set the status to EXPECT_CONTINUE anyways because not every request
     // library will send the Expect header
     status = HttpRequestParseStatus::EXPECT_CONTINUE;
+  }
+  if (request.getContentLength() != request.getBody().length()) {
+    Log::getInstance().error("Invalid content length");
+    return 400;
   }
   return request.getMethodEnum() == HttpRequestMethod::POST ? 201 : 200;
 }
@@ -160,6 +184,11 @@ void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
 void HttpRequestParser::parseHeaders(std::stringstream &ss) {
   std::string header;
   while ((header = getLineSanitized(ss)).length() > 0) {
+    if (header.length() > MAX_HEADER_SIZE) {
+      Log::getInstance().error("Header too long: " + header);
+      status = HttpRequestParseStatus::INVALID;
+      return;
+    }
     /*
     No whitespace is allowed between the field name and colon.  In the
     past, differences in the handling of such whitespace have led to
@@ -176,8 +205,8 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
     if (pos != std::string::npos) {
       std::string key = header.substr(0, pos);
       if (HttpMaps::headerSet.find(key) == HttpMaps::headerSet.end()) {
-        Log::getInstance().warning("Unknown header: " + key +
-                                   " found in request " + request.getUri());
+        Log::getInstance().debug("Unknown header: " + key +
+                                 " found in request " + request.getUri());
         // Unknown headers are ignored to improve server performance and prevent
         // security vulnerabilities
         continue;
@@ -472,7 +501,6 @@ bool HttpRequestParser::validateHttpVersion() {
 void HttpRequestParser::parseQueryParams(std::string query) {
   std::stringstream ss(query);
   std::string param;
-  std::cout << "Query: " << query << std::endl;
   while (std::getline(ss, param, '&')) {
     size_t pos = param.find("=");
     if (pos != std::string::npos) {

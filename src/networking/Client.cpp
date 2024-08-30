@@ -119,11 +119,13 @@ bool Client::execute() {
   } else {
     send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
   }
+  Log::getInstance().info(request.getMethod() + " " + request.getHost() +
+                          request.getUri());
   return true;
 }
 
 bool Client::handleRequest() {
-  char buffer[BUFFER_SIZE];
+  char buffer[BUFFER_SIZE + 1];
 
   int bytes_read;
   int status;
@@ -132,11 +134,18 @@ bool Client::handleRequest() {
     if (parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
       return handleContinue();
     }
+    std::string raw = "";
     bytes_read = read(fd, buffer, BUFFER_SIZE);
     if (bytes_read > 0) {
       buffer[bytes_read] = '\0';
-      std::cout << buffer << std::endl;
-      parser = HttpRequestParser(buffer, fd);
+      raw = buffer;
+      while (bytes_read == BUFFER_SIZE) {
+        raw.append(buffer, bytes_read);
+        bytes_read = read(fd, buffer, BUFFER_SIZE);
+        buffer[bytes_read] = '\0';
+      }
+      std::cout << raw << std::endl;
+      parser = HttpRequestParser(raw, fd);
       status = parser.parse();
       if ((status == 200 || status == 201) &&
           parser.status == HttpRequestParseStatus::PARSED) {
@@ -149,8 +158,7 @@ bool Client::handleRequest() {
       }
       auto request = parser.getHttpRequest();
       Log::getInstance().error(
-          "Something went wrong while processing request: " +
-          std::string(buffer));
+          "Something went wrong while processing request: " + raw);
       response.setStatusCode(status);
       std::string responseString = response.getResponse();
       send(fd, responseString.c_str(), responseString.length(), 0);
