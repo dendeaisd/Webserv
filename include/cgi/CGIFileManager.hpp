@@ -30,7 +30,7 @@ class CGIFileManager {
   std::vector<CGIFile> cgiFiles_;
   std::map<std::string, std::string> cgiExecutors_;
   std::string cgiDir_;
-  void mapCGIDir();
+  void mapCGIDir(std::string cgiDir);
 };
 
 #endif

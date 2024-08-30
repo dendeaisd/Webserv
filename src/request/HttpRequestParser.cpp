@@ -98,7 +98,8 @@ int HttpRequestParser::parse() {
     parseQueryParams(request.getQuery());
   }
   std::string contentType = request.getHeader("Content-Type");
-  if (contentType.find("application/json") != std::string::npos) {
+  if (contentType.find("application/json") != std::string::npos ||
+      contentType.find("text/plain") != std::string::npos) {
     parseBody(ss);
 
   } else if (contentType.find("application/x-www-form-urlencoded") !=

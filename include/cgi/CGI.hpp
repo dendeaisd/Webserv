@@ -25,6 +25,7 @@ class CGI {
   std::string _stream;
   std::string _script;
   std::string _language;
+  std::string _urlArg;
   HttpRequest _request;
 
   void executeCGI();

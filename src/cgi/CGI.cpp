@@ -24,7 +24,20 @@ CGI::CGI(int fd, HttpRequest &request) {
   fd_ = fd;
   _request = request;
   _unableToExecute = false;
-  _script = "." + request.getUri();
+  std::string uri = request.getUri();
+  size_t dotPos = uri.find(".");
+  if (dotPos == std::string::npos) {
+    _unableToExecute = true;
+    return;
+  }
+  _urlArg = "";
+  size_t slashPos = uri.find("/", dotPos);
+  if (slashPos != std::string::npos) {
+    _urlArg = uri.substr(slashPos + 1);
+    _script = "." + uri.substr(0, slashPos);
+  } else {
+    _script = "." + uri;
+  }
   _language = CGIFileManager::getInstance().getExecutor(_script);
   if (_language.empty()) {
     Log::getInstance().error("Failed to get executor for script");
@@ -56,6 +69,8 @@ bool CGI::run() {
     sendInternalErrorResponse(fd_);
     return false;
   }
+
+  Log::getInstance().debug("Request: " + _request.toJson());
   pid_ = fork();
   if (pid_ == -1) {
     throw std::runtime_error("Failed to fork");
@@ -72,6 +87,13 @@ bool CGI::run() {
   } else {
     close(pipeInFd_[0]);
     close(pipeOutFd_[1]);
+
+    if (!_request.getBody().empty()) {
+      Log::getInstance().debug("Writing to pipe " + _request.getBody());
+      write(pipeInFd_[1], _request.getBody().c_str(),
+            _request.getBody().length());
+      close(pipeInFd_[1]);
+    }
   }
   return true;
 }
@@ -106,12 +128,22 @@ bool CGI::tunnelData() {
   bytes_read = read(pipeOutFd_[0], buffer, BUFFER_SIZE);
   Log::getInstance().debug("Read " + std::to_string(bytes_read) + " bytes");
   if (bytes_read > 0) {
+    buffer[bytes_read] = '\0';
+    std::cout << buffer << std::endl;
     int sent = send(fd_, buffer, bytes_read, 0);
     Log::getInstance().debug("Sent " + std::to_string(sent) + " bytes");
     if (sent < 0) {
       Log::getInstance().error("Failed to send response");
+      close(fd_);
     }
-    close(pipeOutFd_[0]);
+    if (bytes_read == BUFFER_SIZE) {
+      return tunnelData();
+    } else {
+      close(pipeOutFd_[0]);
+    }
+    // if (_request.getHeader("Connection") != "keep-alive") {
+    //   close(fd_);
+    // }
     return true;
   } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
     return false;
@@ -178,9 +210,16 @@ void CGI::executeCGI() {
       std::string("REQUEST_METHOD=" + _request.getMethod()).c_str()));
   envp.push_back(
       const_cast<char *>(std::string("HOST=" + _request.getHost()).c_str()));
+  envp.push_back(const_cast<char *>(
+      std::string("ORIGIN=" + _request.getHeader("Origin")).c_str()));
+  envp.push_back(const_cast<char *>(std::string("URL_ARG=" + _urlArg).c_str()));
   auto qp = _request.getQueryParams();
   for (auto it = qp.begin(); it != qp.end(); ++it) {
     env_strs.push_back("QS_" + it->first + "=" + it->second);
+  }
+  auto form = _request.getFormData();
+  for (auto it = form.begin(); it != form.end(); ++it) {
+    env_strs.push_back("FORM_" + it->first + "=" + it->second);
   }
 
   for (auto it = env_strs.begin(); it != env_strs.end(); ++it) {

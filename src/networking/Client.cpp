@@ -150,7 +150,7 @@ bool Client::handleRequest() {
       auto request = parser.getHttpRequest();
       Log::getInstance().error(
           "Something went wrong while processing request: " +
-          request.getHost());
+          std::string(buffer));
       response.setStatusCode(status);
       std::string responseString = response.getResponse();
       send(fd, responseString.c_str(), responseString.length(), 0);
