@@ -2,7 +2,7 @@ NAME        :=  webserv
 CC          :=  c++
 CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g -fsanitize=address
 
-INCLUDE_DIRS := -I./include -I./tester
+INCLUDE_DIRS := -I./include -I./tester -I./include/configFile
 TESTER_MAIN := tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
 SRC_MAIN := main.cpp
 
@@ -11,7 +11,7 @@ OBJ_DIR := obj
 
 SRC         :=  $(wildcard src/*.cpp) $(wildcard src/networking/*.cpp) \
 	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp) $(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp) \
-	$(wildcard src/response/*.cpp)
+	$(wildcard src/response/*.cpp) $(wildcard src/configFile/*.cpp)
 
 OBJ         :=  $(SRC:.cpp=.o)
 
@@ -50,7 +50,7 @@ test: fclean $(OBJ) $(OBJ_TESTER)
 ## OBJ_DIR can be replaced by INCLUDE directory incase you need to include a library
 .SECONDEXPANSION:
 $(OBJ_DIR)/%.o: $(SRC_DIR)/$$(subst @,/,$$*).cpp
-	@$(CC) $(CFLAGS) $(addprefix -iquote ,$(OBJ_DIR)) -c $< -o $@
+	@$(CC) $(CFLAGS) $(addprefix -iquote ,$(OBJ_DIR)) $(INCLUDE_DIRS) -c $< -o $@
 
 $(OBJ): $(OBJ_DIR)
 
