@@ -6,15 +6,15 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/26 17:32:08 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/08/30 15:50:59 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
+
 #include <string.h>
 
-Location::Location()
-{
+Location::Location() {
   _urlValue.clear();
   _rootValue.clear();
   _proxyPassValue.clear();
@@ -24,18 +24,12 @@ Location::Location()
   _errorPageValue.clear();
   _accessLogValue.clear();
   _denyValue.clear();
-
 }
 
-void Location::initializeLocation(const std::string &url)
-{
-  _urlValue = url;
-}
-
+void Location::initializeLocation(const std::string &url) { _urlValue = url; }
 
 void Location::locationSaveDirectiveValue(const std::string &key,
-                                  const std::string &value)
-{
+                                          const std::string &value) {
   if (key == "root")
     _rootValue = value;
   else if (key == "proxy_pass")
@@ -56,11 +50,9 @@ void Location::locationSaveDirectiveValue(const std::string &key,
     _includeValue = value;
   else if (key == "cgi")
     cgiSetSeparatedValue(value);
-
 }
 
-void Location::cgiSetSeparatedValue(const std::string &value)
-{
+void Location::cgiSetSeparatedValue(const std::string &value) {
   std::string fileType;
   std::string pathToInterpreter;
   char delimiter = ' ';
@@ -73,38 +65,33 @@ void Location::cgiSetSeparatedValue(const std::string &value)
   free(tmp_value);
 }
 
-void Location::printLocation()
-{
+void Location::printLocation() {
   std::cout << "-LOCATION-\n";
   std::cout << "url: [" << _urlValue << "]" << std::endl
-            << "root: [" <<  _rootValue << "]" << std::endl
+            << "root: [" << _rootValue << "]" << std::endl
             << "include: [" << _includeValue << "]" << std::endl
             << "proxy pass: [" << _proxyPassValue << "]" << std::endl
             << "alias: [" << _aliasValue << "]" << std::endl
-            << "try files: [" <<_tryFilesValue << "]" << std::endl
+            << "try files: [" << _tryFilesValue << "]" << std::endl
             << "index: [" << _indexValue << "]" << std::endl
             << "error page: [" << _errorPageValue << "]" << std::endl
             << "access log: [" << _accessLogValue << "]" << std::endl
-            << "deny: [" << _denyValue  << "]\n";
+            << "deny: [" << _denyValue << "]\n";
 
   auto it_rewrite = _rewriteValue.begin();
 
-  while (it_rewrite != _rewriteValue.end())
-  {
+  while (it_rewrite != _rewriteValue.end()) {
     std::cout << "rewrite: [" << *it_rewrite << "]" << std::endl;
     it_rewrite++;
   }
 
   auto it_cgi = _cgi.begin();
 
-  while (it_cgi != _cgi.end())
-  {
+  while (it_cgi != _cgi.end()) {
     std::cout << "GCI: "
-              << "file type: [" << (*it_cgi).first
-              << "] path to interpreter: [" << (*it_cgi).second
-              << "]\n";
+              << "file type: [" << (*it_cgi).first << "] path to interpreter: ["
+              << (*it_cgi).second << "]\n";
     it_cgi++;
   }
   std::cout << std::endl;
 }
-
