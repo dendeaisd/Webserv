@@ -21,9 +21,9 @@ enum EBracketStatus {
 };
 
 
-class ConfigFile {
+class SyntaxAnalysis {
  public:
-  ConfigFile();
+  SyntaxAnalysis();
 
   void printConfigFileContent();
   void parseConfiguration(const std::string &fileName);
