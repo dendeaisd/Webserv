@@ -10,8 +10,6 @@
 #include <cerrno>
 #include <cstring>
 
-using namespace net;
-
 Socket::Socket(int domain, int type, int protocol) {
   if ((sockFd_ = socket(domain, type, protocol)) == -1) {
     throw socketException("Failed to create socket");

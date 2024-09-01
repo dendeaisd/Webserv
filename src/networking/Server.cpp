@@ -10,8 +10,6 @@
 #include "../../include/Event.hpp"
 #include "../../include/log/Log.hpp"
 
-using namespace net;
-
 Server::Server(int port) : serverSocket_(AF_INET, SOCK_STREAM, 0) {
   serverSocket_.setSocketOption(SOL_SOCKET, SO_REUSEADDR, 1);
   serverSocket_.bindSocket(port);

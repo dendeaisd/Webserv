@@ -4,8 +4,6 @@
 #include <stdexcept>
 #include <string>
 
-namespace net {
-
 class socketException : public std::runtime_error {
  public:
   socketException(const std::string& message) : std::runtime_error(message) {}
@@ -58,7 +56,5 @@ class setNonBlockingModeFailed : public socketException {
   setNonBlockingModeFailed(const std::string& message)
       : socketException("Failed to set non-blocking mode: " + message) {}
 };
-
-}  // namespace net
 
 #endif

@@ -15,11 +15,11 @@
 int main() {
   try {
     CGIFileManager::getInstance().configure("./cgi-bin");
-    net::Server server(PORT);
+    Server server(PORT);
     server.run();
-  } catch (const net::socketException& e) {
+  } catch (const socketException& e) {
     std::cerr << "Socket error: " << e.what() << std::endl;
-  } catch (const net::pollManagerException& e) {
+  } catch (const pollManagerException& e) {
     std::cerr << "PollManager error:" << e.what() << std::endl;
   } catch (const std::exception& e) {
     std::cerr << "Unexpected error: " << e.what() << std::endl;

@@ -7,8 +7,6 @@
 #include "PollManager.hpp"
 #include "Socket.hpp"
 
-namespace net {
-
 class Server {
  public:
   Server(int port);
@@ -27,5 +25,4 @@ class Server {
   void cleanupClient(std::vector<Client*>::iterator& it);
 };
 
-}  // namespace net
 #endif
