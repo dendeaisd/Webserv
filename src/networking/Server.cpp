@@ -103,9 +103,17 @@ void Server::cleanupClient(std::vector<Client*>::iterator& it) {
 void Server::handleNewConnection(int serverFd) {
   struct sockaddr_in address;
   socklen_t addrlen = sizeof(address);
-  int new_socket =
-      serverSockets_[serverFd].acceptConnection(&address, &addrlen);
+  auto it = std::find_if(serverSockets_.begin(), serverSockets_.end(),
+                         [serverFd](const Socket& socket) {
+                           return socket.getSocketFd() == serverFd;
+                         });
 
+  if (it == serverSockets_.end()) {
+    std::cerr << "Error: Server socket not found for fd " << serverFd
+              << std::endl;
+    return;
+  }
+  int new_socket = it->acceptConnection(&address, &addrlen);
   if (new_socket >= 0) {
     Client* new_client = new Client(new_socket);
     clients_.push_back(new_client);
