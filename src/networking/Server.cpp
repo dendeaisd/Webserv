@@ -10,12 +10,16 @@
 #include "../../include/Event.hpp"
 #include "../../include/log/Log.hpp"
 
-Server::Server(int port) : serverSocket_(AF_INET, SOCK_STREAM, 0) {
-  serverSocket_.setSocketOption(SOL_SOCKET, SO_REUSEADDR, 1);
-  serverSocket_.bindSocket(port);
-  serverSocket_.listenSocket(SOMAXCONN);
-  serverSocket_.setNonBlocking();
-  pollManager_.addSocket(serverSocket_.getSocketFd());
+Server::Server(const std::vector<int>& ports) {
+  for (int port : ports) {
+    Socket newSocket(AF_INET, SOCK_STREAM, 0);
+    newSocket.setSocketOption(SOL_SOCKET, SO_REUSEADDR, 1);
+    newSocket.bindSocket(port);
+    newSocket.listenSocket(SOMAXCONN);
+    newSocket.setNonBlocking();
+    pollManager_.addSocket(newSocket.getSocketFd());
+    serverSockets_.push_back(std::move(newSocket));
+  }
 }
 
 Server::~Server() {
@@ -37,13 +41,24 @@ void Server::handleEvents() {
 
   for (size_t i = 0; i < fds.size(); ++i) {
     if (fds[i].revents & POLLIN) {
-      if (fds[i].fd == serverSocket_.getSocketFd()) {
-        handleNewConnection();
+      // Check if the fd is one of the server sockets
+      auto it = std::find_if(serverSockets_.begin(), serverSockets_.end(),
+                             [fd = fds[i].fd](const Socket& socket) {
+                               return socket.getSocketFd() == fd;
+                             });
+      if (it != serverSockets_.end()) {
+        // If it matches, handle new connection on that specific server socket
+        handleNewConnection(it->getSocketFd());
       } else {
+        // Otherwise, handle client request
         handleClientRequest(fds[i].fd);
       }
     }
   }
+  removeCGIEvents();
+}
+
+void Server::removeCGIEvents() {
   std::vector<int> eventsToRemove;
   for (auto it = Event::getInstance().getEvents().begin();
        it != Event::getInstance().getEvents().end(); ++it) {
@@ -52,8 +67,8 @@ void Server::handleEvents() {
       eventsToRemove.push_back(it->first);
     }
   }
-  for (auto it = eventsToRemove.begin(); it != eventsToRemove.end(); ++it) {
-    Event::getInstance().removeEvent(*it);
+  for (int eventId : eventsToRemove) {
+    Event::getInstance().removeEvent(eventId);
   }
 }
 
@@ -85,10 +100,11 @@ void Server::cleanupClient(std::vector<Client*>::iterator& it) {
   clients_.erase(it);
 }
 
-void Server::handleNewConnection() {
+void Server::handleNewConnection(int serverFd) {
   struct sockaddr_in address;
   socklen_t addrlen = sizeof(address);
-  int new_socket = serverSocket_.acceptConnection(&address, &addrlen);
+  int new_socket =
+      serverSockets_[serverFd].acceptConnection(&address, &addrlen);
 
   if (new_socket >= 0) {
     Client* new_client = new Client(new_socket);

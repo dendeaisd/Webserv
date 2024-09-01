@@ -9,20 +9,21 @@
 
 class Server {
  public:
-  Server(int port);
+  Server(const std::vector<int>& ports);
   void run();
   ~Server();
 
  private:
-  Socket serverSocket_;
+  std::vector<Socket> serverSockets_;
   PollManager pollManager_;
   std::vector<Client*> clients_;
 
   void handleEvents();
-  void handleNewConnection();
+  void handleNewConnection(int serverFd);
   void handleClientRequest(int fd);
   void processClientRequest(std::vector<Client*>::iterator& it);
   void cleanupClient(std::vector<Client*>::iterator& it);
+  void removeCGIEvents();
 };
 
 #endif
