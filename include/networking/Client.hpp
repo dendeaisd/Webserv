@@ -35,4 +35,5 @@ class Client {
   bool handleContinue();
   bool execute();
 };
+
 #endif  // CLIENT_H
