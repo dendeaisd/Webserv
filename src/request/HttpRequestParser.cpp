@@ -403,6 +403,7 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
 
 bool HttpRequestParser::askForContinue() {
   std::string expectation = request.getHeader("Expect");
+  Log::getInstance().debug("Expectation: " + expectation);
   if (expectation == "100-continue") {
     Log::getInstance().debug("Client sent header Expect: 100-continue");
     HttpResponse response = HttpResponse(100);
@@ -459,18 +460,21 @@ bool HttpRequestParser::writeToFile(std::string filename,
   Log::getInstance().debug("Bytes read: " + std::to_string(bytes_read));
   if (bytes_read == 0 || bytes_read == -1) return false;
   total_read += bytes_read;
-  std::ofstream file(UPLOAD_DIR + filename, std::ios::binary | std::ios::app);
+  std::ofstream file(UPLOAD_DIR + filename, std::ios::app);
   std::string data;
   if (!file.is_open()) {
     Log::getInstance().error("Failed to open file for writing");
     return false;
   }
+  bool boundaryFound = false;
   while (std::getline(ss, data)) {
     if (data.find("\r") != std::string::npos)
       data = data.erase(data.find("\r"), 1);
     Log::getInstance().debug("Data: " + data);
-    if (checkForTerminator(data) || data.find(boundary) != std::string::npos)
+    if (checkForTerminator(data) || data.find(boundary) != std::string::npos) {
+      boundaryFound = true;
       break;
+    }
     file << data.data();
     if (!Helpers::boundaryUpcoming(ss, boundary)) file << "\n";
     if (bytes_read == MAX_BUFFER_SIZE) {
@@ -478,6 +482,10 @@ bool HttpRequestParser::writeToFile(std::string filename,
     }
   }
   file.close();
+  if (boundaryFound) {
+	Log::getInstance().debug("Boundary found: " + std::to_string(boundaryFound));
+    currentFileUploadStatus = HttpFileUploadStatus::COMPLETE;
+  }
   return true;
 }
 
@@ -487,7 +495,8 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   size_t contentLength = request.getContentLength();
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
     if (currentFileUploadStatus == HttpFileUploadStatus::IN_PROGRESS) {
-      if (!writeToFile(currentFileUploadName, ss)) return false;
+      Log::getInstance().debug("Writing to file in progress: " + currentFileUploadName);
+      return writeToFile(currentFileUploadName, ss);
     }
     bytes_read = readMore(ss, _clientFd);
     Log::getInstance().debug("Bytes read: " + std::to_string(bytes_read));
@@ -496,7 +505,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   }
   if (boundary.empty()) parseBoundary();
   while ((data = getLineSanitized(ss)).length() > 0) {
-    Log::getInstance().debug("Data: " + data);
+    Log::getInstance().debug("Multipart Data: " + data);
     if (checkForTerminator(data)) break;
     std::string filename;
     std::string key;
@@ -528,8 +537,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
             "key");
         return false;
       }
-      std::ofstream file(UPLOAD_DIR + filename,
-                         std::ios::binary | std::ios::app);
+      std::ofstream file(UPLOAD_DIR + filename, std::ios::binary);
       if (!file.is_open()) {
         Log::getInstance().error("Failed to open file for writing");
         return false;
@@ -540,13 +548,17 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
       std::getline(ss, data);  // skip empty line
       // getLineSanitized is not used here because we need to write to the
       // file even if the line is empty
+      bool boundaryFound = false;
       while (std::getline(ss, data)) {
         if (data.find("\r") != std::string::npos)
           data = data.erase(data.find("\r"), 1);
-        Log::getInstance().debug("Data: " + data);
+        // Log::getInstance().debug("File Data: " + data);
         if (checkForTerminator(data) ||
-            data.find(boundary) != std::string::npos)
+            data.find(boundary) != std::string::npos) {
+          Log::getInstance().debug("Boundary found!!");
+          boundaryFound = true;
           break;
+        }
         file << data;
         if (!Helpers::boundaryUpcoming(ss, boundary)) file << "\n";
         if (bytes_read == MAX_BUFFER_SIZE) {
@@ -555,6 +567,14 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
         }
       }
       file.close();
+      Log::getInstance().debug("Boundary found: " +
+                               std::to_string(boundaryFound));
+      if (!boundaryFound) {
+        currentFileUploadStatus = HttpFileUploadStatus::IN_PROGRESS;
+      } else {
+        currentFileUploadStatus = HttpFileUploadStatus::COMPLETE;
+        currentFileUploadName = "";
+      }
       if (total_read > contentLength) {
         Log::getInstance().error("Content-Length exceeded");
         return false;
@@ -567,6 +587,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
 }
 
 int HttpRequestParser::handshake() {
+  Log::getInstance().debug("--------------------------------");
   Log::getInstance().debug("Starting handshake for request: " +
                            request.toJson());
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
