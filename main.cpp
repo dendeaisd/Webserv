@@ -14,11 +14,7 @@
 int main() {
   try {
     CGIFileManager::getInstance().configure("./cgi-bin");
-
-    // Define the list of ports the server will listen to
-    std::vector<int> ports = {8080, 8081, 8082};  // Example ports
-
-    // Create the server with multiple ports
+    std::vector<int> ports = {8080, 8081, 8082};
     Server server(ports);
     server.run();
   } catch (const socketException& e) {

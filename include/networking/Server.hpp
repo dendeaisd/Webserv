@@ -9,12 +9,12 @@
 
 class Server {
  public:
-  Server(const std::vector<int>& ports);
+  Server(std::vector<int>& ports);
   void run();
   ~Server();
 
  private:
-  std::vector<Socket> serverSockets_;
+  std::vector<std::shared_ptr<Socket>> serverSockets_;
   PollManager pollManager_;
   std::vector<Client*> clients_;
 
