@@ -14,9 +14,9 @@ class Server {
   ~Server();
 
  private:
-  std::vector<std::shared_ptr<Socket>> serverSockets_;
-  PollManager pollManager_;
-  std::vector<Client*> clients_;
+  std::vector<std::shared_ptr<Socket>> _serverSockets;
+  PollManager _pollManager;
+  std::vector<Client*> _clients;
 
   void handleEvents();
   void handleNewConnection(int serverFd);
