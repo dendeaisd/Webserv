@@ -26,6 +26,7 @@ class ServerContext {
   std::string _indexValue;
   std::string _rootValue;
 
+  /*_listenValue should store only a vector of ints that contains the ports*/
   std::vector<std::string> _listenValue;
   std::vector<std::unique_ptr<Location> > _locationContext;
 };
