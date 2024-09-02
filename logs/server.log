@@ -70,3 +70,35 @@
 2024-09-02 17:11:13 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
 2024-09-02 17:11:13 [ DEBUG ] Favicon handler for request: /favicon.ico
 2024-09-02 17:11:13 [ DEBUG ] Successful request. Favicon
+2024-09-02 17:14:05 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-09-02 17:14:05 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-09-02 17:14:05 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-09-02 17:14:05 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-09-02 17:14:05 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-09-02 17:14:05 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-09-02 17:14:05 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-09-02 17:14:05 [ DEBUG ] Successful request. Static
+2024-09-02 17:14:05 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-09-02 17:14:05 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-09-02 17:14:05 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-09-02 17:14:05 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-09-02 17:14:05 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-09-02 17:14:05 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-09-02 17:14:05 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-09-02 17:14:05 [ DEBUG ] Successful request. Favicon
+2024-09-02 17:14:10 [ WARNING ] Unknown header: sec-ch-ua found in request /
+2024-09-02 17:14:10 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /
+2024-09-02 17:14:10 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /
+2024-09-02 17:14:10 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /
+2024-09-02 17:14:10 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /
+2024-09-02 17:14:10 [ WARNING ] Unknown header: Sec-Fetch-User found in request /
+2024-09-02 17:14:10 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /
+2024-09-02 17:14:10 [ DEBUG ] Successful request. Static
+2024-09-02 17:14:10 [ WARNING ] Unknown header: sec-ch-ua found in request /favicon.ico
+2024-09-02 17:14:11 [ WARNING ] Unknown header: sec-ch-ua-mobile found in request /favicon.ico
+2024-09-02 17:14:11 [ WARNING ] Unknown header: sec-ch-ua-platform found in request /favicon.ico
+2024-09-02 17:14:11 [ WARNING ] Unknown header: Sec-Fetch-Site found in request /favicon.ico
+2024-09-02 17:14:11 [ WARNING ] Unknown header: Sec-Fetch-Mode found in request /favicon.ico
+2024-09-02 17:14:11 [ WARNING ] Unknown header: Sec-Fetch-Dest found in request /favicon.ico
+2024-09-02 17:14:11 [ DEBUG ] Favicon handler for request: /favicon.ico
+2024-09-02 17:14:11 [ DEBUG ] Successful request. Favicon
