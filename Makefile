@@ -2,7 +2,9 @@ NAME        :=  webserv
 CC          :=  c++
 CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g -fsanitize=address
 
-INCLUDE_DIRS := -I./include -I./tester -I./include/configFile
+INCLUDE_DIRS := -I./include -I./tester                                   \
+								-I./include/parseConfigFile/syntaxAnalysis               \
+								-I./include/parseConfigFile/tokenizing
 TESTER_MAIN := tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
 SRC_MAIN := main.cpp
 
@@ -10,8 +12,12 @@ SRC_DIR := .
 OBJ_DIR := obj
 
 SRC         :=  $(wildcard src/*.cpp) $(wildcard src/networking/*.cpp) \
-	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp) $(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp) \
-	$(wildcard src/response/*.cpp) $(wildcard src/configFile/*.cpp)
+	$(wildcard src/request/*.cpp) $(wildcard src/http/*.cpp)             \
+	$(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp)                  \
+	$(wildcard src/response/*.cpp)                                       \
+	$(wildcard src/parseConfigFile/*.cpp)                \
+	$(wildcard src/parseConfigFile/syntaxAnalysis/*.cpp)                \
+	$(wildcard src/parseConfigFile/tokenizing/*.cpp)
 
 OBJ         :=  $(SRC:.cpp=.o)
 
@@ -61,7 +67,7 @@ $(TEST_NAME): $(OBJ) $(TEST_OBJ)
 	@$(CC) $(CFLAGS) $(OBJ) $(TEST_OBJ) -lgtest -lgtest_main -pthread -o $(TEST_NAME)
 
 %.o: %.cpp
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $(INCLUDE_DIRS) $< -o $@
 
 clean:
 	@printf "$(UP)$(BEGIN)$(CUT)$(YELLOW)🧹Cleaning object files...$(RESET)"

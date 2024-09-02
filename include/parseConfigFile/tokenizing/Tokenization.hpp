@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/31 17:16:48 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/02 15:43:49 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "NodeToken.hpp"
 #include "TypeToken.hpp"
@@ -30,17 +31,14 @@ class Tokenization {
 
  private:
   std::string getNextLine(std::ifstream &file);
-  void seperateTokenStringsFromLine(
-      std::string &line, std::vector<std::string> &seperatedTokensStr);
-  std::string getNextTokenString(std::string &line);
-  void insertIntoTokenNode(std::vector<std::string> &seperatedTokenStr);
+  void separateTokenStringsFromLine(std::string &line);
   void identifyTokenType();
   void lineNumberAddToTokens();
   void addToLineTokensToTokenChain();
   void clearTokenFromLine();
 
-  std::vector<TokenNode> _tokensFromLine;
-  std::vector<TokenNode> _chainOfTokens;
+  std::vector<std::unique_ptr<TokenNode> > _tokensFromLine;
+  std::vector<std::unique_ptr<TokenNode> > _chainOfTokens;
 };
 
 #endif

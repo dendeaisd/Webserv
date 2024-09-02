@@ -25,6 +25,7 @@ class Location {
   std::string _errorPageValue;
   std::string _accessLogValue;
   std::string _denyValue;
+  // add returnValue
   std::unordered_map<std::string, std::string> _cgi;
   std::vector<std::string> _rewriteValue;
 

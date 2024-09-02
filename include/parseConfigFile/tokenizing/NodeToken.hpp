@@ -6,7 +6,7 @@
 
 class TokenNode {
  public:
-  TokenNode() : _foundLine(0), _type(TypeToken::DEFAULT) {}
+  TokenNode() : _type(TypeToken::DEFAULT), _foundLine(0) {}
 
   std::string _tokenStr;
   TypeToken _type;
