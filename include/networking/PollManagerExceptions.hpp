@@ -10,12 +10,6 @@ class pollManagerException : public std::runtime_error {
       : std::runtime_error(message) {}
 };
 
-// class duplicateSocket : public pollManagerException {
-//  public:
-//   duplicateSocket()
-//       : pollManagerException("Socket already added to the poll") {}
-// };
-
 class invalidFd : public pollManagerException {
  public:
   invalidFd(int fd)
