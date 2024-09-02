@@ -82,6 +82,7 @@ bool HttpRequestParser::isAllowedMethod(const std::string &method) {
 
 bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
   // TODO: update this to use server configuration
+  (void)contentLength;
   return true;
 }
 
