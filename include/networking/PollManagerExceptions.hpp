@@ -4,8 +4,6 @@
 #include <stdexcept>
 #include <string>
 
-namespace net {
-
 class pollManagerException : public std::runtime_error {
  public:
   pollManagerException(const std::string& message)
@@ -30,7 +28,5 @@ class pollFailed : public pollManagerException {
   pollFailed(const std::string& message)
       : pollManagerException("Poll failed: " + message) {}
 };
-
-}  // namespace net
 
 #endif

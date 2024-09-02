@@ -11,8 +11,6 @@
 #include <cstring>
 #include <vector>
 
-using namespace net;
-
 PollManager::PollManager() {}
 
 void PollManager::addSocket(int fd, int events) {

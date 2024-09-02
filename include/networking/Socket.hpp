@@ -9,8 +9,6 @@
 
 #include "SocketExceptions.hpp"
 
-namespace net {
-
 class Socket {
  public:
   Socket(int domain, int type, int protocol);
@@ -28,7 +26,5 @@ class Socket {
  private:
   int sockFd_;
 };
-
-}  // namespace net
 
 #endif

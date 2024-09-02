@@ -60,9 +60,9 @@ void HttpContext::printHttpContent() {
             << "geo ip country: [" << _geoipCountryValue << "]" << std::endl
             << "proxy cache path: [" << _proxyCachePathValue << "]" << std::endl
             << "proxy cache: [" << _proxyCacheValue << "]" << std::endl
-            << "proxy cache use stale: [" << _proxyCacheUseStaleValue
-            << "]" << std::endl
-            << "gzip: [" << _gzipValue << "]"<< std::endl
+            << "proxy cache use stale: [" << _proxyCacheUseStaleValue << "]"
+            << std::endl
+            << "gzip: [" << _gzipValue << "]" << std::endl
             << "gzip types: [" << _gzipTypesValue << "]" << std::endl
             << "limit req zone: [" << _limitReqZoneValue << "]" << std::endl;
   printVectorOfStrings(_proxySetHeaderValue, "proxy set header");
