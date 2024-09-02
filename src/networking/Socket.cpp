@@ -30,6 +30,8 @@ void Socket::setSocketOption(int level, int optname, int optval) {
 }
 
 void Socket::bindSocket(int port) {
+  // TODO::before binding the socket, find a way to check if it has
+  //  a speciffic adress assigend to that port
   struct sockaddr_in address;
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
