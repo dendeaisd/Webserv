@@ -29,8 +29,10 @@ const char* HTTP_RESPONSE =
     "Hello, World!";
 
 bool Client::sendDirectoryListings(const std::string& path) {
-  std::string requestUri = parser.getHttpRequest().getUri();
-  std::string dirListingHtml = generateDirectoryListing(path, requestUri);
+  auto req = parser.getHttpRequest();
+  std::string requestUri = req.getUri();
+  std::string dirListingHtml =
+      generateDirectoryListing(path, requestUri, req.getInjections());
 
   response.setStatusCode(200);
   response.setBody(dirListingHtml);
@@ -58,12 +60,16 @@ bool Client::sendDefaultPage() {
 }
 
 std::string Client::generateDirectoryListing(const std::string& path,
-                                             const std::string& requestUri) {
+                                             const std::string& requestUri,
+                                             const std::string& inject) {
   std::stringstream ss;
-  ss << "<html><body><h1>Directory Listing for " << path << "</h1><ul>";
+  ss << "<html><body>";
+  ss << inject;
+  ss << "<h1>Directory Listing for " << path << "</h1><ul>";
   for (const auto& entry : std::filesystem::directory_iterator(path)) {
     std::string fileName = entry.path().filename().string();
-    std::string relativePath = requestUri + fileName;
+    std::string relativePath = fileName;
+    if (requestUri != "/") relativePath = requestUri + "/" + fileName;
     std::string displayName = fileName;
     if (std::filesystem::is_directory(entry.path())) {
       relativePath += "/";
@@ -101,23 +107,44 @@ bool Client::handleContinue() {
 
 bool Client::execute() {
   auto request = parser.getHttpRequest();
-  if (request.getHandler() == HttpRequestHandler::CGI) {
-    Log::getInstance().debug("Successful request. CGI");
-    auto cgi = std::make_shared<CGI>(fd, request);
-    if (cgi->run()) Event::getInstance().addEvent(fd, cgi);
-  } else if (request.getHandler() == HttpRequestHandler::FAVICON) {
-    Log::getInstance().debug("Successful request. Favicon");
-    sendDefaultFavicon();
-  } else if (request.getHandler() == HttpRequestHandler::STATIC &&
-             request.getMethodEnum() == HttpRequestMethod::GET &&
-             request.getUri() == "/") {
-    Log::getInstance().debug("Successful request. Static");
-    sendDefaultPage();
-  } else if (request.getHandler() == HttpRequestHandler::DIRECTORY_LISTING) {
-    Log::getInstance().debug("Successful request. Directory Listing");
-    sendDirectoryListings("./default" + request.getUri());
-  } else {
-    send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
+  switch (request.getHandler()) {
+    case HttpRequestHandler::CGI: {
+      Log::getInstance().debug("Successful request. CGI");
+      auto cgi = std::make_shared<CGI>(fd, request);
+      if (cgi->run()) Event::getInstance().addEvent(fd, cgi);
+      break;
+    }
+    case HttpRequestHandler::FAVICON: {
+      Log::getInstance().debug("Successful request. Favicon");
+      sendDefaultFavicon();
+      break;
+    }
+    case HttpRequestHandler::STATIC: {
+      sendDefaultPage();
+      break;
+    }
+    case HttpRequestHandler::DIRECTORY_LISTING: {
+      Log::getInstance().debug("Successful request. Directory Listing");
+      sendDirectoryListings("./default" + request.getUri());
+      break;
+    }
+    case HttpRequestHandler::LIST_UPLOADS: {
+      Log::getInstance().debug("Successful request. List Uploads");
+      sendDirectoryListings("./uploads");
+      break;
+    }
+    case HttpRequestHandler::SEND_UPLOADED_FILE: {
+      Log::getInstance().debug("Successful request. Send Uploaded File");
+      response.setStatusCode(200);
+      std::string mimeType = HttpMaps::getMimeType(request.getUri());
+      response.setFile("." + request.getUri(), mimeType);
+      response.sendResponse(fd);
+      break;
+    }
+    default: {
+      send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
+      break;
+    }
   }
   Log::getInstance().info(request.getMethod() + " " + request.getHost() +
                           request.getUri());
@@ -125,7 +152,7 @@ bool Client::execute() {
 }
 
 bool Client::handleRequest() {
-  char buffer[BUFFER_SIZE + 1];
+  char buffer[BUFFER_SIZE];
 
   int bytes_read;
   int status;
@@ -137,12 +164,10 @@ bool Client::handleRequest() {
     std::string raw = "";
     bytes_read = read(fd, buffer, BUFFER_SIZE);
     if (bytes_read > 0) {
-      buffer[bytes_read] = '\0';
       raw = buffer;
       while (bytes_read == BUFFER_SIZE) {
         raw.append(buffer, bytes_read);
         bytes_read = read(fd, buffer, BUFFER_SIZE);
-        buffer[bytes_read] = '\0';
       }
       std::cout << raw << std::endl;
       parser = HttpRequestParser(raw, fd);

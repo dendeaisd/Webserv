@@ -30,7 +30,16 @@ enum class HttpRequestHandler {
   STATIC,
   REDIRECT,
   FAVICON,
-  DIRECTORY_LISTING
+  DIRECTORY_LISTING,
+  LIST_UPLOADS,
+  SEND_UPLOADED_FILE,
+};
+
+enum class HttpFileUploadStatus {
+  NOT_STARTED,
+  IN_PROGRESS,
+  COMPLETE,
+  FAILED,
 };
 
 #endif

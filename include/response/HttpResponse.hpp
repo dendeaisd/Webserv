@@ -18,6 +18,8 @@ class HttpResponse {
   void setFile(std::string path, std::string contentType,
                std::string disposition, std::string filename);
 
+  bool sendResponse(int fd);
+
  private:
   std::string _version;
   int _statusCode;
@@ -28,4 +30,5 @@ class HttpResponse {
   std::string _file;
 
   std::string loadFile();
+  void sendHeaders(int fd);
 };
