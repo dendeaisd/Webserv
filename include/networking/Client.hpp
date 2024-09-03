@@ -21,9 +21,9 @@ class Client {
   bool handleRequest();
 
  private:
-  int fd;
-  HttpRequestParser parser;
-  HttpResponse response;
+  int _fd;
+  HttpRequestParser _parser;
+  HttpResponse _response;
   std::unique_ptr<Event> _events;
 
   bool sendDefaultFavicon();

@@ -16,7 +16,7 @@ class PollManager {
   std::vector<struct pollfd>& getFds();
 
  private:
-  std::vector<struct pollfd> fds_;
+  std::vector<struct pollfd> _fds;
 };
 
 #endif
