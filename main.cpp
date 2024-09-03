@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     auto config = ConfigFile();
     config.parseConfiguration(configFile);
     config.printConfigFileContent();
-    Log::getInstance().configure("ERROR");
+    Log::getInstance().configure("DEBUG");
     CGIFileManager::getInstance().configure("./cgi-bin");
     std::vector<int> ports = {8080, 8081, 8082};
     Server server(ports);

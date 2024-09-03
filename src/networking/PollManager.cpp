@@ -18,7 +18,7 @@ void PollManager::addSocket(int fd, int events) {
   pfd.fd = fd;
   pfd.events = events;
   pfd.revents = 0;
-  fds_.push_back(pfd);
+  _fds.push_back(pfd);
 }
 
 void PollManager::removeSocket(int fd) {
@@ -26,20 +26,20 @@ void PollManager::removeSocket(int fd) {
     throw invalidFd(fd);
   }
 
-  for (size_t i = 0; i < fds_.size(); ++i) {
-    if (fds_[i].fd == fd) {
-      std::swap(fds_[i], fds_.back());
-      fds_.pop_back();
+  for (size_t i = 0; i < _fds.size(); ++i) {
+    if (_fds[i].fd == fd) {
+      std::swap(_fds[i], _fds.back());
+      _fds.pop_back();
       break;
     }
   }
 }
 
 void PollManager::pollSockets() {
-  int poll_count = poll(&fds_[0], fds_.size(), 0);
+  int poll_count = poll(&_fds[0], _fds.size(), 0);
   if (poll_count < 0) {
     throw pollFailed(std::strerror(errno));
   }
 }
 
-std::vector<struct pollfd>& PollManager::getFds() { return fds_; }
+std::vector<struct pollfd>& PollManager::getFds() { return _fds; }

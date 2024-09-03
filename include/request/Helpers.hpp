@@ -19,4 +19,5 @@ class Helpers {
   static std::string getFormKeyIfExists(std::string data);
   static std::string getFilenameIfExists(std::string data);
   static std::string decodeUrl(const std::string &url);
+  static std::string getFilenameFromPath(const std::string &path);
 };

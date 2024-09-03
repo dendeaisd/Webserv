@@ -21,9 +21,9 @@ class Client {
   bool handleRequest();
 
  private:
-  int fd;
-  HttpRequestParser parser;
-  HttpResponse response;
+  int _fd;
+  HttpRequestParser _parser;
+  HttpResponse _response;
   std::unique_ptr<Event> _events;
 
   bool sendDefaultFavicon();
@@ -31,7 +31,8 @@ class Client {
   bool sendDirectoryListings(const std::string& path);
 
   std::string generateDirectoryListing(const std::string& path,
-                                       const std::string& requestUri);
+                                       const std::string& requestUri,
+                                       const std::string& inject);
   bool handleContinue();
   bool execute();
 };

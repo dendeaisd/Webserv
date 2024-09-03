@@ -18,35 +18,35 @@ Server::Server(std::vector<int>& ports) {
     newSocket->bindSocket(port);
     newSocket->listenSocket(SOMAXCONN);
     newSocket->setNonBlocking();
-    pollManager_.addSocket(newSocket->getSocketFd());
-    serverSockets_.push_back(newSocket);
+    _pollManager.addSocket(newSocket->getSocketFd());
+    _serverSockets.push_back(newSocket);
   }
 }
 
 Server::~Server() {
-  for (std::vector<Client*>::iterator it = clients_.begin();
-       it != clients_.end(); ++it) {
+  for (std::vector<Client*>::iterator it = _clients.begin();
+       it != _clients.end(); ++it) {
     delete *it;
   }
 }
 
 void Server::run() {
   while (true) {
-    pollManager_.pollSockets();
+    _pollManager.pollSockets();
     handleEvents();
   }
 }
 
 void Server::handleEvents() {
-  std::vector<struct pollfd>& fds = pollManager_.getFds();
+  std::vector<struct pollfd>& fds = _pollManager.getFds();
 
   for (size_t i = 0; i < fds.size(); ++i) {
     if (fds[i].revents & POLLIN) {
-      auto it = std::find_if(serverSockets_.begin(), serverSockets_.end(),
+      auto it = std::find_if(_serverSockets.begin(), _serverSockets.end(),
                              [fd = fds[i].fd](std::shared_ptr<Socket> socket) {
                                return socket->getSocketFd() == fd;
                              });
-      if (it != serverSockets_.end()) {
+      if (it != _serverSockets.end()) {
         handleNewConnection((*it)->getSocketFd());
       } else {
         handleClientRequest(fds[i].fd);
@@ -71,8 +71,8 @@ void Server::removeCGIEvents() {
 }
 
 void Server::handleClientRequest(int fd) {
-  for (std::vector<Client*>::iterator it = clients_.begin();
-       it != clients_.end(); ++it) {
+  for (std::vector<Client*>::iterator it = _clients.begin();
+       it != _clients.end(); ++it) {
     if ((*it)->getFd() == fd) {
       processClientRequest(it);
       break;
@@ -93,20 +93,20 @@ void Server::processClientRequest(std::vector<Client*>::iterator& it) {
 }
 
 void Server::cleanupClient(std::vector<Client*>::iterator& it) {
-  pollManager_.removeSocket((*it)->getFd());
+  _pollManager.removeSocket((*it)->getFd());
   delete *it;
-  clients_.erase(it);
+  _clients.erase(it);
 }
 
 void Server::handleNewConnection(int serverFd) {
   struct sockaddr_in address;
   socklen_t addrlen = sizeof(address);
-  auto it = std::find_if(serverSockets_.begin(), serverSockets_.end(),
+  auto it = std::find_if(_serverSockets.begin(), _serverSockets.end(),
                          [serverFd](std::shared_ptr<Socket> socket) {
                            return socket->getSocketFd() == serverFd;
                          });
 
-  if (it == serverSockets_.end()) {
+  if (it == _serverSockets.end()) {
     std::cerr << "Error: Server socket not found for fd " << serverFd
               << std::endl;
     return;
@@ -114,7 +114,7 @@ void Server::handleNewConnection(int serverFd) {
   int new_socket = (*it)->acceptConnection(&address, &addrlen);
   if (new_socket >= 0) {
     Client* new_client = new Client(new_socket);
-    clients_.push_back(new_client);
-    pollManager_.addSocket(new_socket);
+    _clients.push_back(new_client);
+    _pollManager.addSocket(new_socket);
   }
 }
