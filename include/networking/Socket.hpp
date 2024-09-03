@@ -24,7 +24,7 @@ class Socket {
   int getSocketFd() const;
 
  private:
-  int sockFd_;
+  int _sockFd;
 };
 
 #endif
