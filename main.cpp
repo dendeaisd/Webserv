@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include <iostream>
+#include <vector>
 
 #include "./include/cgi/CGIFileManager.hpp"
 #include "./include/log/Log.hpp"
@@ -28,12 +29,13 @@ int main(int argc, char* argv[]) {
     config.printConfigFileContent();
     Log::getInstance().configure("DEBUG");
     CGIFileManager::getInstance().configure("./cgi-bin");
-    net::Server server(PORT);
+    std::vector<int> ports = {8080, 8081, 8082};
+    Server server(ports);
     server.run();
-  } catch (const net::socketException& e) {
+  } catch (const socketException& e) {
     std::cerr << "Socket error: " << e.what() << std::endl;
-  } catch (const net::pollManagerException& e) {
-    std::cerr << "PollManager error:" << e.what() << std::endl;
+  } catch (const pollManagerException& e) {
+    std::cerr << "PollManager error: " << e.what() << std::endl;
   } catch (const std::exception& e) {
     std::cerr << "Unexpected error: " << e.what() << std::endl;
   }

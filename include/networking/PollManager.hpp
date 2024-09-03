@@ -7,8 +7,6 @@
 
 #include "PollManagerExceptions.hpp"
 
-namespace net {
-
 class PollManager {
  public:
   PollManager();
@@ -20,6 +18,5 @@ class PollManager {
  private:
   std::vector<struct pollfd> fds_;
 };
-}  // namespace net
 
 #endif

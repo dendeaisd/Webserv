@@ -168,7 +168,7 @@ bool Client::handleRequest() {
       continue;
     } else {
       if (bytes_read < 0) {
-        throw net::readFailed(std::strerror(errno));
+        throw readFailed(std::strerror(errno));
       }
       close(fd);
       return false;
