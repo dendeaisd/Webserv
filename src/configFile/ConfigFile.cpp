@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigFile.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/28 13:35:03 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/03 22:12:08 by ramymoussa       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,7 @@ EBracketStatus ConfigFile::transferStateToBracketStatus() {
       return (LOCATION_BRACKET);
       break;
   }
+  return (MAIN_BRACKET);
 }
 
 void ConfigFile::mainContextSaveDirective(const std::string &line) {
