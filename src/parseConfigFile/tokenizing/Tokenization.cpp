@@ -45,33 +45,32 @@ void Tokenization::identifyTokenLineTypes() {
 void Tokenization::checkAndSetSemikolonInToken() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     size_t pos = (*it)->_tokenStr.size() - 1;
-    if ((*it)->_tokenStr[pos] == ';')
-      (*it)->_semikolonSet = true;
+    if ((*it)->_tokenStr[pos] == ';') (*it)->_semikolonSet = true;
   }
 }
 
 void Tokenization::removeSemikolonFromToken() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     size_t pos = (*it)->_tokenStr.size() - 1;
-    if ((*it)->_semikolonSet == true)
-      (*it)->_tokenStr.erase(pos, 1);
+    if ((*it)->_semikolonSet == true) (*it)->_tokenStr.erase(pos, 1);
   }
 }
 
-void Tokenization::clearTokenLine() {
-  _tokensFromLine.clear();
-}
+void Tokenization::clearTokenLine() { _tokensFromLine.clear(); }
 
 void Tokenization::bracketIdentification() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
-    if ((*it)->_tokenStr.find('{') == true) {
-      /*
-      if ((*it)->tokenStr.size < 2)
-        // trow exception
-      else */
+    if ((*it)->_tokenStr.find('{') != std::string::npos &&
+        (*it)->_tokenStr.size() == 1)
       (*it)->_type = TypeToken::OPEN_BRACKET;
-    }
-    
+    else if ((*it)->_tokenStr.find('}') != std::string::npos &&
+             (*it)->_tokenStr.size() == 1)
+      (*it)->_type = TypeToken::OPEN_BRACKET;
+    /*
+    else if ((*it)->_tokenStr.find('}') != std::string::npos &&
+             (*it)->_tokenStr.size() > 1)
+      // trow exception
+    */
   }
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     std::cout << "STR: [" << (*it)->_tokenStr << "]" << std::endl;
