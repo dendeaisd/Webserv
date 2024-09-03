@@ -129,7 +129,6 @@ bool CGI::tunnelData() {
   Log::getInstance().debug("Read " + std::to_string(bytes_read) + " bytes");
   if (bytes_read > 0) {
     buffer[bytes_read] = '\0';
-    std::cout << buffer << std::endl;
     int sent = send(fd_, buffer, bytes_read, 0);
     Log::getInstance().debug("Sent " + std::to_string(sent) + " bytes");
     if (sent < 0) {
@@ -213,6 +212,10 @@ void CGI::executeCGI() {
   envp.push_back(const_cast<char *>(
       std::string("ORIGIN=" + _request.getHeader("Origin")).c_str()));
   envp.push_back(const_cast<char *>(std::string("URL_ARG=" + _urlArg).c_str()));
+  if (_request.getHeader("Cookie") != "") {
+    Log::getInstance().debug("Cookie: " + _request.getHeader("Cookie"));
+    env_strs.push_back("HTTP_COOKIE=" + _request.getHeader("Cookie"));
+  }
   auto qp = _request.getQueryParams();
   for (auto it = qp.begin(); it != qp.end(); ++it) {
     env_strs.push_back("QS_" + it->first + "=" + it->second);
@@ -252,6 +255,5 @@ int CGI::load() {
       return -1;
     }
   }
-  std::cout << _stream << std::endl;
   return 0;
 }

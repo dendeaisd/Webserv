@@ -10,9 +10,24 @@
 #include "./include/cgi/CGIFileManager.hpp"
 #include "./include/log/Log.hpp"
 #include "./include/networking/Server.hpp"
+#include "ConfigFile.hpp"
 
-int main() {
+#define PORT 8080
+
+int main(int argc, char* argv[]) {
+  if (argc > 2)
+    std::cerr << "Usage: " << argv[0] << " [config file]" << std::endl;
+  std::string configFile = argc == 2 ? argv[1] : "./configs/default.conf";
+  if (access(configFile.c_str(), F_OK) == -1) {
+    std::cerr << "Config file not found, default path: `./configs/default.conf`"
+              << std::endl;
+    return 1;
+  }
   try {
+    auto config = ConfigFile();
+    config.parseConfiguration(configFile);
+    config.printConfigFileContent();
+    Log::getInstance().configure("DEBUG");
     CGIFileManager::getInstance().configure("./cgi-bin");
     std::vector<int> ports = {8080, 8081, 8082};
     Server server(ports);

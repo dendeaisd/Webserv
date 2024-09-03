@@ -31,6 +31,9 @@ class HttpRequestParser {
   HttpRequest request;
   std::string raw;
   std::string boundary;
+  HttpFileUploadStatus currentFileUploadStatus;
+  std::string currentFileUploadName;
+  size_t total_read;
   void electHandler();
   void parseRequestLine(char *requestLine, size_t len);
   void parseHeaders(std::stringstream &ss);
@@ -43,8 +46,14 @@ class HttpRequestParser {
   bool validateHttpVersion();
   bool askForContinue();
   bool checkForTerminator(std::string line);
-
+  bool isAllowedMethod(const std::string &method);
+  bool isAllowedContentLength(size_t contentLength);
   bool isCgiRequest();
   bool isFaviconRequest();
   bool isDirectoryRequest(const std::string &path);
+  bool canHaveBody();
+  bool isUploadAllowed();
+  void injectUploadFormIfNeeded();
+  bool writeToFile(std::string filename, std::stringstream &ss);
+  bool parseBoundary();
 };

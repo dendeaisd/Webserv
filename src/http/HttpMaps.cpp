@@ -61,3 +61,25 @@ std::set<std::string> HttpMaps::initRequiredHeaders1_1() {
   set.insert("Host");
   return set;
 }
+
+std::string HttpMaps::getMimeType(const std::string &path) {
+  size_t pos = path.find_last_of('.');
+  if (pos == std::string::npos) {
+    return "text/plain";
+  }
+  std::string extension = path.substr(pos + 1);
+  std::unordered_map<std::string, std::string> mimeMap = {
+      {"html", "text/html"},        {"htm", "text/html"},
+      {"css", "text/css"},          {"js", "application/javascript"},
+      {"json", "application/json"}, {"jpg", "image/jpeg"},
+      {"jpeg", "image/jpeg"},       {"png", "image/png"},
+      {"gif", "image/gif"},         {"ico", "image/x-icon"},
+      {"pdf", "application/pdf"},   {"zip", "application/zip"},
+      {"txt", "text/plain"}};
+
+  auto it = mimeMap.find(extension);
+  if (it != mimeMap.end()) {
+    return it->second;
+  }
+  return "application/octet-stream";
+}

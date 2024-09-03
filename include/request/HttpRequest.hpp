@@ -6,6 +6,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "HttpRequestEnums.hpp"
 
@@ -33,6 +34,7 @@ class HttpRequest {
   std::string getAttachment(std::string key);
   std::map<std::string, std::string> getAttachments();
   std::string getRequestTime();
+  size_t getContentLength();
   bool checkTimeout();
   void setHandler(HttpRequestHandler handler);
   bool setMethod(std::string method);
@@ -50,6 +52,8 @@ class HttpRequest {
   void setHeaders(std::map<std::string, std::string> headers);
   void setQueryParam(std::string key, std::string value);
   void addAttachment(std::string key, std::string value);
+  void addInjection(std::string injection);
+  std::string getInjections();
   std::string toString();
   std::string toJson();
 
@@ -73,6 +77,7 @@ class HttpRequest {
   std::map<std::string, std::string> _queryParams;
   std::map<std::string, std::string> _formData;
   std::map<std::string, std::string> _attachments;
+  std::vector<std::string> _injections;
 };
 
 #endif
