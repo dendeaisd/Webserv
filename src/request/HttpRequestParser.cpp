@@ -92,7 +92,7 @@ bool HttpRequestParser::isAllowedMethod(const std::string &method) {
 
 bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
   // TODO: update this to use server configuration
-  return contentLength < 10000000;
+  return contentLength < 10000000000;
 }
 
 bool HttpRequestParser::isUploadAllowed() {
@@ -187,9 +187,6 @@ int HttpRequestParser::parse() {
         status == HttpRequestParseStatus::EXPECT_CONTINUE) {
       return 500;  // Internal Server Error
     }
-    // set the status to EXPECT_CONTINUE anyways because not every request
-    // library will send the Expect header
-    status = HttpRequestParseStatus::EXPECT_CONTINUE;
   }
   return request.getMethodEnum() == HttpRequestMethod::POST ? 201 : 200;
 }
@@ -378,7 +375,10 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
     file << "\n";
     bytesWritten++;
     if (bytesWritten >= contentLength) {
+      Log::getInstance().debug("File upload complete for request: " +
+                               request.getUri());
       file.close();
+      status = HttpRequestParseStatus::PARSED;
       return true;
     }
   }
@@ -415,8 +415,34 @@ bool HttpRequestParser::askForContinue() {
       Log::getInstance().error("Failed to send 100 Continue response");
       return false;
     }
+    return true;
   }
+  status = HttpRequestParseStatus::PARSED;
   return true;
+}
+
+int readAllAvailable(std::stringstream &ss, int _clientFd) {
+  char buffer[MAX_BUFFER_SIZE + 1];
+  int total_read = 0;
+  int bytes_read = 0;
+  while (true) {
+    bytes_read = read(_clientFd, buffer, MAX_BUFFER_SIZE);
+    if (bytes_read > 0) {
+      buffer[bytes_read] = '\0';
+      ss << buffer;
+      total_read += bytes_read;
+      Log::getInstance().debug("Read more data: " + std::string(buffer));
+    } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+      continue;
+    } else {
+      if (bytes_read < 0) {
+        Log::getInstance().error(std::strerror(errno));
+      }
+      close(_clientFd);
+      break;
+    }
+  }
+  return total_read;
 }
 
 int readMore(std::stringstream &ss, int _clientFd) {
@@ -455,6 +481,7 @@ bool HttpRequestParser::checkForTerminator(std::string line) {
 
 bool HttpRequestParser::writeToFile(std::string filename,
                                     std::stringstream &ss) {
+  Log::getInstance().debug("Writing to file: " + filename);
   int bytes_read = 0;
   bytes_read = readMore(ss, _clientFd);
   Log::getInstance().debug("Bytes read: " + std::to_string(bytes_read));
@@ -483,7 +510,8 @@ bool HttpRequestParser::writeToFile(std::string filename,
   }
   file.close();
   if (boundaryFound) {
-	Log::getInstance().debug("Boundary found: " + std::to_string(boundaryFound));
+    Log::getInstance().debug("Boundary found: " +
+                             std::to_string(boundaryFound));
     currentFileUploadStatus = HttpFileUploadStatus::COMPLETE;
   }
   return true;
@@ -494,15 +522,19 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   int bytes_read = 0;
   size_t contentLength = request.getContentLength();
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-    if (currentFileUploadStatus == HttpFileUploadStatus::IN_PROGRESS) {
-      Log::getInstance().debug("Writing to file in progress: " + currentFileUploadName);
-      return writeToFile(currentFileUploadName, ss);
-    }
+    // if (currentFileUploadStatus == HttpFileUploadStatus::IN_PROGRESS) {
+    //   Log::getInstance().debug("Writing to file in progress: " +
+    //                            currentFileUploadName);
+    //   return writeToFile(currentFileUploadName, ss);
+    // }
     bytes_read = readMore(ss, _clientFd);
     Log::getInstance().debug("Bytes read: " + std::to_string(bytes_read));
     if (bytes_read == -1) return false;
     total_read += bytes_read;
   }
+  // set the status to EXPECT_CONTINUE anyways because not every request
+  // library will send the Expect header
+  status = HttpRequestParseStatus::EXPECT_CONTINUE;
   if (boundary.empty()) parseBoundary();
   while ((data = getLineSanitized(ss)).length() > 0) {
     Log::getInstance().debug("Multipart Data: " + data);
@@ -569,18 +601,19 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
       file.close();
       Log::getInstance().debug("Boundary found: " +
                                std::to_string(boundaryFound));
-      if (!boundaryFound) {
-        currentFileUploadStatus = HttpFileUploadStatus::IN_PROGRESS;
-      } else {
-        currentFileUploadStatus = HttpFileUploadStatus::COMPLETE;
-        currentFileUploadName = "";
-      }
+      // if (!boundaryFound) {
+      //   currentFileUploadStatus = HttpFileUploadStatus::IN_PROGRESS;
+      // } else {
+      //   currentFileUploadStatus = HttpFileUploadStatus::COMPLETE;
+      //   currentFileUploadName = "";
+      // }
       if (total_read > contentLength) {
         Log::getInstance().error("Content-Length exceeded");
         return false;
       }
       request.addAttachment(filename, contentType);
       filename.clear();
+      if (status == HttpRequestParseStatus::PARSED) return true;
     }
   }
   return true;

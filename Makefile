@@ -36,13 +36,10 @@ OBJ_TESTER := $(addprefix $(OBJ_DIR)/, $(subst /,@,$(TESTER_MAIN:.cpp=.o)))
 all:
 	@$(MAKE) $(NAME) -j
 
-dirs:
-	@if [ ! -d "logs" ]; then mkdir logs; fi
-	@if [ ! -d "default" ]; then mkdir default; fi
-	@if [ ! -d "uploads" ]; then mkdir uploads; fi
 
 $(NAME): $(OBJ) $(OBJ_MAIN)
 	@$(CC) $(OBJ) $(OBJ_MAIN) -o $(NAME) $(CFLAGS) $(INCLUDE_DIRS) && echo "Compiled $(NAME) successfully..!"
+	
 
 test: fclean $(OBJ) $(OBJ_TESTER)
 	@$(CC) $(OBJ) $(OBJ_TESTER) -o $(NAME) $(CFLAGS) -D HALT_ON_FAILURE=1 $(INCLUDE_DIRS) && echo "Testing Mode Compiled $(NAME) successfully..!"
@@ -71,6 +68,13 @@ fclean:
 	@echo "$(UP)$(BEGIN)$(CUT)$(ORANGE)🔥Full clean, removing executable...$(RESET)"
 	@rm -rf $(OBJ_DIR)
 	@rm -f $(NAME) $(TEST_NAME)
+	@rm -rf logs
+	@rm -rf uploads
+	@if [ ! -d "logs" ]; then mkdir logs; fi
+	@if [ ! -d "default" ]; then mkdir default; fi
+	@if [ ! -d "uploads" ]; then mkdir uploads; fi
+	@touch logs/server.log
+	@touch logs/error.log
 
 re: fclean all
 
