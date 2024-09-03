@@ -85,16 +85,14 @@ bool HttpRequest::setMethod(std::string method) {
     Log::getInstance().debug("Method is empty");
     return false;
   }
-  if (HttpMaps::httpRequestMethodMap.find(method) !=
-      HttpMaps::httpRequestMethodMap.end()) {
-    setMethod(HttpMaps::httpRequestMethodMap.at(
-        HttpMaps::httpRequestMethodMap.find(method)->first));
+  auto methodEnum = HttpMaps::getInstance().getMethodEnum(method);
+  setMethod(methodEnum);
+  if (methodEnum != HttpRequestMethod::UNKNOWN) {
     _method = method;
     return true;
-  } else {
-    setMethod(HttpRequestMethod::UNKNOWN);
-    return false;
   }
+  Log::getInstance().debug("Unknown method: " + method);
+  return false;
 }
 void HttpRequest::setMethod(HttpRequestMethod httpRequestMethod) {
   _httpRequestMethod = httpRequestMethod;

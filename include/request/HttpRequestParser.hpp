@@ -9,7 +9,6 @@
 #include <iostream>
 #include <sstream>
 
-// #include "../FileUpload.hpp"  // path was not correct, i changed it
 #include "HttpMaps.hpp"
 #include "HttpRequest.hpp"
 #include "HttpRequestEnums.hpp"

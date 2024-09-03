@@ -274,7 +274,8 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
     size_t pos = header.find(": ");
     if (pos != std::string::npos) {
       std::string key = header.substr(0, pos);
-      if (HttpMaps::headerSet.find(key) == HttpMaps::headerSet.end()) {
+      bool validHeader = HttpMaps::getInstance().isHeaderValid(key);
+      if (!validHeader) {
         Log::getInstance().debug("Unknown header: " + key +
                                  " found in request " + request.getUri());
         // Unknown headers are ignored to improve server performance and
@@ -436,29 +437,6 @@ bool HttpRequestParser::askForContinue() {
   }
   status = HttpRequestParseStatus::PARSED;
   return true;
-}
-
-int readAllAvailable(std::stringstream &ss, int _clientFd) {
-  char buffer[MAX_BUFFER_SIZE + 1];
-  int total_read = 0;
-  int bytes_read = 0;
-  while (true) {
-    bytes_read = read(_clientFd, buffer, MAX_BUFFER_SIZE);
-    if (bytes_read > 0) {
-      buffer[bytes_read] = '\0';
-      ss << buffer;
-      total_read += bytes_read;
-    } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-      continue;
-    } else {
-      if (bytes_read < 0) {
-        Log::getInstance().error(std::strerror(errno));
-      }
-      close(_clientFd);
-      break;
-    }
-  }
-  return total_read;
 }
 
 int readMore(std::stringstream &ss, int _clientFd) {
@@ -659,17 +637,12 @@ int HttpRequestParser::handshake() {
 }
 
 bool HttpRequestParser::validateHttpVersion() {
-  if (HttpMaps::httpRequestVersionMap.find(request.getHttpVersion()) !=
-      HttpMaps::httpRequestVersionMap.end()) {
-    request.setHttpVersion(HttpMaps::httpRequestVersionMap.at(
-        HttpMaps::httpRequestVersionMap.find(request.getHttpVersion())->first));
-    if (request.getHttpVersionEnum() != HttpRequestVersion::HTTP_1_1)
-      return false;
-    return true;
-  } else {
-    request.setHttpVersion(HttpRequestVersion::UNKNOWN);
+  auto version =
+      HttpMaps::getInstance().getVersionEnum(request.getHttpVersion());
+  request.setHttpVersion(version);
+  if (request.getHttpVersionEnum() != HttpRequestVersion::HTTP_1_1)
     return false;
-  }
+  return true;
 }
 
 void HttpRequestParser::parseQueryParams(std::string query) {

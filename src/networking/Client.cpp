@@ -138,7 +138,8 @@ bool Client::execute() {
     case HttpRequestHandler::SEND_UPLOADED_FILE: {
       Log::getInstance().debug("Successful request. Send Uploaded File");
       _response.setStatusCode(200);
-      std::string mimeType = HttpMaps::getMimeType(request.getUri());
+      std::string mimeType =
+          HttpMaps::getInstance().getMimeType(request.getUri());
       _response.setFile("." + request.getUri(), mimeType);
       _response.sendResponse(_fd);
       break;

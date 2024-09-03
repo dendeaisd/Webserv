@@ -1,14 +1,18 @@
 #include "../../include/request/HttpMaps.hpp"
 
-const std::unordered_map<std::string, HttpRequestMethod>
-    HttpMaps::httpRequestMethodMap = initHttpRequestMethodMap();
+HttpMaps::HttpMaps() {
+  httpRequestMethodMap = initHttpRequestMethodMap();
+  httpRequestVersionMap = initHttpRequestVersionMap();
+  headerSet = initHeaderSet();
+  requiredHeaders1_1 = initRequiredHeaders1_1();
+}
 
-const std::unordered_map<std::string, HttpRequestVersion>
-    HttpMaps::httpRequestVersionMap = initHttpRequestVersionMap();
-
-const std::set<std::string> HttpMaps::headerSet = initHeaderSet();
-const std::set<std::string> HttpMaps::requiredHeaders1_1 =
-    initRequiredHeaders1_1();
+HttpMaps::~HttpMaps() {
+  httpRequestMethodMap.clear();
+  httpRequestVersionMap.clear();
+  headerSet.clear();
+  requiredHeaders1_1.clear();
+}
 
 std::unordered_map<std::string, HttpRequestMethod>
 HttpMaps::initHttpRequestMethodMap() {
@@ -82,4 +86,24 @@ std::string HttpMaps::getMimeType(const std::string &path) {
     return it->second;
   }
   return "application/octet-stream";
+}
+
+HttpRequestMethod HttpMaps::getMethodEnum(std::string method) {
+  return httpRequestMethodMap.find(method) != httpRequestMethodMap.end()
+             ? httpRequestMethodMap.at(method)
+             : HttpRequestMethod::UNKNOWN;
+}
+
+HttpRequestVersion HttpMaps::getVersionEnum(std::string version) {
+  return httpRequestVersionMap.find(version) != httpRequestVersionMap.end()
+             ? httpRequestVersionMap.at(version)
+             : HttpRequestVersion::UNKNOWN;
+}
+
+bool HttpMaps::isHeaderValid(const std::string &header) {
+  return headerSet.find(header) != headerSet.end();
+}
+
+bool HttpMaps::isHeaderRequired1_1(const std::string &header) {
+  return requiredHeaders1_1.find(header) != requiredHeaders1_1.end();
 }
