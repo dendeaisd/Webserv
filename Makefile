@@ -78,13 +78,21 @@ fclean:
 
 re: fclean all
 
+CONTAINER_NAME := webserv
+IMAGE_NAME := webserv
+HOST_DIR = $(shell pwd)
+CONTAINER_DIR = /usr/src/app
+
 docker-build:
-	@docker build -t server_test .
+	@docker build -t $(IMAGE_NAME) .
 
-docker-run:
-	@docker run -p 8080:8080 --rm server_test
+docker-run: docker-build
+	@docker run -it -p 8080:8080 -p 8081:8081 -p 8082:8082 --rm --name $(CONTAINER_NAME) -v $(HOST_DIR):$(CONTAINER_DIR) $(IMAGE_NAME)
 
-docker-test: docker-build
-	@docker run -p 8080:8080 --rm server_test ./run_tests
+docker-ssh:
+	@docker exec -it $(CONTAINER_NAME) /bin/bash
 
-.PHONY: all clean fclean re
+docker-purge:
+	@docker rm -f $(CONTAINER_NAME) || true
+
+.PHONY: all clean fclean re docker-build docker-run docker-purge

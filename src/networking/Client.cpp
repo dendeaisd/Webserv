@@ -150,6 +150,7 @@ bool Client::execute() {
       std::string responseString = _response.getResponse();
       Log::getInstance().debug(responseString);
       send(_fd, responseString.c_str(), responseString.length(), 0);
+      break;
     }
     default: {
       send(_fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);

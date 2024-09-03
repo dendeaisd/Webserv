@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 
 #include <chrono>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <thread>
@@ -127,7 +128,7 @@ bool HttpResponse::sendResponse(int fd) {
           send(fd, buffer + totalSent, bytesToSend - totalSent, 0);
       if (bytesSent < 0) {
         Log::getInstance().error("Failed to send file: " + _file +
-                                 ". Error: " + strerror(errno));
+                                 ". Error: " + std::strerror(errno));
         if (errno == EWOULDBLOCK || errno == EAGAIN) {
           // sleep a bit
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
