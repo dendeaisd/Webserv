@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/03 08:37:09 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/03 14:03:56 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,13 @@ class Tokenization {
 
  private:
   void separateTokenStringsFromLine(std::string &line);
-  void identifyTokenType();
-  void lineNumberAddToTokens();
+  void lineNumberAddToLineOfTokens(size_t currentLineNumber);
+  void identifyTokenLineTypes();
+  void checkAndSetSemikolonInToken();
+  void removeSemikolonFromToken();
+  void bracketIdentification();
   void addToLineTokensToTokenChain();
-  void clearTokenFromLine();
+  void clearTokenLine();
 
   std::vector<std::unique_ptr<TokenNode> > _tokensFromLine;
   std::vector<std::unique_ptr<TokenNode> > _chainOfTokens;

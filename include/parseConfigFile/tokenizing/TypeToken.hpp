@@ -1,13 +1,15 @@
 #ifndef TYPE_TOKEN_HPP
 #define TYPE_TOKEN_HPP
 
+#include <iostream>
+
 enum class TypeToken {
   WORKER_PROCESS = 0,
   PID = 1,
   ERROR_LOG = 2,
   GEO_IP_COUNTRY = 3,
-  PROXY_CHACHE = 4,
-  PROXY_CHACHE_USE_STALE = 5,
+  PROXY_CACHE = 4,
+  PROXY_CACHE_USE_STALE = 5,
   GZIP = 6,
   GZIP_TYPES = 7,
   LIMIT_RED_ZONE = 8,
@@ -32,7 +34,11 @@ enum class TypeToken {
   SERVER = 27,
   HTTP = 28,
   LOCATION = 29,
-  DEFAULT = 30
+  OPEN_BRACKET = 30,
+  CLOSING_BRACKET = 31,
+  DEFAULT = 32
 };
+
+std::ostream &operator << (std::ostream &outStream, const TypeToken &type);
 
 #endif
