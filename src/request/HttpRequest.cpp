@@ -1,6 +1,8 @@
 #include "../../include/request/HttpRequest.hpp"
 
+#include <fstream>
 #include <iostream>
+#include <sstream>
 
 #include "../../include/log/Log.hpp"
 #include "../../include/request/HttpMaps.hpp"
@@ -224,6 +226,29 @@ std::string HttpRequest::getAttachment(std::string key) {
 
 std::map<std::string, std::string> HttpRequest::getAttachments() {
   return _attachments;
+}
+
+void HttpRequest::addInjection(std::string injection) {
+  if (injection.empty()) {
+    Log::getInstance().debug("Injection is empty");
+    return;
+  }
+  _injections.push_back(injection);
+}
+
+std::string HttpRequest::getInjections() {
+  std::stringstream ss;
+  for (auto it = _injections.begin(); it != _injections.end(); it++) {
+    std::ifstream file(*it);
+    if (file.is_open()) {
+      ss << file.rdbuf();
+      file.close();
+    } else {
+      Log::getInstance().error("Failed to open file: " + *it);
+    }
+  }
+  std::cout << ss.str() << std::endl;
+  return ss.str();
 }
 
 std::string HttpRequest::getRequestTime() {

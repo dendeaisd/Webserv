@@ -31,7 +31,8 @@ class Client {
   bool sendDirectoryListings(const std::string& path);
 
   std::string generateDirectoryListing(const std::string& path,
-                                       const std::string& requestUri);
+                                       const std::string& requestUri,
+                                       const std::string& inject);
   bool handleContinue();
   bool execute();
 };
