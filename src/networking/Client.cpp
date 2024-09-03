@@ -15,11 +15,11 @@
 
 #define BUFFER_SIZE 4096
 
-Client::Client(int fd) : fd(fd) { fcntl(fd, F_SETFL, O_NONBLOCK); }
+Client::Client(int fd) : _fd(fd) { fcntl(fd, F_SETFL, O_NONBLOCK); }
 
-Client::~Client() { close(fd); }
+Client::~Client() { close(_fd); }
 
-int Client::getFd() const { return fd; }
+int Client::getFd() const { return _fd; }
 
 const char* HTTP_RESPONSE =
     "HTTP/1.1 200 OK\r\n"
@@ -29,33 +29,33 @@ const char* HTTP_RESPONSE =
     "Hello, World!";
 
 bool Client::sendDirectoryListings(const std::string& path) {
-  auto req = parser.getHttpRequest();
+  auto req = _parser.getHttpRequest();
   std::string requestUri = req.getUri();
   std::string dirListingHtml =
       generateDirectoryListing(path, requestUri, req.getInjections());
 
-  response.setStatusCode(200);
-  response.setBody(dirListingHtml);
-  response.setContentType("text/html");
-  std::string responseString = response.getResponse();
-  Log::getInstance().debug("Directory listing response: " + responseString);
-  send(fd, responseString.c_str(), responseString.length(), 0);
+  _response.setStatusCode(200);
+  _response.setBody(dirListingHtml);
+  _response.setContentType("text/html");
+
+  std::string responseString = _response.getResponse();
+  send(_fd, responseString.c_str(), responseString.length(), 0);
   return true;
 }
 
 bool Client::sendDefaultFavicon() {
-  response.setStatusCode(200);
-  response.setFile("./default/favicon-dt.png", "image/x-icon");
-  std::string responseString = response.getResponse();
-  send(fd, responseString.c_str(), responseString.length(), 0);
+  _response.setStatusCode(200);
+  _response.setFile("./default/favicon-dt.png", "image/x-icon");
+  std::string responseString = _response.getResponse();
+  send(_fd, responseString.c_str(), responseString.length(), 0);
   return true;
 }
 
 bool Client::sendDefaultPage() {
-  response.setStatusCode(200);
-  response.setFile("./default/index.html", "text/html", "inline");
-  std::string responseString = response.getResponse();
-  send(fd, responseString.c_str(), responseString.length(), 0);
+  _response.setStatusCode(200);
+  _response.setFile("./default/index.html", "text/html", "inline");
+  std::string responseString = _response.getResponse();
+  send(_fd, responseString.c_str(), responseString.length(), 0);
   return true;
 }
 
@@ -85,22 +85,22 @@ std::string Client::generateDirectoryListing(const std::string& path,
 }
 
 bool Client::handleContinue() {
-  int status = parser.handshake();
+  int status = _parser.handshake();
   if (status != 200 && status != 201) {
     Log::getInstance().error("Something went wrong while processing request: " +
-                             parser.getHttpRequest().getHost());
-    response.setStatusCode(status);
-    std::string responseString = response.getResponse();
-    send(fd, responseString.c_str(), responseString.length(), 0);
-    close(fd);
+                             _parser.getHttpRequest().getHost());
+    _response.setStatusCode(status);
+    std::string responseString = _response.getResponse();
+    send(_fd, responseString.c_str(), responseString.length(), 0);
+    close(_fd);
     return false;
   }
-  if (parser.status == HttpRequestParseStatus::PARSED) {
-    auto request = parser.getHttpRequest();
-    response.setStatusCode(status);
-    std::string responseString = response.getResponse();
-    send(fd, responseString.c_str(), responseString.length(), 0);
-    close(fd);
+  if (_parser.status == HttpRequestParseStatus::PARSED) {
+    auto request = _parser.getHttpRequest();
+    _response.setStatusCode(status);
+    std::string responseString = _response.getResponse();
+    send(_fd, responseString.c_str(), responseString.length(), 0);
+    close(_fd);
     Log::getInstance().debug(
         "Successful multipart/octet-stream request with handshake");
   }
@@ -108,12 +108,12 @@ bool Client::handleContinue() {
 }
 
 bool Client::execute() {
-  auto request = parser.getHttpRequest();
+  auto request = _parser.getHttpRequest();
   switch (request.getHandler()) {
     case HttpRequestHandler::CGI: {
       Log::getInstance().debug("Successful request. CGI");
-      auto cgi = std::make_shared<CGI>(fd, request);
-      if (cgi->run()) Event::getInstance().addEvent(fd, cgi);
+      auto cgi = std::make_shared<CGI>(_fd, request);
+      if (cgi->run()) Event::getInstance().addEvent(_fd, cgi);
       break;
     }
     case HttpRequestHandler::FAVICON: {
@@ -137,30 +137,30 @@ bool Client::execute() {
     }
     case HttpRequestHandler::SEND_UPLOADED_FILE: {
       Log::getInstance().debug("Successful request. Send Uploaded File");
-      response.setStatusCode(200);
+      _response.setStatusCode(200);
       std::string mimeType = HttpMaps::getMimeType(request.getUri());
-      response.setFile("." + request.getUri(), mimeType);
-      response.sendResponse(fd);
+      _response.setFile("." + request.getUri(), mimeType);
+      _response.sendResponse(_fd);
       break;
     }
     case HttpRequestHandler::FILE_UPLOAD: {
-      response.setStatusCode(302);
-      response.setHeader("Location", "/uploads");
-      response.setContentType("text/html");
-      std::string responseString = response.getResponse();
+      _response.setStatusCode(302);
+      _response.setHeader("Location", "/uploads");
+      _response.setContentType("text/html");
+      std::string responseString = _response.getResponse();
       Log::getInstance().debug(responseString);
-      send(fd, responseString.c_str(), responseString.length(), 0);
+      send(_fd, responseString.c_str(), responseString.length(), 0);
     }
     default: {
-      send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
+      send(_fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
       break;
     }
   }
   Log::getInstance().info(request.getMethod() + " " + request.getHost() +
                           request.getUri());
   // clean up request/response objects
-  parser = HttpRequestParser();
-  response = HttpResponse();
+  _parser = HttpRequestParser();
+  _response = HttpResponse();
   return true;
 }
 
@@ -171,45 +171,46 @@ bool Client::handleRequest() {
   int status;
 
   while (true) {
-    if (parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+    if (_parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
       return handleContinue();
     }
     std::string raw = "";
-    bytes_read = read(fd, buffer, BUFFER_SIZE);
+    bytes_read = read(_fd, buffer, BUFFER_SIZE);
     if (bytes_read > 0) {
       buffer[bytes_read] = '\0';
       raw = buffer;
       while (bytes_read == BUFFER_SIZE) {
         raw.append(buffer, bytes_read);
-        bytes_read = read(fd, buffer, BUFFER_SIZE);
-        if (bytes_read > 0) buffer[bytes_read] = '\0';
+        bytes_read = read(_fd, buffer, BUFFER_SIZE);
+        buffer[bytes_read] = '\0';
       }
-      parser = HttpRequestParser(raw, fd);
-      status = parser.parse();
+      _parser = HttpRequestParser(raw, _fd);
+      status = _parser.parse();
       if ((status == 200 || status == 201) &&
-          parser.status == HttpRequestParseStatus::PARSED) {
+          _parser.status == HttpRequestParseStatus::PARSED) {
         return execute();
       } else if ((status == 200 || status == 201) &&
-                 parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+                 _parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
         Log::getInstance().debug("Request is to be continued: " +
-                                 parser.getHttpRequest().getHost());
+                                 _parser.getHttpRequest().getHost());
         return true;
       }
-      auto request = parser.getHttpRequest();
+      auto request = _parser.getHttpRequest();
       Log::getInstance().error(
           "Something went wrong while processing request: " + raw);
-      response.setStatusCode(status);
-      std::string responseString = response.getResponse();
-      send(fd, responseString.c_str(), responseString.length(), 0);
-      close(fd);
+      _response.setStatusCode(status);
+      std::string responseString = _response.getResponse();
+      send(_fd, responseString.c_str(), responseString.length(), 0);
+      close(_fd);
+
       return false;
     } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
       continue;
     } else {
       if (bytes_read < 0) {
-        throw net::readFailed(std::strerror(errno));
+        throw readFailed(std::strerror(errno));
       }
-      close(fd);
+      close(_fd);
       return false;
     }
   }

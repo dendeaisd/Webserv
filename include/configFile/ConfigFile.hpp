@@ -20,7 +20,6 @@ enum EBracketStatus {
   LOCATION_BRACKET = 3
 };
 
-
 class ConfigFile {
  public:
   ConfigFile();
