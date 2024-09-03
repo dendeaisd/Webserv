@@ -37,8 +37,8 @@ bool Client::sendDirectoryListings(const std::string& path) {
   response.setStatusCode(200);
   response.setBody(dirListingHtml);
   response.setContentType("text/html");
-
   std::string responseString = response.getResponse();
+  Log::getInstance().debug("Directory listing response: " + responseString);
   send(fd, responseString.c_str(), responseString.length(), 0);
   return true;
 }
@@ -63,6 +63,7 @@ std::string Client::generateDirectoryListing(const std::string& path,
                                              const std::string& requestUri,
                                              const std::string& inject) {
   std::stringstream ss;
+  // (void)inject;
   ss << "<html><body>";
   ss << inject;
   ss << "<h1>Directory Listing for " << path << "</h1><ul>";
@@ -79,6 +80,7 @@ std::string Client::generateDirectoryListing(const std::string& path,
        << "</a></li>";
   }
   ss << "</ul></body></html>";
+  Log::getInstance().debug("TO return directory listing: " + ss.str());
   return ss.str();
 }
 
@@ -141,6 +143,14 @@ bool Client::execute() {
       response.sendResponse(fd);
       break;
     }
+    case HttpRequestHandler::FILE_UPLOAD: {
+      response.setStatusCode(302);
+      response.setHeader("Location", "/uploads");
+      response.setContentType("text/html");
+      std::string responseString = response.getResponse();
+      Log::getInstance().debug(responseString);
+      send(fd, responseString.c_str(), responseString.length(), 0);
+    }
     default: {
       send(fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
       break;
@@ -148,11 +158,14 @@ bool Client::execute() {
   }
   Log::getInstance().info(request.getMethod() + " " + request.getHost() +
                           request.getUri());
+  // clean up request/response objects
+  parser = HttpRequestParser();
+  response = HttpResponse();
   return true;
 }
 
 bool Client::handleRequest() {
-  char buffer[BUFFER_SIZE];
+  char buffer[BUFFER_SIZE + 1];
 
   int bytes_read;
   int status;
@@ -164,12 +177,13 @@ bool Client::handleRequest() {
     std::string raw = "";
     bytes_read = read(fd, buffer, BUFFER_SIZE);
     if (bytes_read > 0) {
+      buffer[bytes_read] = '\0';
       raw = buffer;
       while (bytes_read == BUFFER_SIZE) {
         raw.append(buffer, bytes_read);
         bytes_read = read(fd, buffer, BUFFER_SIZE);
+        if (bytes_read > 0) buffer[bytes_read] = '\0';
       }
-      std::cout << raw << std::endl;
       parser = HttpRequestParser(raw, fd);
       status = parser.parse();
       if ((status == 200 || status == 201) &&

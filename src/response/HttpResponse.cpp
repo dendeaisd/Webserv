@@ -3,8 +3,10 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 
+#include <chrono>
 #include <fstream>
 #include <iostream>
+#include <thread>
 
 #include "../../include/log/Log.hpp"
 #include "../../include/request/Helpers.hpp"
@@ -116,12 +118,24 @@ bool HttpResponse::sendResponse(int fd) {
 
   const std::size_t bufferSize = 8192;  // 8 KB buffer
   char buffer[bufferSize];
-  size_t bytesSent = 0;
   while (file.read(buffer, bufferSize) || file.gcount() > 0) {
-    bytesSent = send(fd, buffer, file.gcount(), 0);
-    if (bytesSent < 0) {
-      Log::getInstance().error("Failed to send file: " + _file);
-      return false;
+    size_t bytesToSend = file.gcount();
+    size_t totalSent = 0;
+
+    while (totalSent < bytesToSend) {
+      ssize_t bytesSent =
+          send(fd, buffer + totalSent, bytesToSend - totalSent, 0);
+      if (bytesSent < 0) {
+        Log::getInstance().error("Failed to send file: " + _file +
+                                 ". Error: " + strerror(errno));
+        if (errno == EWOULDBLOCK || errno == EAGAIN) {
+          // sleep a bit
+          std::this_thread::sleep_for(std::chrono::milliseconds(100));
+          continue;
+        }
+        return false;
+      }
+      totalSent += bytesSent;
     }
   }
   file.close();

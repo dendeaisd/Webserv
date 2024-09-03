@@ -58,6 +58,9 @@ void HttpRequestParser::electHandler() {
   } else if (request.getUri().substr(0, 9) == "/uploads/" &&
              request.getMethodEnum() == HttpRequestMethod::GET) {
     request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
+  } else if (request.getUri() == "/uploads" &&
+             request.getMethodEnum() == HttpRequestMethod::POST) {
+    request.setHandler(HttpRequestHandler::FILE_UPLOAD);
   } else {
     request.setHandler(HttpRequestHandler::STATIC);
   }
@@ -117,7 +120,6 @@ bool HttpRequestParser::canHaveBody() {
 
 int HttpRequestParser::parse() {
   std::stringstream ss(raw);
-  Log::getInstance().debug("Raw request:\n" + raw);
   std::string requestLine = getLineSanitized(ss);
   parseRequestLine((char *)requestLine.c_str(), requestLine.length());
   if (status == HttpRequestParseStatus::INVALID ||
@@ -126,25 +128,40 @@ int HttpRequestParser::parse() {
                              requestLine);
     return 400;
   }
+  Log::getInstance().debug("Request line parsed");
   if (!isAllowedMethod(request.getMethod())) {
     Log::getInstance().error("Invalid method: " + request.getMethod());
     return 405;  // Method Not Allowed
   }
+  Log::getInstance().debug("Method allowed");
   if (!validateHttpVersion()) {
     Log::getInstance().error("Invalid HTTP version. expected HTTP/1.1 got " +
                              request.getHttpVersion());
     return 505;  // HTTP Version Not Supported
   }
+  Log::getInstance().debug("HTTP version validated");
   parseHeaders(ss);
   if (status == HttpRequestParseStatus::INVALID) return 400;
+  Log::getInstance().debug("Headers parsed");
   size_t contentLength = request.getContentLength();
   if (!isAllowedContentLength(contentLength)) {
     Log::getInstance().error("Invalid content length " +
                              std::to_string(contentLength));
     return 413;  // Payload Too Large
   }
+  Log::getInstance().debug("Content length validated");
   injectUploadFormIfNeeded();
   electHandler();
+  if (request.getHandler() == HttpRequestHandler::SEND_UPLOADED_FILE) {
+    // check if file exists
+    std::string filename =
+        request.getUri().substr(std::string(UPLOAD_DIR).length());
+    if (!exists(UPLOAD_DIR + filename)) {
+      Log::getInstance().error("File not found: " + filename);
+      return 404;  // Not Found
+    }
+  }
+  Log::getInstance().debug("Handler elected");
   size_t pos = request.getUri().find("?");
   if (pos != std::string::npos) {
     request.setQuery(request.getUri().substr(pos + 1));
@@ -431,7 +448,6 @@ int readAllAvailable(std::stringstream &ss, int _clientFd) {
       buffer[bytes_read] = '\0';
       ss << buffer;
       total_read += bytes_read;
-      Log::getInstance().debug("Read more data: " + std::string(buffer));
     } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
       continue;
     } else {
@@ -453,7 +469,6 @@ int readMore(std::stringstream &ss, int _clientFd) {
     if (bytes_read > 0) {
       buffer[bytes_read] = '\0';
       ss << buffer;
-      Log::getInstance().debug("Read more data: " + std::string(buffer));
       return bytes_read;
     } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
       continue;
@@ -497,7 +512,6 @@ bool HttpRequestParser::writeToFile(std::string filename,
   while (std::getline(ss, data)) {
     if (data.find("\r") != std::string::npos)
       data = data.erase(data.find("\r"), 1);
-    Log::getInstance().debug("Data: " + data);
     if (checkForTerminator(data) || data.find(boundary) != std::string::npos) {
       boundaryFound = true;
       break;
@@ -537,14 +551,12 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   status = HttpRequestParseStatus::EXPECT_CONTINUE;
   if (boundary.empty()) parseBoundary();
   while ((data = getLineSanitized(ss)).length() > 0) {
-    Log::getInstance().debug("Multipart Data: " + data);
     if (checkForTerminator(data)) break;
     std::string filename;
     std::string key;
     std::string contentType;
     while ((data = getLineSanitized(ss)).length() > 0) {
       if (data.find(boundary) != std::string::npos) continue;
-      Log::getInstance().debug("Line: " + data);
       key = Helpers::getFormKeyIfExists(data);
       if (key.empty()) {
         filename = Helpers::getFilenameIfExists(data);
