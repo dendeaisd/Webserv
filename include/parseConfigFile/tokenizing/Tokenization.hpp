@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/02 15:43:49 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/03 08:37:09 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ class Tokenization {
   std::vector<TokenNode> getTokens() const;
 
  private:
-  std::string getNextLine(std::ifstream &file);
   void separateTokenStringsFromLine(std::string &line);
   void identifyTokenType();
   void lineNumberAddToTokens();

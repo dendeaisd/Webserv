@@ -11,16 +11,9 @@
 Tokenization::Tokenization(std::ifstream &file) {
   std::string line;
   std::vector<std::string> seperaatedTokensStr;
-  do {
-    line = getNextLine(file);
+  while (std::getline(file, line)) {
     separateTokenStringsFromLine(line);
-  } while (line.empty() == false);
-}
-
-std::string Tokenization::getNextLine(std::ifstream &file) {
-  std::string line;
-  std::getline(file, line);
-  return (line);
+  }
 }
 
 void Tokenization::separateTokenStringsFromLine(std::string &line)
@@ -33,6 +26,6 @@ void Tokenization::separateTokenStringsFromLine(std::string &line)
     _tokensFromLine.push_back(std::make_unique<TokenNode>());
     _tokensFromLine.back()->_tokenStr = oneStr;
   }
-  for (auto it : _tokensFromLine)
-    std::cout << "[" << it << "]"<<  std::endl;
+  for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++)
+    std::cout << "[" << (*it)->_tokenStr << "]"<<  std::endl;
 }
