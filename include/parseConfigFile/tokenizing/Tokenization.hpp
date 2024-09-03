@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/03 14:03:56 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/03 20:21:43 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ class Tokenization {
   void checkAndSetSemikolonInToken();
   void removeSemikolonFromToken();
   void bracketIdentification();
+  void contextIdentification();
   void addToLineTokensToTokenChain();
   void clearTokenLine();
 

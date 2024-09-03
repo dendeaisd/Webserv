@@ -40,6 +40,7 @@ void Tokenization::identifyTokenLineTypes() {
   checkAndSetSemikolonInToken();
   removeSemikolonFromToken();
   bracketIdentification();
+  contextIdentification();
 }
 
 void Tokenization::checkAndSetSemikolonInToken() {
@@ -67,15 +68,29 @@ void Tokenization::bracketIdentification() {
              (*it)->_tokenStr.size() == 1)
       (*it)->_type = TypeToken::OPEN_BRACKET;
     /*
-    else if ((*it)->_tokenStr.find('}') != std::string::npos &&
-             (*it)->_tokenStr.size() > 1)
-      // trow exception
+       else if ((*it)->_tokenStr.find('}') != std::string::npos &&
+       (*it)->_tokenStr.size() > 1)
+    // trow exception
     */
   }
+}
+
+void Tokenization::contextIdentification() {
+  for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
+    if ((*it)->_tokenStr == "http")
+        (*it)->_type = TypeToken::HTTP;
+    }
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     std::cout << "STR: [" << (*it)->_tokenStr << "]" << std::endl;
     std::cout << "line number: [" << (*it)->_foundLine << "]\n";
     std::cout << "semicolon set: [" << (*it)->_semikolonSet << "]\n";
     std::cout << "type: [" << (*it)->_type << "]\n\n";
   }
+    /*
+    else if ((*it)->_tokenStr == ("server")
+      //throw
+    else if ((*it)->_tokenStr == ("")
+      //throw
+      */
 }
+
