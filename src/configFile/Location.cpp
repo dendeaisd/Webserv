@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/30 15:50:59 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/03 22:11:45 by ramymoussa       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,8 @@ void Location::cgiSetSeparatedValue(const std::string &value) {
   char *tmp_value;
 
   tmp_value = strdup(value.c_str());
-  fileType = std::strtok(tmp_value, &delimiter);
-  pathToInterpreter = std::strtok(NULL, &delimiter);
+  fileType = strtok(tmp_value, &delimiter);
+  pathToInterpreter = strtok(NULL, &delimiter);
   _cgi.insert({fileType, pathToInterpreter});
   free(tmp_value);
 }

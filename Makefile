@@ -1,6 +1,6 @@
 NAME        :=  webserv
 CC          :=  c++
-CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g -fsanitize=address
+CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g
 
 INCLUDE_DIRS := -I./include -I./tester -I./include/configFile
 TESTER_MAIN := tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
@@ -87,7 +87,7 @@ docker-build:
 	@docker build -t $(IMAGE_NAME) .
 
 docker-run: docker-build
-	@docker run -it -p 8080:8080 -p 8081:8081 -p 8082:8082 --rm --name $(CONTAINER_NAME) -v $(HOST_DIR):$(CONTAINER_DIR) $(IMAGE_NAME)
+	@docker run -it -p 8080:8080 -p 8081:8081 -p 8082:8082 --name $(CONTAINER_NAME) -v $(HOST_DIR):$(CONTAINER_DIR) $(IMAGE_NAME)
 
 docker-ssh:
 	@docker exec -it $(CONTAINER_NAME) /bin/bash
