@@ -12,7 +12,7 @@ jobs:
     - name: install python dependencies
       run: sudo apt-get install python3-setuptools
     - name: run clang-format linter
-      uses: DoozyX/clang-format-lint-action@v0.16.2
+      uses: LLVM-Mirror/clang-format-lint-action@v1
       with:
         source: '.'
         extensions: 'hpp,cpp,tpp,ipp'
