@@ -1,14 +1,8 @@
 import os
-import cgitb
-import cgi
 import logging
 
 logging.basicConfig(filename="hello.log", level=logging.DEBUG)
-cgitb.enable()
 def return_info_in_html():
-	logging.debug("Hello, CGI!")
-	form = cgi.FieldStorage()
-	logging.debug(f"Keys: {form.keys()}")
 	envp = os.environ
 	content = "<h1>Environment Variables</h1>"
 	content += "<table>"
