@@ -6,13 +6,14 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/03 22:11:45 by ramymoussa       ###   ########.fr       */
+/*   Updated: 2024/09/04 19:37:28 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
 
 #include <string.h>
+#include <sstream>
 
 Location::Location() {
   _urlValue.clear();
@@ -55,14 +56,11 @@ void Location::locationSaveDirectiveValue(const std::string &key,
 void Location::cgiSetSeparatedValue(const std::string &value) {
   std::string fileType;
   std::string pathToInterpreter;
-  char delimiter = ' ';
-  char *tmp_value;
+  std::istringstream stream(value);
 
-  tmp_value = strdup(value.c_str());
-  fileType = strtok(tmp_value, &delimiter);
-  pathToInterpreter = strtok(NULL, &delimiter);
+  stream >> fileType;
+  stream >> pathToInterpreter;
   _cgi.insert({fileType, pathToInterpreter});
-  free(tmp_value);
 }
 
 void Location::printLocation() {
