@@ -9,9 +9,8 @@ jobs:
     steps:
     - name: checkout code
       uses: actions/checkout@v2
-
-    - name: run clang-format linter
-      uses: DoozyX/clang-format-lint-action@v0.16.2
+    - name: clang-format Check
+      uses: jidicula/clang-format-action@v4.13.0        
       with:
         source: '.'
         extensions: 'hpp,cpp,tpp,ipp'
