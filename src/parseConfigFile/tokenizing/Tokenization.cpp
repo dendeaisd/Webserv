@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "ExceptionsTokenization.hpp"
+
 Tokenization::Tokenization(std::ifstream &file) {
   std::string line;
   size_t currentLineNumber = 0;
@@ -68,11 +69,10 @@ void Tokenization::bracketIdentification() {
     else if ((*it)->_tokenStr.find('}') != std::string::npos &&
              (*it)->_tokenStr.size() == 1)
       (*it)->_type = TypeToken::OPEN_BRACKET;
-    /*
-       else if ((*it)->_tokenStr.find('}') != std::string::npos &&
-       (*it)->_tokenStr.size() > 1)
-    // trow exception
-    */
+    else if (((*it)->_tokenStr.find('{') != std::string::npos ||
+             (*it)->_tokenStr.find('}') != std::string::npos) &&
+             (*it)->_tokenStr.size() != 1)
+      throw invalidFormat("Breacktets neeed to be seperated by spaces");
   }
 }
 
