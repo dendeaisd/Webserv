@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "ExceptionsTokenization.hpp"
 Tokenization::Tokenization(std::ifstream &file) {
   std::string line;
   size_t currentLineNumber = 0;
@@ -78,19 +79,33 @@ void Tokenization::bracketIdentification() {
 void Tokenization::contextIdentification() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     if ((*it)->_tokenStr == "http")
-        (*it)->_type = TypeToken::HTTP;
-    }
+      (*it)->_type = TypeToken::HTTP;
+    else if ((*it)->_tokenStr == "server")
+      (*it)->_type = TypeToken::SERVER;
+    else if ((*it)->_tokenStr == "location")
+      (*it)->_type = TypeToken::LOCATION;
+    else if ((*it)->_tokenStr == "events")
+      throw invalidContext("Events context is not implemented");
+    else if ((*it)->_tokenStr == "stream")
+      throw invalidContext("Stream context is not implemented");
+    else if ((*it)->_tokenStr == "mail")
+      throw invalidContext("Mail context is not implemented");
+    else if ((*it)->_tokenStr == "upstream")
+      throw invalidContext("Upstream context is not implemented");
+    else if ((*it)->_tokenStr == "limit_except")
+      throw invalidContext("Limit_except context is not implemented");
+    else if ((*it)->_tokenStr == "map")
+      throw invalidContext("Map context is not implemented");
+    else if ((*it)->_tokenStr == "types")
+      throw invalidContext("Types context is not implemented");
+    else if ((*it)->_tokenStr == "geo")
+      throw invalidContext("Geo context is not implemented");
+  }
+
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     std::cout << "STR: [" << (*it)->_tokenStr << "]" << std::endl;
     std::cout << "line number: [" << (*it)->_foundLine << "]\n";
     std::cout << "semicolon set: [" << (*it)->_semikolonSet << "]\n";
     std::cout << "type: [" << (*it)->_type << "]\n\n";
   }
-    /*
-    else if ((*it)->_tokenStr == ("server")
-      //throw
-    else if ((*it)->_tokenStr == ("")
-      //throw
-      */
 }
-
