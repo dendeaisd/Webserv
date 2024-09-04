@@ -9,7 +9,8 @@ jobs:
     steps:
     - name: checkout code
       uses: actions/checkout@v2
-
+    - name: install python dependencies
+      run: sudo apt-get install python3-setuptools
     - name: run clang-format linter
       uses: DoozyX/clang-format-lint-action@v0.16.2
       with:
