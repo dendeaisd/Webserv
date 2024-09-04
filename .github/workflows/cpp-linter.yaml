@@ -9,10 +9,8 @@ jobs:
     steps:
     - name: checkout code
       uses: actions/checkout@v2
-    - name: install python dependencies
-      run: sudo apt-get install python3-setuptools
-    - name: run clang-format linter
-      uses: LLVM-Mirror/clang-format-lint-action@v1
+    - name: clang-format Check
+      uses: jidicula/clang-format-action@v4.13.0        
       with:
         source: '.'
         extensions: 'hpp,cpp,tpp,ipp'
