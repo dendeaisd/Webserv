@@ -33,7 +33,8 @@ enum class HttpRequestHandler {
   DIRECTORY_LISTING,
   LIST_UPLOADS,
   SEND_UPLOADED_FILE,
-  FILE_UPLOAD
+  FILE_UPLOAD,
+  BENCHMARK,
 };
 
 enum class HttpFileUploadStatus {

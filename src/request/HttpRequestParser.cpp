@@ -42,7 +42,7 @@ HttpRequest HttpRequestParser::getHttpRequest() {
   }
 }
 
-void HttpRequestParser::electHandler() {
+bool HttpRequestParser::electHandler() {
   if (isCgiRequest()) {
     request.setHandler(HttpRequestHandler::CGI);
   } else if (isFaviconRequest()) {
@@ -61,9 +61,13 @@ void HttpRequestParser::electHandler() {
   } else if (request.getUri() == "/uploads" &&
              request.getMethodEnum() == HttpRequestMethod::POST) {
     request.setHandler(HttpRequestHandler::FILE_UPLOAD);
+  } else if (request.getUri() == "/benchmark") {
+    request.setHandler(HttpRequestHandler::BENCHMARK);
+    return false;
   } else {
     request.setHandler(HttpRequestHandler::STATIC);
   }
+  return true;
 }
 
 bool HttpRequestParser::isCgiRequest() {
@@ -140,6 +144,10 @@ int HttpRequestParser::parse() {
     return 505;  // HTTP Version Not Supported
   }
   Log::getInstance().debug("HTTP version validated");
+  bool shouldProceed = electHandler();
+  if (!shouldProceed) {
+    return 200;
+  }
   parseHeaders(ss);
   if (status == HttpRequestParseStatus::INVALID) return 400;
   Log::getInstance().debug("Headers parsed");
@@ -151,7 +159,7 @@ int HttpRequestParser::parse() {
   }
   Log::getInstance().debug("Content length validated");
   injectUploadFormIfNeeded();
-  electHandler();
+
   if (request.getHandler() == HttpRequestHandler::SEND_UPLOADED_FILE) {
     // check if file exists
     std::string filename =

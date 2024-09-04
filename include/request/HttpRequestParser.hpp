@@ -33,7 +33,7 @@ class HttpRequestParser {
   HttpFileUploadStatus currentFileUploadStatus;
   std::string currentFileUploadName;
   size_t total_read;
-  void electHandler();
+  bool electHandler();
   void parseRequestLine(char *requestLine, size_t len);
   void parseHeaders(std::stringstream &ss);
   void parseBody(std::stringstream &ss);

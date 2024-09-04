@@ -87,7 +87,7 @@ docker-build:
 	@docker build -t $(IMAGE_NAME) .
 
 docker-run: docker-build
-	@docker run -it -p 8080:8080 -p 8081:8081 -p 8082:8082 --name $(CONTAINER_NAME) -v $(HOST_DIR):$(CONTAINER_DIR) $(IMAGE_NAME)
+	@docker run --cap-add=NET_ADMIN -it -p 8080:8080 -p 8081:8081 -p 8082:8082 --name $(CONTAINER_NAME) -v $(HOST_DIR):$(CONTAINER_DIR) $(IMAGE_NAME)
 
 docker-ssh:
 	@docker exec -it $(CONTAINER_NAME) /bin/bash

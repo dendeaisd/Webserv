@@ -245,7 +245,6 @@ std::string HttpRequest::getInjections() {
       Log::getInstance().error("Failed to open file: " + *it);
     }
   }
-  std::cout << ss.str() << std::endl;
   return ss.str();
 }
 
