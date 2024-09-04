@@ -4,18 +4,10 @@
 #include <stdexcept>
 #include <string>
 
-namespace net {
-
 class socketException : public std::runtime_error {
  public:
   socketException(const std::string& message) : std::runtime_error(message) {}
 };
-
-// class invalidAddress : public socketException {
-//  public:
-//   invalidAddress(const std::string& address)
-//       : socketException("Invalid address: " + address) {}
-// };
 
 class bindFailed : public socketException {
  public:
@@ -58,7 +50,5 @@ class setNonBlockingModeFailed : public socketException {
   setNonBlockingModeFailed(const std::string& message)
       : socketException("Failed to set non-blocking mode: " + message) {}
 };
-
-}  // namespace net
 
 #endif

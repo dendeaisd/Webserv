@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   SyntaxAnalysis.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/31 10:16:57 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/04 22:07:17 by ramymoussa       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,7 @@ EBracketStatus SyntaxAnalysis::transferStateToBracketStatus() {
       return (LOCATION_BRACKET);
       break;
   }
+  return (MAIN_BRACKET);
 }
 
 void SyntaxAnalysis::mainContextSaveDirective(const std::string &line) {
@@ -188,7 +189,8 @@ int SyntaxAnalysis::numberOfWordsSeparatedBySpaces(const std::string &str) {
   return (numberOfWords);
 }
 
-bool SyntaxAnalysis::isStoringState(const std::string &line, StoringStates state) {
+bool SyntaxAnalysis::isStoringState(const std::string &line,
+                                    StoringStates state) {
   std::istringstream stream(line);
   std::string onState;
   std::string stateAsStr;
@@ -200,7 +202,8 @@ bool SyntaxAnalysis::isStoringState(const std::string &line, StoringStates state
   return (false);
 }
 
-void SyntaxAnalysis::getStateAsString(std::string &stateStr, StoringStates &state) {
+void SyntaxAnalysis::getStateAsString(std::string &stateStr,
+                                      StoringStates &state) {
   switch (state) {
     case StoringStates::HTTPS_CONTEXT:
       stateStr = "http";

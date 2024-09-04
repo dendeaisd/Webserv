@@ -3,12 +3,14 @@
 #include <filesystem>
 #include <iostream>
 
+#include "../../include/log/Log.hpp"
+
 namespace fs = std::filesystem;
 
 void CGIFileManager::configure(std::string cgiDir) {
   // TEMP map for cgi executors
   if (_configured) {
-    std::cout << "CGIFileManager is already configured" << std::endl;
+    Log::getInstance().warning("CGIFileManager already configured");
     return;
   }
   cgiExecutors_[".php"] = "/usr/bin/php";

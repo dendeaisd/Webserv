@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stack>
+#include <string>
 
 #include "HttpContext.hpp"
 
@@ -19,7 +20,6 @@ enum EBracketStatus {
   SERVER_BRACKET = 2,
   LOCATION_BRACKET = 3
 };
-
 
 class SyntaxAnalysis {
  public:

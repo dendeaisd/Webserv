@@ -13,6 +13,7 @@ class HttpMaps {
       httpRequestVersionMap;
   static const std::set<std::string> requiredHeaders1_1;
   static const std::set<std::string> headerSet;
+  static std::string getMimeType(const std::string &uri);
 
  private:
   HttpMaps();

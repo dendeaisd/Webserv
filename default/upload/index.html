@@ -1,0 +1,39 @@
+<h1>Upload a file</h1>
+
+<input type="file" name="file">
+<button type="submit">Upload</button>
+<script>
+    document.querySelector('button').addEventListener('click', function (event) {
+        var file = document.querySelector('input[type=file]').files[0];
+        if (!file) {
+            console.error('No file selected');
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (event) {
+            console.log(event.target.result);
+            var arrayBuffer = event.target.result;
+            var blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+            const filename = file.name;
+            fetch('/uploads', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                    'Content-Disposition': 'attachment; filename="' + filename + '"',
+                },
+                body: blob
+            }).then(function (response) {
+                if (response.redirected) {
+                    window.location.href = '/uploads';
+                } else {
+                    return response.text().then(function (text) {
+                        throw new Error(text);
+                    });
+                }
+            }).then(function (text) {
+                console.log(text);
+            });
+        };
+        reader.readAsArrayBuffer(file);
+    });
+</script>
