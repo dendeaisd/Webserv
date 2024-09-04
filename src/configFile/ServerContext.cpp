@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/04 20:29:52 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/04 20:33:16 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,10 +66,10 @@ void ServerContext::printServerContent() const {
     listen_it++;
   }
 
-  for (auto it =  _portWithAdressListenValue.begin();
-       it !=  _portWithAdressListenValue.end(); it++) {
-    std::cout << "listen: adress [" << (*it).first << "] port ["
-              << (*it).second << "]\n";
+  for (auto it = _portWithAdressListenValue.begin();
+       it != _portWithAdressListenValue.end(); it++) {
+    std::cout << "listen: adress [" << (*it).first << "] port [" << (*it).second
+              << "]\n";
   }
 
   auto it_location = _locationContext.begin();
@@ -92,6 +92,6 @@ void ServerContext::addListen(const std::string &value) {
     std::string adress;
     std::getline(stream, adress, ':');
     stream >> port;
-     _portWithAdressListenValue.push_back(std::make_pair(adress, port));
+    _portWithAdressListenValue.push_back(std::make_pair(adress, port));
   }
 }
