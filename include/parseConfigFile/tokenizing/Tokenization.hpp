@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/03 20:21:43 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/05 10:57:05 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <set>
 
 #include "NodeToken.hpp"
 #include "TypeToken.hpp"
@@ -30,6 +31,7 @@ class Tokenization {
   std::vector<TokenNode> getTokens() const;
 
  private:
+  void loadInvalidContextsAndDirectives();
   void separateTokenStringsFromLine(std::string &line);
   void lineNumberAddToLineOfTokens(size_t currentLineNumber);
   void identifyTokenLineTypes();
@@ -42,6 +44,8 @@ class Tokenization {
 
   std::vector<std::unique_ptr<TokenNode> > _tokensFromLine;
   std::vector<std::unique_ptr<TokenNode> > _chainOfTokens;
+  std::set<std::string> _invalidContext;
+  std::set<std::string> _invalidDirective;
 };
 
 #endif

@@ -14,6 +14,7 @@ Tokenization::Tokenization(std::ifstream &file) {
   std::string line;
   size_t currentLineNumber = 0;
 
+  loadInvalidContextsAndDirectives();
   while (std::getline(file, line)) {
     currentLineNumber++;
     separateTokenStringsFromLine(line);
@@ -21,6 +22,18 @@ Tokenization::Tokenization(std::ifstream &file) {
     identifyTokenLineTypes();
     clearTokenLine();
   }
+}
+
+void Tokenization::loadInvalidContextsAndDirectives() {
+  std::string path = "include/parseConfigFile/configContextAndDirectives";
+  std::ifstream context(path + "allInvalidContexts.txt");
+  std::ifstream directives(path + "allInvalidDirectives.txt");
+  std::string oneLine;
+  
+  while (std::getline(context, oneLine))
+    _invalidContext.insert(oneLine);
+  while (std::getline(context, oneLine))
+    _invalidDirective.insert(oneLine);
 }
 
 void Tokenization::separateTokenStringsFromLine(std::string &line) {
@@ -70,7 +83,7 @@ void Tokenization::bracketIdentification() {
              (*it)->_tokenStr.size() == 1)
       (*it)->_type = TypeToken::OPEN_BRACKET;
     else if (((*it)->_tokenStr.find('{') != std::string::npos ||
-             (*it)->_tokenStr.find('}') != std::string::npos) &&
+              (*it)->_tokenStr.find('}') != std::string::npos) &&
              (*it)->_tokenStr.size() != 1)
       throw invalidFormat("Breacktets neeed to be seperated by spaces");
   }
