@@ -178,48 +178,48 @@ bool Client::handleRequest() {
   int bytes_read;
   int status;
 
-  while (true) {
-    if (_parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-      return handleContinue();
-    }
-    std::string raw = "";
-    bytes_read = read(_fd, buffer, BUFFER_SIZE);
-    if (bytes_read > 0) {
-      buffer[bytes_read] = '\0';
-      raw = buffer;
-      while (bytes_read == BUFFER_SIZE) {
-        raw.append(buffer, bytes_read);
-        bytes_read = read(_fd, buffer, BUFFER_SIZE);
-        buffer[bytes_read] = '\0';
-      }
-      _parser = HttpRequestParser(raw, _fd);
-      status = _parser.parse();
-      if ((status == 200 || status == 201) &&
-          _parser.status == HttpRequestParseStatus::PARSED) {
-        return execute();
-      } else if ((status == 200 || status == 201) &&
-                 _parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-        Log::getInstance().debug("Request is to be continued: " +
-                                 _parser.getHttpRequest().getHost());
-        return true;
-      }
-      auto request = _parser.getHttpRequest();
-      Log::getInstance().error(
-          "Something went wrong while processing request: " + raw);
-      _response.setStatusCode(status);
-      std::string responseString = _response.getResponse();
-      send(_fd, responseString.c_str(), responseString.length(), 0);
-      close(_fd);
-
-      return false;
-    } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-      continue;
-    } else {
+  if (_parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+    return handleContinue();
+  }
+  std::string raw = "";
+  bytes_read = read(_fd, buffer, BUFFER_SIZE);
+  if (bytes_read > 0) {
+    buffer[bytes_read] = '\0';
+    raw = buffer;
+    while (bytes_read == BUFFER_SIZE) {
+      raw.append(buffer, bytes_read);
+      bytes_read = read(_fd, buffer, BUFFER_SIZE);
       if (bytes_read < 0) {
-        throw readFailed(std::strerror(errno));
+        Log::getInstance().error("Failed to read from socket with error: " +
+                                 std::string(std::strerror(errno)));
+        break;
       }
-      close(_fd);
-      return false;
+      buffer[bytes_read] = '\0';
+    }
+    _parser = HttpRequestParser(raw, _fd);
+    status = _parser.parse();
+    if ((status == 200 || status == 201) &&
+        _parser.status == HttpRequestParseStatus::PARSED) {
+      return execute();
+    } else if ((status == 200 || status == 201) &&
+               _parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+      Log::getInstance().debug("Request is to be continued: " +
+                               _parser.getHttpRequest().getHost());
+      return true;
+    }
+    auto request = _parser.getHttpRequest();
+    Log::getInstance().error("Something went wrong while processing request: " +
+                             raw);
+    _response.setStatusCode(status);
+    std::string responseString = _response.getResponse();
+    send(_fd, responseString.c_str(), responseString.length(), 0);
+    close(_fd);
+    return false;
+  } else {
+    if (bytes_read < 0) {
+      Log::getInstance().error("Failed to read from socket with error: " +
+                               std::string(std::strerror(errno)));
     }
   }
+  return true;
 }
