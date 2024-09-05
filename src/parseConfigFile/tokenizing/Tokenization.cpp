@@ -64,6 +64,14 @@ void Tokenization::identifyTokenLineTypes() {
   removeSemikolonFromToken();
   bracketIdentification();
   contextIdentification();
+  directiveIdentification();
+
+  for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
+    std::cout << "STR: [" << (*it)->_tokenStr << "]" << std::endl;
+    std::cout << "line number: [" << (*it)->_foundLine << "]\n";
+    std::cout << "semicolon set: [" << (*it)->_semikolonSet << "]\n";
+    std::cout << "type: [" << (*it)->_type << "]\n\n";
+  }
 }
 
 void Tokenization::checkAndSetSemikolonInToken() {
@@ -108,13 +116,6 @@ void Tokenization::contextIdentification() {
     else if (isInvalidContext((*it)->_tokenStr) == true)
       throw invalidContext((*it)->_tokenStr + " context is not implemented");
   }
-
-  for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
-    std::cout << "STR: [" << (*it)->_tokenStr << "]" << std::endl;
-    std::cout << "line number: [" << (*it)->_foundLine << "]\n";
-    std::cout << "semicolon set: [" << (*it)->_semikolonSet << "]\n";
-    std::cout << "type: [" << (*it)->_type << "]\n\n";
-  }
 }
 
 bool Tokenization::isInvalidContext(const std::string &context) {
@@ -122,3 +123,71 @@ bool Tokenization::isInvalidContext(const std::string &context) {
     return (true);
   return (false);
 }
+
+bool Tokenization::isInvalidDirective(const std::string &directive) {
+  if (_invalidDirective.find(directive) != _invalidDirective.end())
+    return (true);
+  return (false);
+}
+
+void Tokenization::directiveIdentification() {
+  for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
+    if (isInvalidDirective((*it)->_tokenStr) == true)
+      throw invalidDirective((*it)->_tokenStr);
+    else if ((*it)->_tokenStr == "ssl_certificate")
+      (*it)->_type = TypeToken::SSL_CERTIFICATE;
+    else if ((*it)->_tokenStr == "ssl_certificate_key")
+      (*it)->_type = TypeToken::SSL_CERTIFICATE_KEY;
+    else if ((*it)->_tokenStr == "index")
+      (*it)->_type = TypeToken::INDEX;
+    else if ((*it)->_tokenStr == "root")
+      (*it)->_type = TypeToken::ROOT;
+    else if ((*it)->_tokenStr == "listen")
+      (*it)->_type = TypeToken::LISTEN;
+    else if ((*it)->_tokenStr == "geoip_country")
+      (*it)->_type = TypeToken::GEO_IP_COUNTRY;
+    else if ((*it)->_tokenStr == "proxy_cache_path")
+      (*it)->_type = TypeToken::PROXY_CACHE_PATH;
+    else if ((*it)->_tokenStr == "proxy_cache")
+      (*it)->_type = TypeToken::PROXY_CACHE;
+    else if ((*it)->_tokenStr == "proxy_cache_use_stale")
+      (*it)->_type = TypeToken::PROXY_CACHE_USE_STALE;
+    else if ((*it)->_tokenStr == "gzip")
+      (*it)->_type = TypeToken::GZIP;
+    else if ((*it)->_tokenStr == "gzip_types")
+      (*it)->_type = TypeToken::GZIP_TYPES;
+    else if ((*it)->_tokenStr == "limit_req_zone")
+      (*it)->_type = TypeToken::LIMIT_RED_ZONE;
+    else if ((*it)->_tokenStr == "proxy_set_header")
+      (*it)->_type = TypeToken::LIMIT_RED_ZONE;
+    else if ((*it)->_tokenStr == "proxy_cache_valid")
+      (*it)->_type = TypeToken::PROXY_CACHE_VALID;
+    else if ((*it)->_tokenStr == "ssl_certificate")
+      (*it)->_type = TypeToken::SSL_CERTIFICATE;
+    else if ((*it)->_tokenStr == "ssl_certificate_key")
+      (*it)->_type = TypeToken::SSL_CERTIFICATE_KEY;
+    else if ((*it)->_tokenStr == "index")
+      (*it)->_type = TypeToken::INDEX;
+    else if ((*it)->_tokenStr == "root")
+      (*it)->_type = TypeToken::ROOT;
+    else if ((*it)->_tokenStr == "include")
+      (*it)->_type = TypeToken::INCLUDE;
+    else if ((*it)->_tokenStr == "prox_pass")
+      (*it)->_type = TypeToken::PROXY_PASS;
+    else if ((*it)->_tokenStr == "alias")
+      (*it)->_type = TypeToken::ALIAS;
+    else if ((*it)->_tokenStr == "try_files")
+      (*it)->_type = TypeToken::TRY_FILES;
+    else if ((*it)->_tokenStr == "error_page")
+      (*it)->_type = TypeToken::ERROR_PAGE;
+    else if ((*it)->_tokenStr == "access_log")
+      (*it)->_type = TypeToken::ACCESS_LOG;
+    else if ((*it)->_tokenStr == "deny")
+      (*it)->_type = TypeToken::DENY;
+    else if ((*it)->_tokenStr == "cgi")
+      (*it)->_type = TypeToken::CGI;
+    else if ((*it)->_tokenStr == "rewrite")
+      (*it)->_type = TypeToken::REWRITE;
+  }
+}
+

@@ -36,7 +36,8 @@ enum class TypeToken {
   LOCATION = 29,
   OPEN_BRACKET = 30,
   CLOSING_BRACKET = 31,
-  DEFAULT = 32
+  DEFAULT = 32,
+  PROXY_CACHE_PATH = 33,
 };
 
 std::ostream &operator << (std::ostream &outStream, const TypeToken &type);

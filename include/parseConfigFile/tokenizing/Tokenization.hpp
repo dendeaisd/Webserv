@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/05 15:28:58 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/05 20:10:52 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ class Tokenization {
   void bracketIdentification();
   void contextIdentification();
   bool isInvalidContext(const std::string &context);
+  bool isInvalidDirective(const std::string &directive);
+  void directiveIdentification();
   void addToLineTokensToTokenChain();
   void clearTokenLine();
 
