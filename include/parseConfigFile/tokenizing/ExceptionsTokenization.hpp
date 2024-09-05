@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/05 15:25:26 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/05 20:32:47 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,4 +37,8 @@ class cantOpenFile : public ExceptionsToken {
       : ExceptionsToken("Can't open file: " + message) {}
 };
 
-
+class invalidDirective : public ExceptionsToken {
+  public:
+    invalidDirective(const std::string &message)
+      : ExceptionsToken("Invalide directive in config file: " + message) {}
+};
