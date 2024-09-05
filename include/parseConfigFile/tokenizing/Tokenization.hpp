@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/05 10:57:05 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/05 15:28:58 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class Tokenization {
   void removeSemikolonFromToken();
   void bracketIdentification();
   void contextIdentification();
+  bool isInvalidContext(const std::string &context);
   void addToLineTokensToTokenChain();
   void clearTokenLine();
 

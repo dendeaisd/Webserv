@@ -25,15 +25,23 @@ Tokenization::Tokenization(std::ifstream &file) {
 }
 
 void Tokenization::loadInvalidContextsAndDirectives() {
-  std::string path = "include/parseConfigFile/configContextAndDirectives";
-  std::ifstream context(path + "allInvalidContexts.txt");
-  std::ifstream directives(path + "allInvalidDirectives.txt");
+  std::string path = "include/parseConfigFile/configContextAndDirectives/";
   std::string oneLine;
+
+  std::ifstream context(path + "allInvalidContexts.txt");
+  if (context.is_open() == false)
+    throw cantOpenFile("allInvalidContexts.txt");
+
+  std::ifstream directives(path + "allInvalidDirectives.txt");
+  if (context.is_open() == false)
+    throw cantOpenFile("currentLineNumber");
   
   while (std::getline(context, oneLine))
     _invalidContext.insert(oneLine);
   while (std::getline(context, oneLine))
     _invalidDirective.insert(oneLine);
+  context.close();
+  directives.close();
 }
 
 void Tokenization::separateTokenStringsFromLine(std::string &line) {
@@ -97,22 +105,8 @@ void Tokenization::contextIdentification() {
       (*it)->_type = TypeToken::SERVER;
     else if ((*it)->_tokenStr == "location")
       (*it)->_type = TypeToken::LOCATION;
-    else if ((*it)->_tokenStr == "events")
-      throw invalidContext("Events context is not implemented");
-    else if ((*it)->_tokenStr == "stream")
-      throw invalidContext("Stream context is not implemented");
-    else if ((*it)->_tokenStr == "mail")
-      throw invalidContext("Mail context is not implemented");
-    else if ((*it)->_tokenStr == "upstream")
-      throw invalidContext("Upstream context is not implemented");
-    else if ((*it)->_tokenStr == "limit_except")
-      throw invalidContext("Limit_except context is not implemented");
-    else if ((*it)->_tokenStr == "map")
-      throw invalidContext("Map context is not implemented");
-    else if ((*it)->_tokenStr == "types")
-      throw invalidContext("Types context is not implemented");
-    else if ((*it)->_tokenStr == "geo")
-      throw invalidContext("Geo context is not implemented");
+    else if (isInvalidContext((*it)->_tokenStr) == true)
+      throw invalidContext((*it)->_tokenStr + " context is not implemented");
   }
 
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
@@ -121,4 +115,10 @@ void Tokenization::contextIdentification() {
     std::cout << "semicolon set: [" << (*it)->_semikolonSet << "]\n";
     std::cout << "type: [" << (*it)->_type << "]\n\n";
   }
+}
+
+bool Tokenization::isInvalidContext(const std::string &context) {
+  if (_invalidContext.find(context) != _invalidContext.end())
+    return (true);
+  return (false);
 }
