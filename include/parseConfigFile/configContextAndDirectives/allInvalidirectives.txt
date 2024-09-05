@@ -1,8 +1,10 @@
 accept_mutex
 accept_mutex_delay
+add_header
 aio
 aio_write
 allow
+auth_basic
 auth_basic_user_file
 auth_delay
 auth_http_header
@@ -51,7 +53,6 @@ default_type
 defer
 deferred
 delay_error_logging
-deny
 directio
 directio_alignment
 disable_symlinks
@@ -59,7 +60,6 @@ discard_unsafe_fields
 dscp
 empty_gif
 env
-error_page
 etag
 events
 expect
@@ -139,9 +139,9 @@ geoip_city
 geoip_org
 geoip_proxy
 geoip_proxy_recursive
+grpc_pass
 gunzip
 gunzip_buffers
-gzip
 gzip_buffers
 gzip_comp_level
 gzip_disable
@@ -149,7 +149,6 @@ gzip_http_version
 gzip_min_length
 gzip_proxied
 gzip_static
-gzip_types
 gzip_vary
 hash
 headers_more_clear_headers
@@ -205,7 +204,6 @@ image_filter_watermark
 image_filter_watermark_position
 image_filter_webp_quality
 include
-index
 internal
 ip_hash
 js_import
@@ -226,12 +224,13 @@ keepalive_timeout
 limit_conn
 limit_conn_zone
 limit_rate
-limit_req_zone
+limit_req
 lingering_close
 lingering_time
 lingering_timeout
 listen
 load_module
+location
 lock_file
 log_format
 log_not_found
@@ -331,11 +330,8 @@ proxy_cache_lock_timeout
 proxy_cache_max_range_offset
 proxy_cache_methods
 proxy_cache_min_uses
-proxy_cache_path
 proxy_cache_purge
 proxy_cache_revalidate
-proxy_cache_use_stale
-proxy_cache_valid
 proxy_connect_timeout
 proxy_cookie_domain
 proxy_cookie_path
@@ -368,7 +364,6 @@ proxy_responses
 proxy_send_lowat
 proxy_send_timeout
 proxy_set_body
-proxy_set_header
 proxy_ssl
 proxy_ssl_certificate
 proxy_ssl_certificate_key
@@ -411,7 +406,9 @@ resolver
 resolver_timeout
 return
 reuseport
-root
+rewrite
+satisfy
+scgi_pass
 secure_link
 secure_link_md5
 secure_link_secret
@@ -442,8 +439,6 @@ ssi_silent_errors
 ssi_types
 ssi_value_length
 ssl
-ssl_certificate
-ssl_certificate_key
 ssl_ciphers
 ssl_client_certificate
 ssl_conf_command
@@ -495,7 +490,7 @@ tls_session_cache
 tls_session_tickets
 tls_session_timeout
 transport
-try_files
+types
 types_hash_bucket_size
 types_hash_max_size
 udp_connect_timeout
@@ -517,6 +512,7 @@ upstream_send_timeout
 use
 use_backend
 user
+uwsgi_pass
 valid
 variable
 variables_hash_bucket_size
