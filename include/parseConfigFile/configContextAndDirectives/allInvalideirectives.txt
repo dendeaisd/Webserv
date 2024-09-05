@@ -59,7 +59,6 @@ discard_unsafe_fields
 dscp
 empty_gif
 env
-error_log
 error_page
 etag
 events
@@ -137,7 +136,6 @@ geoip2_region_code
 geoip2_region_name
 geoip2_timezone
 geoip_city
-geoip_country
 geoip_org
 geoip_proxy
 geoip_proxy_recursive
@@ -312,7 +310,6 @@ perl
 perl_modules
 perl_require
 perl_set
-pid
 pop3_auth
 pop3_capabilities
 port_in_redirect
@@ -325,7 +322,6 @@ proxy_buffer_size
 proxy_buffering
 proxy_buffers
 proxy_busy_buffers_size
-proxy_cache
 proxy_cache_background_update
 proxy_cache_bypass
 proxy_cache_key
@@ -536,7 +532,6 @@ wait_timeout
 worker_connections
 worker_cpu_affinity
 worker_priority
-worker_processes
 worker_rlimit_core
 worker_rlimit_nofile
 worker_shutdown_timeout
