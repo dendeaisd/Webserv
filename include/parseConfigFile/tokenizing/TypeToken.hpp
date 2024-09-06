@@ -38,6 +38,9 @@ enum class TypeToken {
   CLOSING_BRACKET = 31,
   DEFAULT = 32,
   PROXY_CACHE_PATH = 33,
+  CLIENT_MAX_BODY_SIZE = 34,
+  AUTO_INDEX = 35,
+  VALUE = 36
 };
 
 std::ostream &operator << (std::ostream &outStream, const TypeToken &type);
