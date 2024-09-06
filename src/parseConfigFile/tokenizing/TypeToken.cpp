@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:29:53 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/03 14:49:17 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/06 10:39:12 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,14 @@ std::ostream &operator << (std::ostream &outStream, const TypeToken &type) {
       outStream << "CLOSING_BRACKET";
     else if(type == TypeToken::DEFAULT)
       outStream << "DEFAULT";
+    else if (type == TypeToken::PROXY_CACHE_PATH)
+      outStream << "PROXY_CACHE_PATH";
+    else if (type == TypeToken::CLIENT_MAX_BODY_SIZE)
+      outStream << "CLIENT_MAX_BODY_SIZE";
+    else if (type == TypeToken::AUTO_INDEX)
+      outStream << "AUTO_INDEX";
+    else if (type == TypeToken::CLIENT_MAX_BODY_SIZE)
+      outStream << "VALUE";
   return (outStream);
 }
 
