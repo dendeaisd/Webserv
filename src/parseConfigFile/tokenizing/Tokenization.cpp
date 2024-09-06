@@ -27,22 +27,26 @@ Tokenization::Tokenization(std::ifstream &file) {
 
 void Tokenization::loadInvalidContextsAndDirectives() {
   std::string path = "include/parseConfigFile/configContextAndDirectives/";
+
+  std::ifstream invalContext;
+  std::ifstream invalDirectives;
+  std::ifstream valDirective;
+
+  openFile((path + "allInvalidContexts.txt"), invalContext);
+  openFile((path + "allInvalidDirectives.txt"), invalDirectives);
+  openFile((path + "validDirectives.txt"), valDirective);
+
   std::string oneLine;
-
-  std::ifstream context(path + "allInvalidContexts.txt");
-  if (context.is_open() == false)
-    throw cantOpenFile("allInvalidContexts.txt");
-
-  std::ifstream directives(path + "allInvalidDirectives.txt");
-  if (context.is_open() == false)
-    throw cantOpenFile("currentLineNumber");
-  
-  while (std::getline(context, oneLine))
-    _invalidContext.insert(oneLine);
-  while (std::getline(context, oneLine))
+  while (std::getline(invalContext, oneLine)) _invalidContext.insert(oneLine);
+  while (std::getline(invalDirectives, oneLine))
     _invalidDirective.insert(oneLine);
-  context.close();
-  directives.close();
+  while (std::getline(valDirective, oneLine)) _directiveValid.insert(oneLine);
+
+  invalContext.close();
+  invalDirectives.close();
+  valDirective.close();
+}
+
 void Tokenization::openFile(const std::string &filePath, std::ifstream &file) {
   file.open(filePath);
   if (file.is_open() == false) throw cantOpenFile(filePath);
