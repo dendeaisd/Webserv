@@ -17,6 +17,7 @@ Tokenization::Tokenization(std::ifstream &file) {
   loadInvalidContextsAndDirectives();
   while (std::getline(file, line)) {
     currentLineNumber++;
+    removeCommentsFromLine(line);
     separateTokenStringsFromLine(line);
     lineNumberAddToLineOfTokens(currentLineNumber);
     identifyTokenLineTypes();
@@ -42,6 +43,10 @@ void Tokenization::loadInvalidContextsAndDirectives() {
     _invalidDirective.insert(oneLine);
   context.close();
   directives.close();
+void Tokenization::removeCommentsFromLine(std::string &line) {
+  if (line.find('#') == std::string::npos) return;
+  size_t pos = line.find('#');
+  line.erase(pos, (line.size() - pos));
 }
 
 void Tokenization::separateTokenStringsFromLine(std::string &line) {
