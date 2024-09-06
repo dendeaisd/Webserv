@@ -21,12 +21,13 @@ using namespace std::filesystem;
 HttpRequestParser::HttpRequestParser()
     : status(HttpRequestParseStatus::NOT_PARSED) {}
 
-HttpRequestParser::HttpRequestParser(const std::string request, int clientFd)
+HttpRequestParser::HttpRequestParser(const std::string raw, int clientFd)
     : status(HttpRequestParseStatus::NOT_PARSED),
       hasFile(false),
       _clientFd(clientFd),
-      raw(request) {
-  boundary = "";
+      _raw(raw) {
+  _request = HttpRequest();
+  _boundary = "";
   total_read = 0;
   currentFileUploadStatus = HttpFileUploadStatus::NOT_STARTED;
   currentFileUploadName = "";
@@ -36,7 +37,7 @@ HttpRequestParser::~HttpRequestParser() {}
 
 HttpRequest HttpRequestParser::getHttpRequest() {
   if (status == HttpRequestParseStatus::PARSED) {
-    return request;
+    return _request;
   } else {
     return HttpRequest();
   }
@@ -44,38 +45,38 @@ HttpRequest HttpRequestParser::getHttpRequest() {
 
 bool HttpRequestParser::electHandler() {
   if (isCgiRequest()) {
-    request.setHandler(HttpRequestHandler::CGI);
+    _request.setHandler(HttpRequestHandler::CGI);
   } else if (isFaviconRequest()) {
-    request.setHandler(HttpRequestHandler::FAVICON);
+    _request.setHandler(HttpRequestHandler::FAVICON);
     Log::getInstance().debug("Favicon handler for request: " +
-                             request.getUri());
-  } else if (isDirectoryRequest("./default" + request.getUri()) &&
+                             _request.getUri());
+  } else if (isDirectoryRequest("./default" + _request.getUri()) &&
              DIR_LIST_ON) {
-    request.setHandler(HttpRequestHandler::DIRECTORY_LISTING);
-  } else if (request.getUri() == "/uploads" &&
-             request.getMethodEnum() == HttpRequestMethod::GET) {
-    request.setHandler(HttpRequestHandler::LIST_UPLOADS);
-  } else if (request.getUri().substr(0, 9) == "/uploads/" &&
-             request.getMethodEnum() == HttpRequestMethod::GET) {
-    request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
-  } else if (request.getUri() == "/uploads" &&
-             request.getMethodEnum() == HttpRequestMethod::POST) {
-    request.setHandler(HttpRequestHandler::FILE_UPLOAD);
-  } else if (request.getUri() == "/benchmark") {
-    request.setHandler(HttpRequestHandler::BENCHMARK);
+    _request.setHandler(HttpRequestHandler::DIRECTORY_LISTING);
+  } else if (_request.getUri() == "/uploads" &&
+             _request.getMethodEnum() == HttpRequestMethod::GET) {
+    _request.setHandler(HttpRequestHandler::LIST_UPLOADS);
+  } else if (_request.getUri().substr(0, 9) == "/uploads/" &&
+             _request.getMethodEnum() == HttpRequestMethod::GET) {
+    _request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
+  } else if (_request.getUri() == "/uploads" &&
+             _request.getMethodEnum() == HttpRequestMethod::POST) {
+    _request.setHandler(HttpRequestHandler::FILE_UPLOAD);
+  } else if (_request.getUri() == "/benchmark") {
+    _request.setHandler(HttpRequestHandler::BENCHMARK);
     return false;
   } else {
-    request.setHandler(HttpRequestHandler::STATIC);
+    _request.setHandler(HttpRequestHandler::STATIC);
   }
   return true;
 }
 
 bool HttpRequestParser::isCgiRequest() {
-  return request.getUri().find("cgi-bin") != std::string::npos;
+  return _request.getUri().find("cgi-bin") != std::string::npos;
 }
 
 bool HttpRequestParser::isFaviconRequest() {
-  return request.getUri().find("favicon.ico") != std::string::npos;
+  return _request.getUri().find("favicon.ico") != std::string::npos;
 }
 
 bool HttpRequestParser::isDirectoryRequest(const std::string &path) {
@@ -104,26 +105,26 @@ bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
 
 bool HttpRequestParser::isUploadAllowed() {
   // TODO:: update this to use server configuration
-  return request.getUri().find("/upload") != std::string::npos &&
-         request.getMethodEnum() == HttpRequestMethod::POST;
+  return _request.getUri().find("/upload") != std::string::npos &&
+         _request.getMethodEnum() == HttpRequestMethod::POST;
 }
 
 void HttpRequestParser::injectUploadFormIfNeeded() {
-  if (request.getUri() == "/uploads" &&
-      request.getMethodEnum() == HttpRequestMethod::GET) {
-    request.addInjection("./default/upload/index.html");
+  if (_request.getUri() == "/uploads" &&
+      _request.getMethodEnum() == HttpRequestMethod::GET) {
+    _request.addInjection("./default/upload/index.html");
   }
 }
 
 bool HttpRequestParser::canHaveBody() {
-  return request.getMethodEnum() == HttpRequestMethod::POST ||
-         request.getMethodEnum() == HttpRequestMethod::PUT ||
-         request.getMethodEnum() == HttpRequestMethod::DELETE ||
-         request.getMethodEnum() == HttpRequestMethod::PATCH;
+  return _request.getMethodEnum() == HttpRequestMethod::POST ||
+         _request.getMethodEnum() == HttpRequestMethod::PUT ||
+         _request.getMethodEnum() == HttpRequestMethod::DELETE ||
+         _request.getMethodEnum() == HttpRequestMethod::PATCH;
 }
 
 int HttpRequestParser::parse() {
-  std::stringstream ss(raw);
+  std::stringstream ss(_raw);
   std::string requestLine = getLineSanitized(ss);
   parseRequestLine((char *)requestLine.c_str(), requestLine.length());
   if (status == HttpRequestParseStatus::INVALID ||
@@ -133,14 +134,14 @@ int HttpRequestParser::parse() {
     return 400;
   }
   Log::getInstance().debug("Request line parsed");
-  if (!isAllowedMethod(request.getMethod())) {
-    Log::getInstance().error("Invalid method: " + request.getMethod());
+  if (!isAllowedMethod(_request.getMethod())) {
+    Log::getInstance().error("Invalid method: " + _request.getMethod());
     return 405;  // Method Not Allowed
   }
   Log::getInstance().debug("Method allowed");
   if (!validateHttpVersion()) {
     Log::getInstance().error("Invalid HTTP version. expected HTTP/1.1 got " +
-                             request.getHttpVersion());
+                             _request.getHttpVersion());
     return 505;  // HTTP Version Not Supported
   }
   Log::getInstance().debug("HTTP version validated");
@@ -151,7 +152,7 @@ int HttpRequestParser::parse() {
   parseHeaders(ss);
   if (status == HttpRequestParseStatus::INVALID) return 400;
   Log::getInstance().debug("Headers parsed");
-  size_t contentLength = request.getContentLength();
+  size_t contentLength = _request.getContentLength();
   if (!isAllowedContentLength(contentLength)) {
     Log::getInstance().error("Invalid content length " +
                              std::to_string(contentLength));
@@ -160,32 +161,32 @@ int HttpRequestParser::parse() {
   Log::getInstance().debug("Content length validated");
   injectUploadFormIfNeeded();
 
-  if (request.getHandler() == HttpRequestHandler::SEND_UPLOADED_FILE) {
+  if (_request.getHandler() == HttpRequestHandler::SEND_UPLOADED_FILE) {
     // check if file exists
     std::string filename =
-        request.getUri().substr(std::string(UPLOAD_DIR).length());
+        _request.getUri().substr(std::string(UPLOAD_DIR).length());
     if (!exists(UPLOAD_DIR + filename)) {
       Log::getInstance().error("File not found: " + filename);
       return 404;  // Not Found
     }
   }
   Log::getInstance().debug("Handler elected");
-  size_t pos = request.getUri().find("?");
+  size_t pos = _request.getUri().find("?");
   if (pos != std::string::npos) {
-    request.setQuery(request.getUri().substr(pos + 1));
-    request.setUri(request.getUri().substr(0, pos));
-    parseQueryParams(request.getQuery());
+    _request.setQuery(_request.getUri().substr(pos + 1));
+    _request.setUri(_request.getUri().substr(0, pos));
+    parseQueryParams(_request.getQuery());
   }
   if (!canHaveBody() && contentLength > 0) {
-    Log::getInstance().error("Request method " + request.getMethod() +
+    Log::getInstance().error("Request method " + _request.getMethod() +
                              " cannot have a body");
     return 400;
   }
-  std::string contentType = request.getHeader("Content-Type");
+  std::string contentType = _request.getHeader("Content-Type");
   if (contentType.find("application/json") != std::string::npos ||
       contentType.find("text/plain") != std::string::npos) {
     parseBody(ss);
-    if (contentLength != request.getBody().length()) {
+    if (contentLength != _request.getBody().length()) {
       Log::getInstance().error("Invalid content length " +
                                std::to_string(contentLength));
       return 400;
@@ -193,10 +194,10 @@ int HttpRequestParser::parse() {
   } else if (contentType.find("application/x-www-form-urlencoded") !=
              std::string::npos) {
     parseFormData(ss);
-  } else if (hasFile && request.getHeader("filename") != "") {
+  } else if (hasFile && _request.getHeader("filename") != "") {
     if (!isUploadAllowed()) {
       Log::getInstance().error("File upload not allowed to endpoint " +
-                               request.getUri());
+                               _request.getUri());
       return 405;  // Method Not Allowed
     }
     handleFileUpload(ss);
@@ -213,20 +214,20 @@ int HttpRequestParser::parse() {
       return 500;  // Internal Server Error
     }
   }
-  return request.getMethodEnum() == HttpRequestMethod::POST ? 201 : 200;
+  return _request.getMethodEnum() == HttpRequestMethod::POST ? 201 : 200;
 }
 
 bool HttpRequestParser::parseBoundary() {
-  boundary = request.getHeader("Content-Type");
+  _boundary = _request.getHeader("Content-Type");
   std::string attr = "boundary=";
-  size_t pos = boundary.find(attr);
+  size_t pos = _boundary.find(attr);
   if (pos == std::string::npos) {
     Log::getInstance().error(
         "Invalid multipart/form-data while parsing boundary for request " +
-        request.getUri());
+        _request.getUri());
     return false;
   }
-  boundary = boundary.substr(pos + attr.length());
+  _boundary = _boundary.substr(pos + attr.length());
   return true;
 }
 
@@ -234,7 +235,7 @@ void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
   size_t i = 0;
   for (i = 0; i < len; i++) {
     if (requestLine[i] == ' ') {
-      bool valid = request.setMethod(std::string(requestLine, i));
+      bool valid = _request.setMethod(std::string(requestLine, i));
       if (!valid) {
         status = HttpRequestParseStatus::INVALID;
         Log::getInstance().error("Invalid request method");
@@ -246,17 +247,17 @@ void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
   size_t j = i + 1;
   for (i = j; i < len; i++) {
     if (requestLine[i] == ' ') {
-      request.setUri(std::string(requestLine + j, i - j));
+      _request.setUri(std::string(requestLine + j, i - j));
       break;
     }
   }
-  if (i == len || request.getUri().empty() || request.getUri()[0] != '/') {
+  if (i == len || _request.getUri().empty() || _request.getUri()[0] != '/') {
     status = HttpRequestParseStatus::INCOMPLETE;
     Log::getInstance().error("Invalid URI");
     return;
   }
   j = i + 1;
-  request.setHttpVersion(std::string(requestLine + j, len - j));
+  _request.setHttpVersion(std::string(requestLine + j, len - j));
 }
 
 void HttpRequestParser::parseHeaders(std::stringstream &ss) {
@@ -285,7 +286,7 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
       bool validHeader = HttpMaps::getInstance().isHeaderValid(key);
       if (!validHeader) {
         Log::getInstance().debug("Unknown header: " + key +
-                                 " found in request " + request.getUri());
+                                 " found in request " + _request.getUri());
         // Unknown headers are ignored to improve server performance and
         // prevent security vulnerabilities
         continue;
@@ -305,22 +306,22 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
           value = filename;
         }
       }
-      request.setHeader(key, value);
+      _request.setHeader(key, value);
     } else {
       Log::getInstance().error("Invalid header: " + header);
       status = HttpRequestParseStatus::INVALID;
       return;
     }
   }
-  std::string host = request.getHeader("Host");
+  std::string host = _request.getHeader("Host");
   if (host != "") {
     size_t pos = host.find(":");
     if (pos != std::string::npos) {
-      request.setHost(host.substr(0, pos));
-      request.setPort(host.substr(pos + 1));
+      _request.setHost(host.substr(0, pos));
+      _request.setPort(host.substr(pos + 1));
     } else {
-      request.setHost(host);
-      request.setPort("80");
+      _request.setHost(host);
+      _request.setPort("80");
     }
     status = HttpRequestParseStatus::PARSED;
   } else {
@@ -330,9 +331,9 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
 }
 
 void HttpRequestParser::parseBody(std::stringstream &ss) {
-  if (request.getMethodEnum() == HttpRequestMethod::GET ||
-      request.getMethodEnum() == HttpRequestMethod::HEAD ||
-      request.getMethodEnum() == HttpRequestMethod::OPTIONS) {
+  if (_request.getMethodEnum() == HttpRequestMethod::GET ||
+      _request.getMethodEnum() == HttpRequestMethod::HEAD ||
+      _request.getMethodEnum() == HttpRequestMethod::OPTIONS) {
     // While it's not strictly forbidden to send a body in a GET request,
     // it's not recommended and it's not supported by most servers.
     // This is a design decision, and it's not a requirement of the HTTP
@@ -344,7 +345,7 @@ void HttpRequestParser::parseBody(std::stringstream &ss) {
   while (std::getline(ss, line)) {
     body += line;
   }
-  request.setBody(body);
+  _request.setBody(body);
 }
 
 void HttpRequestParser::parseFormData(std::stringstream &ss) {
@@ -366,16 +367,16 @@ void HttpRequestParser::parseFormData(std::stringstream &ss) {
       if (pos != std::string::npos) {
         std::string key = fact.substr(0, pos);
         std::string value = fact.substr(pos + 1);
-        request.addFormData(key, value);
+        _request.addFormData(key, value);
       } else {
-        request.addFormData(data, "");
+        _request.addFormData(data, "");
       }
     }
   }
 }
 
 bool HttpRequestParser::handleFileUpload(std::stringstream &ss) {
-  std::string contentType = request.getHeader("Content-Type");
+  std::string contentType = _request.getHeader("Content-Type");
   if (contentType.find("application/octet-stream") != std::string::npos) {
     return handleOctetStream(ss);
   } else if (contentType.find("multipart/form-data") != std::string::npos) {
@@ -386,9 +387,9 @@ bool HttpRequestParser::handleFileUpload(std::stringstream &ss) {
 
 bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
   std::string data;
-  int contentLength = request.getContentLength();
+  int contentLength = _request.getContentLength();
   int bytesWritten = 0;
-  std::string filename = request.getHeader("filename");
+  std::string filename = _request.getHeader("filename");
   std::ofstream file(UPLOAD_DIR + filename, std::ios::binary);
   if (!file.is_open()) {
     Log::getInstance().error("Failed to open file for writing");
@@ -402,7 +403,7 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
     bytesWritten++;
     if (bytesWritten >= contentLength) {
       Log::getInstance().debug("File upload complete for request: " +
-                               request.getUri());
+                               _request.getUri());
       file.close();
       status = HttpRequestParseStatus::PARSED;
       return true;
@@ -428,7 +429,7 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
 }
 
 bool HttpRequestParser::askForContinue() {
-  std::string expectation = request.getHeader("Expect");
+  std::string expectation = _request.getHeader("Expect");
   Log::getInstance().debug("Expectation: " + expectation);
   if (expectation == "100-continue") {
     Log::getInstance().debug("Client sent header Expect: 100-continue");
@@ -470,10 +471,10 @@ int readMore(std::stringstream &ss, int _clientFd) {
 }
 
 bool HttpRequestParser::checkForTerminator(std::string line) {
-  if (line.find(boundary + "--") != std::string::npos) {
+  if (line.find(_boundary + "--") != std::string::npos) {
     status = HttpRequestParseStatus::PARSED;
     Log::getInstance().debug("Multipart form data parsed for request: " +
-                             request.getUri());
+                             _request.getUri());
     currentFileUploadStatus = HttpFileUploadStatus::COMPLETE;
     return true;
   }
@@ -498,12 +499,12 @@ bool HttpRequestParser::writeToFile(std::string filename,
   while (std::getline(ss, data)) {
     if (data.find("\r") != std::string::npos)
       data = data.erase(data.find("\r"), 1);
-    if (checkForTerminator(data) || data.find(boundary) != std::string::npos) {
+    if (checkForTerminator(data) || data.find(_boundary) != std::string::npos) {
       boundaryFound = true;
       break;
     }
     file << data.data();
-    if (!Helpers::boundaryUpcoming(ss, boundary)) file << "\n";
+    if (!Helpers::boundaryUpcoming(ss, _boundary)) file << "\n";
     if (bytes_read == MAX_BUFFER_SIZE) {
       bytes_read = readMore(ss, _clientFd);
     }
@@ -520,7 +521,7 @@ bool HttpRequestParser::writeToFile(std::string filename,
 bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   std::string data;
   int bytes_read = 0;
-  size_t contentLength = request.getContentLength();
+  size_t contentLength = _request.getContentLength();
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
     // if (currentFileUploadStatus == HttpFileUploadStatus::IN_PROGRESS) {
     //   Log::getInstance().debug("Writing to file in progress: " +
@@ -535,14 +536,14 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   // set the status to EXPECT_CONTINUE anyways because not every request
   // library will send the Expect header
   status = HttpRequestParseStatus::EXPECT_CONTINUE;
-  if (boundary.empty()) parseBoundary();
+  if (_boundary.empty()) parseBoundary();
   while ((data = getLineSanitized(ss)).length() > 0) {
     if (checkForTerminator(data)) break;
     std::string filename;
     std::string key;
     std::string contentType;
     while ((data = getLineSanitized(ss)).length() > 0) {
-      if (data.find(boundary) != std::string::npos) continue;
+      if (data.find(_boundary) != std::string::npos) continue;
       key = Helpers::getFormKeyIfExists(data);
       if (key.empty()) {
         filename = Helpers::getFilenameIfExists(data);
@@ -556,7 +557,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
         std::getline(ss, data);
         if (checkForTerminator(data)) break;
         Log::getInstance().debug("Adding form data: " + key + " " + data);
-        request.addFormData(key, data);
+        _request.addFormData(key, data);
         key = "";
         continue;
       }
@@ -584,13 +585,13 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
           data = data.erase(data.find("\r"), 1);
         // Log::getInstance().debug("File Data: " + data);
         if (checkForTerminator(data) ||
-            data.find(boundary) != std::string::npos) {
+            data.find(_boundary) != std::string::npos) {
           Log::getInstance().debug("Boundary found!!");
           boundaryFound = true;
           break;
         }
         file << data;
-        if (!Helpers::boundaryUpcoming(ss, boundary)) file << "\n";
+        if (!Helpers::boundaryUpcoming(ss, _boundary)) file << "\n";
         if (bytes_read == MAX_BUFFER_SIZE) {
           bytes_read = readMore(ss, _clientFd);
           total_read += bytes_read;
@@ -609,7 +610,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
         Log::getInstance().error("Content-Length exceeded");
         return false;
       }
-      request.addAttachment(filename, contentType);
+      _request.addAttachment(filename, contentType);
       filename.clear();
       if (status == HttpRequestParseStatus::PARSED) return true;
     }
@@ -620,21 +621,21 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
 int HttpRequestParser::handshake() {
   Log::getInstance().debug("--------------------------------");
   Log::getInstance().debug("Starting handshake for request: " +
-                           request.toJson());
+                           _request.toJson());
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-    request.setHeader("Expect", "");
+    _request.setHeader("Expect", "");
     std::stringstream ss("");
     Log::getInstance().debug("File upload handler for request: " +
-                             request.getUri());
+                             _request.getUri());
     if (!isUploadAllowed()) {
       Log::getInstance().error("File upload not allowed to " +
-                               request.getUri());
+                               _request.getUri());
       return 405;  // Method Not Allowed
     }
     if (handleFileUpload(ss)) {
       // TODO: handle when method is PUT and results in creating a new record
       // or file, should return 201
-      if (request.getMethodEnum() == HttpRequestMethod::POST) {
+      if (_request.getMethodEnum() == HttpRequestMethod::POST) {
         return 201;
       }
       return 200;
@@ -646,9 +647,9 @@ int HttpRequestParser::handshake() {
 
 bool HttpRequestParser::validateHttpVersion() {
   auto version =
-      HttpMaps::getInstance().getVersionEnum(request.getHttpVersion());
-  request.setHttpVersion(version);
-  if (request.getHttpVersionEnum() != HttpRequestVersion::HTTP_1_1)
+      HttpMaps::getInstance().getVersionEnum(_request.getHttpVersion());
+  _request.setHttpVersion(version);
+  if (_request.getHttpVersionEnum() != HttpRequestVersion::HTTP_1_1)
     return false;
   return true;
 }
@@ -661,9 +662,9 @@ void HttpRequestParser::parseQueryParams(std::string query) {
     if (pos != std::string::npos) {
       std::string key = param.substr(0, pos);
       std::string value = param.substr(pos + 1);
-      request.setQueryParam(key, value);
+      _request.setQueryParam(key, value);
     } else {
-      request.setQueryParam(param, "");
+      _request.setQueryParam(param, "");
     }
   }
 }

@@ -10,16 +10,15 @@
 class CGI {
  public:
   CGI(int fd, HttpRequest &request);
-  ~CGI() {}
+  ~CGI();
   bool run();
   bool wait();
-  int load();
 
  private:
-  int fd_;
-  int pipeInFd_[2];
-  int pipeOutFd_[2];
-  int pid_;
+  int _fd;
+  int _pipeInFd[2];
+  int _pipeOutFd[2];
+  int _pid;
   bool _unableToExecute;
   std::string _response;
   std::string _stream;

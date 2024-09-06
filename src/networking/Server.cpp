@@ -62,7 +62,7 @@ void Server::removeCGIEvents() {
   for (auto it = Event::getInstance().getEvents().begin();
        it != Event::getInstance().getEvents().end(); ++it) {
     if (it->second->wait()) {
-      Log::getInstance().info("Removing CGI event");
+      Log::getInstance().debug("Removing CGI event");
       eventsToRemove.push_back(it->first);
     }
   }

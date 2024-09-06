@@ -27,9 +27,9 @@ class HttpRequestParser {
 
  private:
   int _clientFd;
-  HttpRequest request;
-  std::string raw;
-  std::string boundary;
+  HttpRequest _request;
+  std::string _raw;
+  std::string _boundary;
   HttpFileUploadStatus currentFileUploadStatus;
   std::string currentFileUploadName;
   size_t total_read;

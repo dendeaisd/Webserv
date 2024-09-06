@@ -18,10 +18,9 @@
 #include "../../include/response/HttpResponse.hpp"
 
 #define BUFFER_SIZE 4096
-#define TIMEOUT 20
 
 CGI::CGI(int fd, HttpRequest &request) {
-  fd_ = fd;
+  _fd = fd;
   _request = request;
   _unableToExecute = false;
   std::string uri = request.getUri();
@@ -44,18 +43,22 @@ CGI::CGI(int fd, HttpRequest &request) {
     _unableToExecute = true;
   }
   // load();
-  if (pipe(pipeInFd_) == -1 || pipe(pipeOutFd_) == -1) {
+  if (pipe(_pipeInFd) == -1 || pipe(_pipeOutFd) == -1) {
     Log::getInstance().error("Failed to create pipe");
     _unableToExecute = true;
   }
 }
 
+CGI::~CGI() {}
+
 void sendTimeoutResponse(int fd) {
   HttpResponse response(408);
   response.setBody(
-      "Request timed out, we apologize for our slowness and unoptimized code.");
+      "<h2>Request timed out, we apologize for our garbage, unoptimized "
+      "code.</h2>");
   std::string resp = response.getResponse();
   send(fd, resp.c_str(), resp.length(), 0);
+  Log::getInstance().error("Request timed out is sent!");
 }
 
 void sendInternalErrorResponse(int fd) {
@@ -66,92 +69,91 @@ void sendInternalErrorResponse(int fd) {
 
 bool CGI::run() {
   if (_unableToExecute) {
-    sendInternalErrorResponse(fd_);
+    sendInternalErrorResponse(_fd);
     return false;
   }
 
   Log::getInstance().debug("Request: " + _request.toJson());
-  pid_ = fork();
-  if (pid_ == -1) {
+  _pid = fork();
+  if (_pid == -1) {
     throw std::runtime_error("Failed to fork");
   }
-  if (pid_ == 0) {
-    close(pipeInFd_[1]);
-    close(pipeOutFd_[0]);
-    dup2(pipeInFd_[0], STDIN_FILENO);
-    dup2(pipeOutFd_[1], STDOUT_FILENO);
-    close(pipeInFd_[0]);
-    close(pipeOutFd_[1]);
+  if (_pid == 0) {
+    close(_pipeInFd[1]);
+    close(_pipeOutFd[0]);
+    dup2(_pipeInFd[0], STDIN_FILENO);
+    dup2(_pipeOutFd[1], STDOUT_FILENO);
+    close(_pipeInFd[0]);
+    close(_pipeOutFd[1]);
     executeCGI();
     throw std::runtime_error("Failed to execute script");
   } else {
-    close(pipeInFd_[0]);
-    close(pipeOutFd_[1]);
+    close(_pipeInFd[0]);
+    close(_pipeOutFd[1]);
 
     if (!_request.getBody().empty()) {
       Log::getInstance().debug("Writing to pipe " + _request.getBody());
-      write(pipeInFd_[1], _request.getBody().c_str(),
+      write(_pipeInFd[1], _request.getBody().c_str(),
             _request.getBody().length());
-      close(pipeInFd_[1]);
+      close(_pipeInFd[1]);
     }
   }
   return true;
 }
 
 void CGI::killChild() {
-  if (pid_ != 0) {
-    kill(pid_, SIGKILL);
+  if (_pid != 0) {
+    kill(_pid, SIGKILL);
   }
 }
 
 bool CGI::handleTimeout() {
   Log::getInstance().error("Request timed out");
+  sendTimeoutResponse(_fd);
+  close(_pipeOutFd[0]);
   killChild();
-  close(pipeOutFd_[0]);
-  sendTimeoutResponse(fd_);
   return true;
 }
 
 bool CGI::handleError(std::string logMessage) {
   Log::getInstance().error(logMessage);
   killChild();
-  close(pipeOutFd_[0]);
-  sendInternalErrorResponse(fd_);
+  close(_pipeOutFd[0]);
+  sendInternalErrorResponse(_fd);
   return true;
 }
 
 bool CGI::tunnelData() {
   char buffer[BUFFER_SIZE + 1];
   int bytes_read;
-  int flags = fcntl(pipeOutFd_[0], F_GETFL, 0);
-  fcntl(pipeOutFd_[0], F_SETFL, flags | O_NONBLOCK);
-  bytes_read = read(pipeOutFd_[0], buffer, BUFFER_SIZE);
+  int flags = fcntl(_pipeOutFd[0], F_GETFL, 0);
+  fcntl(_pipeOutFd[0], F_SETFL, flags | O_NONBLOCK);
+  bytes_read = read(_pipeOutFd[0], buffer, BUFFER_SIZE);
   Log::getInstance().debug("Read " + std::to_string(bytes_read) + " bytes");
   if (bytes_read > 0) {
     buffer[bytes_read] = '\0';
-    int sent = send(fd_, buffer, bytes_read, 0);
+    int sent = send(_fd, buffer, bytes_read, 0);
     Log::getInstance().debug("Sent " + std::to_string(sent) + " bytes");
     if (sent < 0) {
       Log::getInstance().error("Failed to send response");
-      close(fd_);
+      close(_fd);
     }
     if (bytes_read == BUFFER_SIZE) {
       return tunnelData();
     } else {
-      close(pipeOutFd_[0]);
+      close(_pipeOutFd[0]);
     }
     // if (_request.getHeader("Connection") != "keep-alive") {
-    //   close(fd_);
+    //   close(_fd);
     // }
     return true;
-  } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-    return false;
   } else {
     if (bytes_read < 0) {
       Log::getInstance().error("Failed to read from pipe with error: " +
                                std::string(std::strerror(errno)));
     }
-    close(pipeOutFd_[0]);
+    close(_pipeOutFd[0]);
+    sendInternalErrorResponse(_fd);
     return true;
   }
 }
@@ -170,18 +172,11 @@ bool CGI::wait() {
   if (_request.checkTimeout()) {
     return handleTimeout();
   }
-  pid_t result = waitpid(pid_, &status, WNOHANG);
-  if (result == -1) {
-    if (errno == EAGAIN || errno == EWOULDBLOCK) {
-      // still needs time to respond
-      return false;
-    }
-    return handleError("Failed to wait for child process");
-  }
-  if (result == 0) {
+  pid_t result = waitpid(_pid, &status, WNOHANG);
+  if (result == -1 || result == 0) {
     return false;
   }
-  if (result == pid_) {
+  if (result == _pid) {
     if (WIFEXITED(status)) {
       if (WEXITSTATUS(status) != 0) {
         return handleError("Script exited with non-zero status");
@@ -231,27 +226,4 @@ void CGI::executeCGI() {
   execve(_language.c_str(), args.data(), envp.data());
   Log::getInstance().error("Failed to execute script");
   exit(1);
-}
-
-int CGI::load() {
-  char buffer[4096];
-  int bytes_read;
-  while (true) {
-    bytes_read = read(fd_, buffer, 4096);
-    if (bytes_read > 0) {
-      _stream.append(buffer, bytes_read);
-      if (_stream.find("\r\n\r\n") != std::string::npos) {
-        break;
-      }
-    } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-      continue;
-    } else {
-      if (bytes_read < 0) {
-        throw std::runtime_error(std::strerror(errno));
-      }
-      close(fd_);
-      return -1;
-    }
-  }
-  return 0;
 }
