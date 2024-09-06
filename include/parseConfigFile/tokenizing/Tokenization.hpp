@@ -32,6 +32,7 @@ class Tokenization {
 
  private:
   void loadInvalidContextsAndDirectives();
+  void openFile(const std::string &filePath, std::ifstream &file);
   void removeCommentsFromLine(std::string &line);
   void separateTokenStringsFromLine(std::string &line);
   void lineNumberAddToLineOfTokens(size_t currentLineNumber);

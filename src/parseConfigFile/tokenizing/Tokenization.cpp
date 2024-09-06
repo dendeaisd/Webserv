@@ -43,6 +43,10 @@ void Tokenization::loadInvalidContextsAndDirectives() {
     _invalidDirective.insert(oneLine);
   context.close();
   directives.close();
+void Tokenization::openFile(const std::string &filePath, std::ifstream &file) {
+  file.open(filePath);
+  if (file.is_open() == false) throw cantOpenFile(filePath);
+}
 void Tokenization::removeCommentsFromLine(std::string &line) {
   if (line.find('#') == std::string::npos) return;
   size_t pos = line.find('#');
