@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/05 20:10:52 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/06 12:48:05 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ class Tokenization {
   bool isInvalidContext(const std::string &context);
   bool isInvalidDirective(const std::string &directive);
   void directiveIdentification();
+  void valueIdentification();
+  bool validDirective(std::string &directive);
   void addToLineTokensToTokenChain();
   void clearTokenLine();
 
@@ -51,6 +53,7 @@ class Tokenization {
   std::vector<std::unique_ptr<TokenNode> > _chainOfTokens;
   std::set<std::string> _invalidContext;
   std::set<std::string> _invalidDirective;
+  std::set<std::string> _directiveValid;
 };
 
 #endif

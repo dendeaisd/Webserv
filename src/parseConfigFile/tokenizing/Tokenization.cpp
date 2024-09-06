@@ -51,6 +51,7 @@ void Tokenization::openFile(const std::string &filePath, std::ifstream &file) {
   file.open(filePath);
   if (file.is_open() == false) throw cantOpenFile(filePath);
 }
+
 void Tokenization::removeCommentsFromLine(std::string &line) {
   if (line.find('#') == std::string::npos) return;
   size_t pos = line.find('#');
@@ -78,6 +79,7 @@ void Tokenization::identifyTokenLineTypes() {
   bracketIdentification();
   contextIdentification();
   directiveIdentification();
+  valueIdentification();
 
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     std::cout << "STR: [" << (*it)->_tokenStr << "]" << std::endl;
@@ -132,8 +134,7 @@ void Tokenization::contextIdentification() {
 }
 
 bool Tokenization::isInvalidContext(const std::string &context) {
-  if (_invalidContext.find(context) != _invalidContext.end())
-    return (true);
+  if (_invalidContext.find(context) != _invalidContext.end()) return (true);
   return (false);
 }
 
@@ -175,14 +176,12 @@ void Tokenization::directiveIdentification() {
       (*it)->_type = TypeToken::LIMIT_RED_ZONE;
     else if ((*it)->_tokenStr == "proxy_cache_valid")
       (*it)->_type = TypeToken::PROXY_CACHE_VALID;
+    else if ((*it)->_tokenStr == "server_name")
+      (*it)->_type = TypeToken::SERVER_NAME;
     else if ((*it)->_tokenStr == "ssl_certificate")
       (*it)->_type = TypeToken::SSL_CERTIFICATE;
     else if ((*it)->_tokenStr == "ssl_certificate_key")
       (*it)->_type = TypeToken::SSL_CERTIFICATE_KEY;
-    else if ((*it)->_tokenStr == "index")
-      (*it)->_type = TypeToken::INDEX;
-    else if ((*it)->_tokenStr == "root")
-      (*it)->_type = TypeToken::ROOT;
     else if ((*it)->_tokenStr == "include")
       (*it)->_type = TypeToken::INCLUDE;
     else if ((*it)->_tokenStr == "prox_pass")
@@ -201,6 +200,31 @@ void Tokenization::directiveIdentification() {
       (*it)->_type = TypeToken::CGI;
     else if ((*it)->_tokenStr == "rewrite")
       (*it)->_type = TypeToken::REWRITE;
+    else if ((*it)->_tokenStr == "client_max_body_size")
+      (*it)->_type = TypeToken::CLIENT_MAX_BODY_SIZE;
+    else if ((*it)->_tokenStr == "autoindex")
+      (*it)->_type = TypeToken::AUTO_INDEX;
   }
 }
 
+void Tokenization::valueIdentification() {
+  if (_tokensFromLine.empty() || validDirective(_tokensFromLine[0]->_tokenStr) == false) return;
+
+  if (_tokensFromLine.size() < 2 &&
+      _tokensFromLine.back()->_semikolonSet == false)
+    throw invalidFormat("semikolon not set at end of line " +
+                        _tokensFromLine.back()->_tokenStr);
+
+  for (auto it = _tokensFromLine.begin() + 1; it != _tokensFromLine.end();
+       it++) {
+    if ((*it)->_type == TypeToken::DEFAULT)
+      (*it)->_type = TypeToken::VALUE;
+    if ((*it)->_semikolonSet == true)
+      return;
+   }
+}
+
+bool Tokenization::validDirective(std::string &directive) {
+  if (_directiveValid.find(directive) != _directiveValid.end()) return (true);
+  return (false);
+}
