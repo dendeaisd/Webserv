@@ -18,7 +18,6 @@ auth_jwt_key_file
 auth_jwt_leeway
 auth_request
 auth_request_set
-autoindex
 autoindex_exact_size
 autoindex_format
 autoindex_localtime
@@ -42,7 +41,6 @@ client_body_temp_path
 client_body_timeout
 client_header_buffer_size
 client_header_timeout
-client_max_body_size
 connect_timeout
 connection_pool_size
 create_full_put_path
@@ -228,9 +226,7 @@ limit_req
 lingering_close
 lingering_time
 lingering_timeout
-listen
 load_module
-location
 lock_file
 log_format
 log_not_found
@@ -404,7 +400,6 @@ referer_hash_bucket_size
 referer_hash_max_size
 resolver
 resolver_timeout
-return
 reuseport
 rewrite
 satisfy
@@ -415,8 +410,6 @@ secure_link_secret
 send_timeout
 sendfile
 sendfile_max_chunk
-server
-server_name
 server_name_in_redirect
 server_names_hash_bucket_size
 server_names_hash_max_size
