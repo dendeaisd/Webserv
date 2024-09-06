@@ -1,10 +1,8 @@
 #! /usr/bin/python3
 
 import os
-import cgitb
 import datetime
 
-cgitb.enable()
 def hello():
 	envp = os.environ
 	content = "<h1>A script that doesn't sleep: {}</h1><p>{}</p>".format(datetime.datetime.now(), envp)

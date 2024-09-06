@@ -6,13 +6,15 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/03 22:11:45 by ramymoussa       ###   ########.fr       */
+/*   Updated: 2024/09/04 21:27:53 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
 
 #include <string.h>
+
+#include <sstream>
 
 Location::Location() {
   _urlValue.clear();
@@ -24,6 +26,9 @@ Location::Location() {
   _errorPageValue.clear();
   _accessLogValue.clear();
   _denyValue.clear();
+  _statusCodeAndUrlReturnValue.first = 0;
+  _statusCodeAndUrlReturnValue.second.clear();
+  _returnStatusCodeValue = 0;
 }
 
 void Location::initializeLocation(const std::string &url) { _urlValue = url; }
@@ -50,19 +55,18 @@ void Location::locationSaveDirectiveValue(const std::string &key,
     _includeValue = value;
   else if (key == "cgi")
     cgiSetSeparatedValue(value);
+  else if (key == "return")
+    addReturn(value);
 }
 
 void Location::cgiSetSeparatedValue(const std::string &value) {
   std::string fileType;
   std::string pathToInterpreter;
-  char delimiter = ' ';
-  char *tmp_value;
+  std::istringstream stream(value);
 
-  tmp_value = strdup(value.c_str());
-  fileType = strtok(tmp_value, &delimiter);
-  pathToInterpreter = strtok(NULL, &delimiter);
+  stream >> fileType;
+  stream >> pathToInterpreter;
   _cgi.insert({fileType, pathToInterpreter});
-  free(tmp_value);
 }
 
 void Location::printLocation() {
@@ -76,7 +80,10 @@ void Location::printLocation() {
             << "index: [" << _indexValue << "]" << std::endl
             << "error page: [" << _errorPageValue << "]" << std::endl
             << "access log: [" << _accessLogValue << "]" << std::endl
-            << "deny: [" << _denyValue << "]\n";
+            << "deny: [" << _denyValue << "]\n"
+            << "return: status code [" << _statusCodeAndUrlReturnValue.first
+            << "] url [" << _statusCodeAndUrlReturnValue.second << "]\n"
+            << "return: status code [" << _returnStatusCodeValue << "]\n";
 
   auto it_rewrite = _rewriteValue.begin();
 
@@ -94,4 +101,21 @@ void Location::printLocation() {
     it_cgi++;
   }
   std::cout << std::endl;
+}
+
+void Location::addReturn(const std::string &value) {
+  std::istringstream stream(value);
+
+  int statusCode;
+  std::string url;
+
+  stream >> statusCode;
+  stream >> url;
+
+  if (url.empty() == true) {
+    _returnStatusCodeValue = statusCode;
+  } else {
+    _statusCodeAndUrlReturnValue.first = statusCode;
+    _statusCodeAndUrlReturnValue.second = url;
+  }
 }

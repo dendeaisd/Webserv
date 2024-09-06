@@ -7,21 +7,28 @@
 
 class HttpMaps {
  public:
-  static const std::unordered_map<std::string, HttpRequestMethod>
-      httpRequestMethodMap;
-  static const std::unordered_map<std::string, HttpRequestVersion>
-      httpRequestVersionMap;
-  static const std::set<std::string> requiredHeaders1_1;
-  static const std::set<std::string> headerSet;
-  static std::string getMimeType(const std::string &uri);
+  static HttpMaps &getInstance() {
+    static HttpMaps instance;
+    return instance;
+  }
+  HttpMaps(const HttpMaps &) = delete;
+  HttpMaps &operator=(const HttpMaps &) = delete;
+  std::string getMimeType(const std::string &uri);
+  HttpRequestMethod getMethodEnum(std::string method);
+  HttpRequestVersion getVersionEnum(std::string version);
+  bool isHeaderValid(const std::string &header);
+  bool isHeaderRequired1_1(const std::string &header);
 
  private:
   HttpMaps();
   ~HttpMaps();
-  static std::unordered_map<std::string, HttpRequestMethod>
-  initHttpRequestMethodMap();
-  static std::unordered_map<std::string, HttpRequestVersion>
+  std::unordered_map<std::string, HttpRequestMethod> initHttpRequestMethodMap();
+  std::unordered_map<std::string, HttpRequestVersion>
   initHttpRequestVersionMap();
-  static std::set<std::string> initHeaderSet();
-  static std::set<std::string> initRequiredHeaders1_1();
+  std::set<std::string> initHeaderSet();
+  std::set<std::string> initRequiredHeaders1_1();
+  std::unordered_map<std::string, HttpRequestMethod> httpRequestMethodMap;
+  std::unordered_map<std::string, HttpRequestVersion> httpRequestVersionMap;
+  std::set<std::string> requiredHeaders1_1;
+  std::set<std::string> headerSet;
 };

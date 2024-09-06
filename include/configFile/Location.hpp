@@ -25,11 +25,14 @@ class Location {
   std::string _errorPageValue;
   std::string _accessLogValue;
   std::string _denyValue;
+  int _returnStatusCodeValue;
+  std::pair<int, std::string> _statusCodeAndUrlReturnValue;
   std::unordered_map<std::string, std::string> _cgi;
   std::vector<std::string> _rewriteValue;
 
  private:
   void cgiSetSeparatedValue(const std::string &value);
+  void addReturn(const std::string &value);
 };
 
 #endif  // LOCATION_HPP

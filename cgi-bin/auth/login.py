@@ -1,4 +1,3 @@
-import cgitb
 import os
 import uuid
 import csv
@@ -7,7 +6,6 @@ import json
 import logging
 import hashlib
 
-cgitb.enable()
 logging.basicConfig(filename="./cgi-bin/auth/auth.log", level=logging.DEBUG)
 
 db = "./cgi-bin/auth/users.csv"
@@ -77,7 +75,6 @@ def login():
     """
     envp = os.environ
     method = envp['REQUEST_METHOD']
-    logging.debug(envp)
     response = ''
     if method == 'GET':
         session = get_session_cookie(envp)

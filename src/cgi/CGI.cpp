@@ -202,16 +202,14 @@ void CGI::executeCGI() {
   args.push_back(const_cast<char *>(_script.c_str()));
   args.push_back(nullptr);
 
-  envp.push_back(const_cast<char *>(
-      std::string("CONTENT_LENGTH=" + _request.getHeader("Content-Length"))
-          .c_str()));
-  envp.push_back(const_cast<char *>(
-      std::string("REQUEST_METHOD=" + _request.getMethod()).c_str()));
-  envp.push_back(
-      const_cast<char *>(std::string("HOST=" + _request.getHost()).c_str()));
-  envp.push_back(const_cast<char *>(
-      std::string("ORIGIN=" + _request.getHeader("Origin")).c_str()));
-  envp.push_back(const_cast<char *>(std::string("URL_ARG=" + _urlArg).c_str()));
+  env_strs.push_back("CONTENT_LENGTH=" + _request.getHeader("Content-Length"));
+  env_strs.push_back("CONTENT_TYPE=" + _request.getHeader("Content-Type"));
+  env_strs.push_back("GATEWAY_INTERFACE=CGI/1.1");
+  env_strs.push_back("REMOTE_ADDR=" + _request.getHost());
+  env_strs.push_back("REQUEST_METHOD=" + _request.getMethod());
+  env_strs.push_back("HOST=" + _request.getHost());
+  env_strs.push_back("ORIGIN=" + _request.getHeader("Origin"));
+  env_strs.push_back("URL_ARG=" + _urlArg);
   if (_request.getHeader("Cookie") != "") {
     Log::getInstance().debug("Cookie: " + _request.getHeader("Cookie"));
     env_strs.push_back("HTTP_COOKIE=" + _request.getHeader("Cookie"));

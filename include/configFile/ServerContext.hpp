@@ -17,6 +17,7 @@ class ServerContext {
                                   const std::string &value);
   void createNewLocation(const std::string &url);
   void printServerContent() const;
+  void addListen(const std::string &value);
 
   std::string _serverNameValue;  // A separation of the values can be
                                  // implemented if wanted!
@@ -26,7 +27,9 @@ class ServerContext {
   std::string _indexValue;
   std::string _rootValue;
 
-  std::vector<std::string> _listenValue;
+  /*_listenValue should store only a vector of ints that contains the ports*/
+  std::vector<int> _listenValue;
+  std::vector<std::pair<std::string, int> > _portWithAdressListenValue;
   std::vector<std::unique_ptr<Location> > _locationContext;
 };
 
