@@ -40,7 +40,9 @@ enum class TypeToken {
   PROXY_CACHE_PATH = 33,
   CLIENT_MAX_BODY_SIZE = 34,
   AUTO_INDEX = 35,
-  VALUE = 36
+  ALLOW_METHODS = 36,
+  RETURN = 37,
+  VALUE = 38
 };
 
 std::ostream &operator << (std::ostream &outStream, const TypeToken &type);

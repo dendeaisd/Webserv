@@ -204,11 +204,17 @@ void Tokenization::directiveIdentification() {
       (*it)->_type = TypeToken::CLIENT_MAX_BODY_SIZE;
     else if ((*it)->_tokenStr == "autoindex")
       (*it)->_type = TypeToken::AUTO_INDEX;
+    else if ((*it)->_tokenStr == "allow_methods")
+      (*it)->_type = TypeToken::ALLOW_METHODS;
+    else if ((*it)->_tokenStr == "return")
+      (*it)->_type = TypeToken::RETURN;
   }
 }
 
 void Tokenization::valueIdentification() {
-  if (_tokensFromLine.empty() || validDirective(_tokensFromLine[0]->_tokenStr) == false) return;
+  if (_tokensFromLine.empty() ||
+      validDirective(_tokensFromLine[0]->_tokenStr) == false)
+    return;
 
   if (_tokensFromLine.size() < 2 &&
       _tokensFromLine.back()->_semikolonSet == false)
@@ -217,11 +223,9 @@ void Tokenization::valueIdentification() {
 
   for (auto it = _tokensFromLine.begin() + 1; it != _tokensFromLine.end();
        it++) {
-    if ((*it)->_type == TypeToken::DEFAULT)
-      (*it)->_type = TypeToken::VALUE;
-    if ((*it)->_semikolonSet == true)
-      return;
-   }
+    if ((*it)->_type == TypeToken::DEFAULT) (*it)->_type = TypeToken::VALUE;
+    if ((*it)->_semikolonSet == true) return;
+  }
 }
 
 bool Tokenization::validDirective(std::string &directive) {

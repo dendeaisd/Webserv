@@ -25,3 +25,6 @@ deny
 cgi
 rewrite
 client_max_body_size
+allow_methods
+return
+autoindex

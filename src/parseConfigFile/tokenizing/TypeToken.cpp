@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:29:53 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/06 13:20:13 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/07 08:02:42 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,10 @@ std::ostream &operator << (std::ostream &outStream, const TypeToken &type) {
       outStream << "CLIENT_MAX_BODY_SIZE";
     else if (type == TypeToken::AUTO_INDEX)
       outStream << "AUTO_INDEX";
+    else if (type == TypeToken::ALLOW_METHODS)
+      outStream << "ALLOW_METHODS";
+    else if (type == TypeToken::RETURN)
+      outStream << "RETURN";
     else if (type == TypeToken::VALUE)
       outStream << "VALUE";
   return (outStream);
