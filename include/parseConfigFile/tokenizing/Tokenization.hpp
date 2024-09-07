@@ -33,8 +33,8 @@ class Tokenization {
  private:
   void loadInvalidContextsAndDirectives();
   void openFile(const std::string &filePath, std::ifstream &file);
-  void removeCommentsFromLine(std::string &line);
-  void separateTokenStringsFromLine(std::string &line);
+  void removeCommentsFromLine();
+  void separateTokenStringsFromLine();
   void lineNumberAddToLineOfTokens(size_t currentLineNumber);
   void identifyTokenLineTypes();
   void checkAndSetSemikolonInToken();
@@ -49,6 +49,7 @@ class Tokenization {
   void addToLineTokensToTokenChain();
   void clearTokenLine();
 
+  std::string _line;
   std::vector<std::unique_ptr<TokenNode> > _tokensFromLine;
   std::vector<std::unique_ptr<TokenNode> > _chainOfTokens;
   std::set<std::string> _invalidContext;

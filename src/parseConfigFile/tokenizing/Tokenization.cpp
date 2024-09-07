@@ -11,14 +11,11 @@
 #include "ExceptionsTokenization.hpp"
 
 Tokenization::Tokenization(std::ifstream &file) {
-  std::string line;
   size_t currentLineNumber = 0;
 
   loadInvalidContextsAndDirectives();
-  while (std::getline(file, line)) {
+  while (std::getline(file, _line)) {
     currentLineNumber++;
-    removeCommentsFromLine(line);
-    separateTokenStringsFromLine(line);
     lineNumberAddToLineOfTokens(currentLineNumber);
     identifyTokenLineTypes();
     clearTokenLine();
@@ -52,14 +49,14 @@ void Tokenization::openFile(const std::string &filePath, std::ifstream &file) {
   if (file.is_open() == false) throw cantOpenFile(filePath);
 }
 
-void Tokenization::removeCommentsFromLine(std::string &line) {
-  if (line.find('#') == std::string::npos) return;
-  size_t pos = line.find('#');
-  line.erase(pos, (line.size() - pos));
+void Tokenization::removeCommentsFromLine() {
+  if (_line.find('#') == std::string::npos) return;
+  size_t pos = _line.find('#');
+  _line.erase(pos, (_line.size() - pos));
 }
 
-void Tokenization::separateTokenStringsFromLine(std::string &line) {
-  std::stringstream stream(line);
+void Tokenization::separateTokenStringsFromLine() {
+  std::stringstream stream(_line);
   std::string oneStr;
 
   while (stream >> oneStr) {
