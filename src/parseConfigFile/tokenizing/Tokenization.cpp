@@ -16,6 +16,8 @@ Tokenization::Tokenization(std::ifstream &file) {
   loadInvalidContextsAndDirectives();
   while (std::getline(file, _line)) {
     currentLineNumber++;
+    removeCommentsFromLine();
+    separateTokenStringsFromLine();
     lineNumberAddToLineOfTokens(currentLineNumber);
     identifyTokenLineTypes();
     clearTokenLine();
@@ -76,6 +78,7 @@ void Tokenization::identifyTokenLineTypes() {
   bracketIdentification();
   contextIdentification();
   directiveIdentification();
+  locationUrlIdentification();
   valueIdentification();
 
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
@@ -228,4 +231,14 @@ void Tokenization::valueIdentification() {
 bool Tokenization::validDirective(std::string &directive) {
   if (_directiveValid.find(directive) != _directiveValid.end()) return (true);
   return (false);
+}
+
+void Tokenization::locationUrlIdentification() {
+  if (_tokensFromLine.empty() ||
+      _tokensFromLine.front()->_type != TypeToken::LOCATION)
+    return;
+  else if (_tokensFromLine.size() < 2 || _tokensFromLine.size() > 3) {
+    throw invalidFormat("Location is set incorrect. Line: " + _line);
+  } else if (_tokensFromLine[1]->_type == TypeToken::DEFAULT)
+    _tokensFromLine[1]->_type = TypeToken::URL_LOCATION;
 }

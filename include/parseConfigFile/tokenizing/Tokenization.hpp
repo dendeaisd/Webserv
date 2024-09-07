@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/06 12:48:05 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/07 09:26:00 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ class Tokenization {
   void directiveIdentification();
   void valueIdentification();
   bool validDirective(std::string &directive);
+  void locationUrlIdentification();
   void addToLineTokensToTokenChain();
   void clearTokenLine();
 
