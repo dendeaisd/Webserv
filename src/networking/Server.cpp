@@ -42,78 +42,28 @@ void Server::handleEvents() {
   std::vector<struct pollfd>& fds = _pollManager.getFds();
 
   for (size_t i = 0; i < fds.size(); ++i) {
-    if (Event::getInstance().hasEvent(fds[i].fd)) {
-      if (Event::getInstance().getEvent(fds[i].fd)->wait()) {
-        fds[i].events = POLLOUT;
+    int fd = fds[i].fd;
+    short revents = fds[i].revents;
+    if (Event::getInstance().hasEvent(fd)) {
+      if (Event::getInstance().getEvent(fd)->wait()) {
+        auto client = _fdToClientMap.find(fd);
+        if (client != _fdToClientMap.end()) {
+          client->second->setReadyForResponse(true);
+          fds[i].events = POLLOUT;
+        }
       }
     }
-    if (fds[i].revents & POLLIN) {
-      auto it = std::find_if(_serverSockets.begin(), _serverSockets.end(),
-                             [fd = fds[i].fd](std::shared_ptr<Socket> socket) {
-                               return socket->getSocketFd() == fd;
-                             });
-      if (it != _serverSockets.end()) {
-        handleNewConnection((*it)->getSocketFd());
-      } else {
-        auto client = _fdToClientMap.find(fds[i].fd);
-        if (client != _fdToClientMap.end() &&
-            client->second->isReadyForRequest()) {
-          handleClientRequest(fds[i].fd);
-        }
-      }
-      auto client = _fdToClientMap.find(fds[i].fd);
-      if (client != _fdToClientMap.end() &&
-          client->second->isReadyForResponse()) {
-        fds[i].events = POLLOUT;
-      }
-    } else if (fds[i].revents & POLLOUT) {
-      auto client = _fdToClientMap.find(fds[i].fd);
-      auto it = std::find_if(
-          _clients.begin(), _clients.end(),
-          [fd = fds[i].fd](Client* client) { return client->getFd() == fd; });
-      if (client != _fdToClientMap.end() &&
-          (client->second->isReadyForResponse() ||
-           Event::getInstance().hasEvent(fds[i].fd))) {
-        if (!client->second->execute()) {
-          cleanupClient(it);
-          continue;
-        }
-        fds[i].events = POLLIN;
-      }
-    } else if (fds[i].revents & POLLHUP) {
-      Log::getInstance().debug("Connection closed by client");
-      auto it = std::find_if(
-          _clients.begin(), _clients.end(),
-          [fd = fds[i].fd](Client* client) { return client->getFd() == fd; });
-      if (it != _clients.end()) {
-        cleanupClient(it);
-      }
-    } else if (fds[i].revents & POLLERR) {
-      Log::getInstance().error("Error on socket " + std::to_string(fds[i].fd) +
-                               ": " + std::strerror(errno));
-      auto it = std::find_if(
-          _clients.begin(), _clients.end(),
-          [fd = fds[i].fd](Client* client) { return client->getFd() == fd; });
-      if (it != _clients.end()) {
-        cleanupClient(it);
-      }
+    if (revents & POLLIN) {
+      handlePollInEvent(fd, fds[i].events);
+    } else if (revents & POLLOUT) {
+      handlePollOutEvent(fd, fds[i].events);
+    } else if (revents & POLLHUP) {
+      handlePollHupEvent(fd);
+    } else if (revents & POLLERR) {
+      handlePollErrEvent(fd);
     }
   }
 }
-
-// void Server::removeCGIEvents() {
-//   std::vector<int> eventsToRemove;
-//   for (auto it = Event::getInstance().getEvents().begin();
-//        it != Event::getInstance().getEvents().end(); ++it) {
-//     if (it->second->wait()) {
-//       Log::getInstance().debug("Removing CGI event");
-//       eventsToRemove.push_back(it->first);
-//     }
-//   }
-//   for (int eventId : eventsToRemove) {
-//     Event::getInstance().removeEvent(eventId);
-//   }
-// }
 
 void Server::handleClientRequest(int fd) {
   for (std::vector<Client*>::iterator it = _clients.begin();
@@ -133,6 +83,65 @@ void Server::processClientRequest(std::vector<Client*>::iterator& it) {
   } catch (const std::exception& e) {
     std::cerr << "Exception caught while handling request: " << e.what()
               << std::endl;
+    cleanupClient(it);
+  }
+}
+
+bool Server::isServerSocket(int fd) {
+  return std::any_of(_serverSockets.begin(), _serverSockets.end(),
+                     [fd](std::shared_ptr<Socket> socket) {
+                       return socket->getSocketFd() == fd;
+                     });
+}
+
+void Server::handlePollInEvent(int fd, short& events) {
+  if (isServerSocket(fd)) {
+    handleNewConnection(fd);
+  } else {
+    auto client = _fdToClientMap.find(fd);
+    if (client != _fdToClientMap.end() && client->second->isReadyForRequest()) {
+      handleClientRequest(fd);
+    }
+
+    // If client is ready for response, set events to POLLOUT
+    if (client != _fdToClientMap.end() &&
+        client->second->isReadyForResponse()) {
+      events = POLLOUT;
+    }
+  }
+}
+
+void Server::handlePollOutEvent(int fd, short& events) {
+  auto client = _fdToClientMap.find(fd);
+  auto it =
+      std::find_if(_clients.begin(), _clients.end(),
+                   [fd](Client* client) { return client->getFd() == fd; });
+  if (client != _fdToClientMap.end() && client->second->isReadyForResponse()) {
+    if (!client->second->execute()) {
+      cleanupClient(it);
+      return;
+    }
+    events = POLLIN;
+  }
+}
+
+void Server::handlePollHupEvent(int fd) {
+  Log::getInstance().debug("Connection closed by client");
+  auto it =
+      std::find_if(_clients.begin(), _clients.end(),
+                   [fd](Client* client) { return client->getFd() == fd; });
+  if (it != _clients.end()) {
+    cleanupClient(it);
+  }
+}
+
+void Server::handlePollErrEvent(int fd) {
+  Log::getInstance().error("Error on socket " + std::to_string(fd) + ": " +
+                           std::strerror(errno));
+  auto it =
+      std::find_if(_clients.begin(), _clients.end(),
+                   [fd](Client* client) { return client->getFd() == fd; });
+  if (it != _clients.end()) {
     cleanupClient(it);
   }
 }

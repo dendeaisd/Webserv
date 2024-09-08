@@ -250,3 +250,5 @@ bool Client::shouldSendContinue() { return _shouldSendContinue; }
 bool Client::isReadyForRequest() {
   return _isReadyForRequest && !_isReadyForResponse;
 }
+
+void Client::setReadyForResponse(bool ready) { _isReadyForResponse = ready; }

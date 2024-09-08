@@ -23,6 +23,7 @@ class Client {
   bool isReadyForResponse();
   bool isReadyForRequest();
   bool shouldSendContinue();
+  void setReadyForResponse(bool ready);
   bool execute();
 
  private:
