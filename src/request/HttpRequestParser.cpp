@@ -471,20 +471,14 @@ bool HttpRequestParser::askForContinue() {
 int readMore(std::stringstream &ss, int _clientFd) {
   char buffer[MAX_BUFFER_SIZE + 1];
   int bytes_read = 0;
-  while (true) {
-    bytes_read = read(_clientFd, buffer, MAX_BUFFER_SIZE);
-    if (bytes_read > 0) {
-      buffer[bytes_read] = '\0';
-      ss << buffer;
-      return bytes_read;
-    } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-      continue;
-    } else {
-      if (bytes_read < 0) {
-        Log::getInstance().error(std::strerror(errno));
-      }
-      close(_clientFd);
-      break;
+  bytes_read = read(_clientFd, buffer, MAX_BUFFER_SIZE);
+  if (bytes_read > 0) {
+    buffer[bytes_read] = '\0';
+    ss << buffer;
+  } else {
+    if (bytes_read < 0) {
+      Log::getInstance().error("Readmore failed with error: " +
+                               std::string(std::strerror(errno)));
     }
   }
   return bytes_read;
@@ -501,53 +495,11 @@ bool HttpRequestParser::checkForTerminator(std::string line) {
   return false;
 }
 
-bool HttpRequestParser::writeToFile(std::string filename,
-                                    std::stringstream &ss) {
-  Log::getInstance().debug("Writing to file: " + filename);
-  int bytes_read = 0;
-  bytes_read = readMore(ss, _clientFd);
-  Log::getInstance().debug("Bytes read: " + std::to_string(bytes_read));
-  if (bytes_read == 0 || bytes_read == -1) return false;
-  total_read += bytes_read;
-  std::ofstream file(UPLOAD_DIR + filename, std::ios::app);
-  std::string data;
-  if (!file.is_open()) {
-    Log::getInstance().error("Failed to open file for writing");
-    return false;
-  }
-  bool boundaryFound = false;
-  while (std::getline(ss, data)) {
-    if (data.find("\r") != std::string::npos)
-      data = data.erase(data.find("\r"), 1);
-    if (checkForTerminator(data) || data.find(_boundary) != std::string::npos) {
-      boundaryFound = true;
-      break;
-    }
-    file << data.data();
-    if (!Helpers::boundaryUpcoming(ss, _boundary)) file << "\n";
-    if (bytes_read == MAX_BUFFER_SIZE) {
-      bytes_read = readMore(ss, _clientFd);
-    }
-  }
-  file.close();
-  if (boundaryFound) {
-    Log::getInstance().debug("Boundary found: " +
-                             std::to_string(boundaryFound));
-    currentFileUploadStatus = HttpFileUploadStatus::COMPLETE;
-  }
-  return true;
-}
-
 bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
   std::string data;
   int bytes_read = 0;
   size_t contentLength = _request.getContentLength();
   if (status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-    // if (currentFileUploadStatus == HttpFileUploadStatus::IN_PROGRESS) {
-    //   Log::getInstance().debug("Writing to file in progress: " +
-    //                            currentFileUploadName);
-    //   return writeToFile(currentFileUploadName, ss);
-    // }
     bytes_read = readMore(ss, _clientFd);
     Log::getInstance().debug("Bytes read: " + std::to_string(bytes_read));
     if (bytes_read == -1) return false;
@@ -603,7 +555,6 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
       while (std::getline(ss, data)) {
         if (data.find("\r") != std::string::npos)
           data = data.erase(data.find("\r"), 1);
-        // Log::getInstance().debug("File Data: " + data);
         if (checkForTerminator(data) ||
             data.find(_boundary) != std::string::npos) {
           Log::getInstance().debug("Boundary found!!");
@@ -620,12 +571,6 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
       file.close();
       Log::getInstance().debug("Boundary found: " +
                                std::to_string(boundaryFound));
-      // if (!boundaryFound) {
-      //   currentFileUploadStatus = HttpFileUploadStatus::IN_PROGRESS;
-      // } else {
-      //   currentFileUploadStatus = HttpFileUploadStatus::COMPLETE;
-      //   currentFileUploadName = "";
-      // }
       if (total_read > contentLength) {
         Log::getInstance().error("Content-Length exceeded");
         return false;
