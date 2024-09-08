@@ -142,3 +142,5 @@ bool HttpResponse::sendResponse(int fd) {
   file.close();
   return true;
 }
+
+int HttpResponse::getStatusCode() { return _statusCode; }

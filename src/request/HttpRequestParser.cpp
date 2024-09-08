@@ -131,22 +131,26 @@ int HttpRequestParser::parse() {
       status == HttpRequestParseStatus::INCOMPLETE) {
     Log::getInstance().error("Invalid or incomplete request line: " +
                              requestLine);
+    setStatusCode(400);
     return 400;
   }
   Log::getInstance().debug("Request line parsed");
   if (!isAllowedMethod(_request.getMethod())) {
     Log::getInstance().error("Invalid method: " + _request.getMethod());
+    setStatusCode(405);
     return 405;  // Method Not Allowed
   }
   Log::getInstance().debug("Method allowed");
   if (!validateHttpVersion()) {
     Log::getInstance().error("Invalid HTTP version. expected HTTP/1.1 got " +
                              _request.getHttpVersion());
+    setStatusCode(505);
     return 505;  // HTTP Version Not Supported
   }
   Log::getInstance().debug("HTTP version validated");
   bool shouldProceed = electHandler();
   if (!shouldProceed) {
+    setStatusCode(200);
     return 200;
   }
   parseHeaders(ss);
@@ -156,6 +160,7 @@ int HttpRequestParser::parse() {
   if (!isAllowedContentLength(contentLength)) {
     Log::getInstance().error("Invalid content length " +
                              std::to_string(contentLength));
+    setStatusCode(413);
     return 413;  // Payload Too Large
   }
   Log::getInstance().debug("Content length validated");
@@ -167,6 +172,7 @@ int HttpRequestParser::parse() {
         _request.getUri().substr(std::string(UPLOAD_DIR).length());
     if (!exists(UPLOAD_DIR + filename)) {
       Log::getInstance().error("File not found: " + filename);
+      setStatusCode(404);
       return 404;  // Not Found
     }
   }
@@ -180,7 +186,12 @@ int HttpRequestParser::parse() {
   if (!canHaveBody() && contentLength > 0) {
     Log::getInstance().error("Request method " + _request.getMethod() +
                              " cannot have a body");
+    setStatusCode(405);
     return 400;
+  }
+  if (contentLength == 0) {
+    setStatusCode(200);
+    return 200;
   }
   std::string contentType = _request.getHeader("Content-Type");
   if (contentType.find("application/json") != std::string::npos ||
@@ -189,6 +200,7 @@ int HttpRequestParser::parse() {
     if (contentLength != _request.getBody().length()) {
       Log::getInstance().error("Invalid content length " +
                                std::to_string(contentLength));
+      setStatusCode(400);
       return 400;
     }
   } else if (contentType.find("application/x-www-form-urlencoded") !=
@@ -198,23 +210,31 @@ int HttpRequestParser::parse() {
     if (!isUploadAllowed()) {
       Log::getInstance().error("File upload not allowed to endpoint " +
                                _request.getUri());
+      setStatusCode(405);
       return 405;  // Method Not Allowed
     }
     handleFileUpload(ss);
   }
   if (contentType.find("multipart/form-data") != std::string::npos) {
     if (!parseBoundary()) {
+      setStatusCode(400);
       return 400;
     }
     if (!handleFileUpload(ss)) {
+      setStatusCode(400);
       return 400;
     }
     if (!askForContinue() &&
         status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+      setStatusCode(500);
       return 500;  // Internal Server Error
     }
   }
-  return _request.getMethodEnum() == HttpRequestMethod::POST ? 201 : 200;
+  setStatusCode(200);
+  if (_request.getMethodEnum() == HttpRequestMethod::POST) {
+    setStatusCode(201);
+  }
+  return getStatusCode();
 }
 
 bool HttpRequestParser::parseBoundary() {
@@ -630,19 +650,24 @@ int HttpRequestParser::handshake() {
     if (!isUploadAllowed()) {
       Log::getInstance().error("File upload not allowed to " +
                                _request.getUri());
+      setStatusCode(405);
       return 405;  // Method Not Allowed
     }
     if (handleFileUpload(ss)) {
       // TODO: handle when method is PUT and results in creating a new record
       // or file, should return 201
       if (_request.getMethodEnum() == HttpRequestMethod::POST) {
+        setStatusCode(201);
         return 201;
       }
+      setStatusCode(200);
       return 200;
     }
+    setStatusCode(400);
     return 400;
   }
-  return 400;  // TODO: return appropriate status code
+  setStatusCode(400);
+  return 400;
 }
 
 bool HttpRequestParser::validateHttpVersion() {
@@ -668,3 +693,6 @@ void HttpRequestParser::parseQueryParams(std::string query) {
     }
   }
 }
+
+int HttpRequestParser::getStatusCode() { return _statusCode; }
+void HttpRequestParser::setStatusCode(int code) { _statusCode = code; }

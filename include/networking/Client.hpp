@@ -20,11 +20,19 @@ class Client {
   int getFd() const;
   bool handleRequest();
 
+  bool isReadyForResponse();
+  bool isReadyForRequest();
+  bool shouldSendContinue();
+  bool execute();
+
  private:
   int _fd;
   HttpRequestParser _parser;
   HttpResponse _response;
   std::unique_ptr<Event> _events;
+  bool _shouldSendContinue;
+  bool _isReadyForResponse;
+  bool _isReadyForRequest;
 
   bool sendDefaultFavicon();
   bool sendDefaultPage();
@@ -34,7 +42,7 @@ class Client {
                                        const std::string& requestUri,
                                        const std::string& inject);
   bool handleContinue();
-  bool execute();
+  void reset();
 };
 
 #endif  // CLIENT_H

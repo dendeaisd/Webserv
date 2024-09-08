@@ -15,11 +15,24 @@
 
 #define BUFFER_SIZE 4096
 
-Client::Client(int fd) : _fd(fd) { fcntl(fd, F_SETFL, O_NONBLOCK); }
+Client::Client(int fd) : _fd(fd) {
+  fcntl(fd, F_SETFL, O_NONBLOCK);
+  _isReadyForResponse = false;
+  _shouldSendContinue = false;
+  _isReadyForRequest = true;
+}
 
 Client::~Client() { close(_fd); }
 
 int Client::getFd() const { return _fd; }
+
+void Client::reset() {
+  _parser = HttpRequestParser();
+  _response = HttpResponse();
+  _isReadyForResponse = false;
+  _shouldSendContinue = false;
+  _isReadyForRequest = true;
+}
 
 const char* HTTP_RESPONSE =
     "HTTP/1.1 200 OK\r\n"
@@ -87,8 +100,7 @@ std::string Client::generateDirectoryListing(const std::string& path,
 bool Client::handleContinue() {
   int status = _parser.handshake();
   if (status != 200 && status != 201) {
-    Log::getInstance().error("Something went wrong while processing request: " +
-                             _parser.getHttpRequest().getHost());
+    Log::getInstance().error("Failed to complete handshake");
     _response.setStatusCode(status);
     std::string responseString = _response.getResponse();
     send(_fd, responseString.c_str(), responseString.length(), 0);
@@ -109,17 +121,22 @@ bool Client::handleContinue() {
 
 bool Client::execute() {
   auto request = _parser.getHttpRequest();
+  int status = _parser.getStatusCode();
+  if (status != 200 && status != 201) {
+    _response.setStatusCode(status);
+    std::string responseString = _response.getResponse();
+    send(_fd, responseString.c_str(), responseString.length(), 0);
+    Log::getInstance().warning(
+        request.getMethod() + " " + request.getHost() + request.getUri() +
+        " failed with status: " + std::to_string(status));
+    reset();
+    return false;
+  }
   switch (request.getHandler()) {
     case HttpRequestHandler::BENCHMARK: {
       _response.setStatusCode(200);
       std::string responseString = _response.getResponse();
       send(_fd, responseString.c_str(), responseString.length(), 0);
-      break;
-    }
-    case HttpRequestHandler::CGI: {
-      Log::getInstance().debug("Successful request. CGI");
-      auto cgi = std::make_shared<CGI>(_fd, request);
-      if (cgi->run()) Event::getInstance().addEvent(_fd, cgi);
       break;
     }
     case HttpRequestHandler::FAVICON: {
@@ -129,6 +146,11 @@ bool Client::execute() {
     }
     case HttpRequestHandler::STATIC: {
       sendDefaultPage();
+      break;
+    }
+    case HttpRequestHandler::CGI: {
+      Event::getInstance().getEvent(_fd)->handleResponse();
+      Event::getInstance().removeEvent(_fd);
       break;
     }
     case HttpRequestHandler::DIRECTORY_LISTING: {
@@ -167,8 +189,7 @@ bool Client::execute() {
   Log::getInstance().info(request.getMethod() + " " + request.getHost() +
                           request.getUri());
   // clean up request/response objects
-  _parser = HttpRequestParser();
-  _response = HttpResponse();
+  reset();
   return true;
 }
 
@@ -177,10 +198,11 @@ bool Client::handleRequest() {
 
   int bytes_read;
   int status;
+  _isReadyForRequest = false;
 
-  if (_parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-    return handleContinue();
-  }
+  // if (_parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+  //   return handleContinue();
+  // }
   std::string raw = "";
   bytes_read = read(_fd, buffer, BUFFER_SIZE);
   if (bytes_read > 0) {
@@ -198,23 +220,22 @@ bool Client::handleRequest() {
     }
     _parser = HttpRequestParser(raw, _fd);
     status = _parser.parse();
+    Log::getInstance().debug("Parsed request: " + raw);
     if ((status == 200 || status == 201) &&
         _parser.status == HttpRequestParseStatus::PARSED) {
-      return execute();
+      _isReadyForResponse = true;
+      if (_parser.getHttpRequest().getHandler() == HttpRequestHandler::CGI) {
+        auto request = _parser.getHttpRequest();
+        auto cgi = std::make_shared<CGI>(_fd, request);
+        if (cgi->run()) Event::getInstance().addEvent(_fd, cgi);
+        _isReadyForResponse = false;
+      }
     } else if ((status == 200 || status == 201) &&
                _parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-      Log::getInstance().debug("Request is to be continued: " +
-                               _parser.getHttpRequest().getHost());
-      return true;
+      Log::getInstance().debug("Request is to be continued: " + raw);
+      _shouldSendContinue = true;
     }
-    auto request = _parser.getHttpRequest();
-    Log::getInstance().error("Something went wrong while processing request: " +
-                             raw);
-    _response.setStatusCode(status);
-    std::string responseString = _response.getResponse();
-    send(_fd, responseString.c_str(), responseString.length(), 0);
-    close(_fd);
-    return false;
+    return true;
   } else {
     if (bytes_read < 0) {
       Log::getInstance().error("Failed to read from socket with error: " +
@@ -222,4 +243,10 @@ bool Client::handleRequest() {
     }
   }
   return true;
+}
+
+bool Client::isReadyForResponse() { return _isReadyForResponse; }
+bool Client::shouldSendContinue() { return _shouldSendContinue; }
+bool Client::isReadyForRequest() {
+  return _isReadyForRequest && !_isReadyForResponse;
 }

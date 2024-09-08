@@ -51,25 +51,19 @@ CGI::CGI(int fd, HttpRequest &request) {
 
 CGI::~CGI() {}
 
-void sendTimeoutResponse(int fd) {
-  HttpResponse response(408);
-  response.setBody(
+void CGI::sendTimeoutResponse() {
+  _response = HttpResponse(408);
+  _response.setBody(
       "<h2>Request timed out, we apologize for our garbage, unoptimized "
       "code.</h2>");
-  std::string resp = response.getResponse();
-  send(fd, resp.c_str(), resp.length(), 0);
   Log::getInstance().error("Request timed out is sent!");
 }
 
-void sendInternalErrorResponse(int fd) {
-  HttpResponse response(500);
-  std::string resp = response.getResponse();
-  send(fd, resp.c_str(), resp.length(), 0);
-}
+void CGI::sendInternalErrorResponse() { _response = HttpResponse(500); }
 
 bool CGI::run() {
   if (_unableToExecute) {
-    sendInternalErrorResponse(_fd);
+    sendInternalErrorResponse();
     return false;
   }
 
@@ -108,8 +102,7 @@ void CGI::killChild() {
 }
 
 bool CGI::handleTimeout() {
-  Log::getInstance().error("Request timed out");
-  sendTimeoutResponse(_fd);
+  sendTimeoutResponse();
   close(_pipeOutFd[0]);
   killChild();
   return true;
@@ -119,7 +112,7 @@ bool CGI::handleError(std::string logMessage) {
   Log::getInstance().error(logMessage);
   killChild();
   close(_pipeOutFd[0]);
-  sendInternalErrorResponse(_fd);
+  sendInternalErrorResponse();
   return true;
 }
 
@@ -143,9 +136,6 @@ bool CGI::tunnelData() {
     } else {
       close(_pipeOutFd[0]);
     }
-    // if (_request.getHeader("Connection") != "keep-alive") {
-    //   close(_fd);
-    // }
     return true;
   } else {
     if (bytes_read < 0) {
@@ -153,7 +143,9 @@ bool CGI::tunnelData() {
                                std::string(std::strerror(errno)));
     }
     close(_pipeOutFd[0]);
-    sendInternalErrorResponse(_fd);
+    sendInternalErrorResponse();
+    send(_fd, _response.getResponse().c_str(), _response.getResponse().length(),
+         0);
     return true;
   }
 }
@@ -185,7 +177,7 @@ bool CGI::wait() {
       return handleError("Script did not exit normally");
     }
   }
-  return tunnelData();
+  return true;
 }
 
 void CGI::executeCGI() {
@@ -226,4 +218,11 @@ void CGI::executeCGI() {
   execve(_language.c_str(), args.data(), envp.data());
   Log::getInstance().error("Failed to execute script");
   exit(1);
+}
+
+bool CGI::handleResponse() {
+  if (_response.getStatusCode() == -1) return tunnelData();
+  send(_fd, _response.getResponse().c_str(), _response.getResponse().length(),
+       0);
+  return true;
 }
