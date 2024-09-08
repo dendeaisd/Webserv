@@ -36,9 +36,9 @@ class HttpRequestParser {
   std::string currentFileUploadName;
   size_t total_read;
   bool electHandler();
-  void parseRequestLine(char *requestLine, size_t len);
-  void parseHeaders(std::stringstream &ss);
-  void parseBody(std::stringstream &ss);
+  bool parseRequestLine(char *requestLine, size_t len);
+  bool parseHeaders(std::stringstream &ss);
+  bool parseBody(std::stringstream &ss);
   void parseFormData(std::stringstream &ss);
   bool handleFileUpload(std::stringstream &ss);
   bool handleOctetStream(std::stringstream &ss);

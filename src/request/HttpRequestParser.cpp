@@ -126,36 +126,17 @@ bool HttpRequestParser::canHaveBody() {
 int HttpRequestParser::parse() {
   std::stringstream ss(_raw);
   std::string requestLine = getLineSanitized(ss);
-  parseRequestLine((char *)requestLine.c_str(), requestLine.length());
-  if (status == HttpRequestParseStatus::INVALID ||
-      status == HttpRequestParseStatus::INCOMPLETE) {
-    Log::getInstance().error("Invalid or incomplete request line: " +
-                             requestLine);
-    setStatusCode(400);
-    return 400;
+  if (!parseRequestLine((char *)requestLine.c_str(), requestLine.length())) {
+    return getStatusCode();
   }
-  Log::getInstance().debug("Request line parsed");
-  if (!isAllowedMethod(_request.getMethod())) {
-    Log::getInstance().error("Invalid method: " + _request.getMethod());
-    setStatusCode(405);
-    return 405;  // Method Not Allowed
-  }
-  Log::getInstance().debug("Method allowed");
-  if (!validateHttpVersion()) {
-    Log::getInstance().error("Invalid HTTP version. expected HTTP/1.1 got " +
-                             _request.getHttpVersion());
-    setStatusCode(505);
-    return 505;  // HTTP Version Not Supported
-  }
-  Log::getInstance().debug("HTTP version validated");
-  bool shouldProceed = electHandler();
-  if (!shouldProceed) {
+
+  if (!electHandler()) {
     setStatusCode(200);
     return 200;
   }
-  parseHeaders(ss);
-  if (status == HttpRequestParseStatus::INVALID) return 400;
-  Log::getInstance().debug("Headers parsed");
+  if (!parseHeaders(ss)) {
+    return getStatusCode();
+  }
   size_t contentLength = _request.getContentLength();
   if (!isAllowedContentLength(contentLength)) {
     Log::getInstance().error("Invalid content length " +
@@ -196,17 +177,14 @@ int HttpRequestParser::parse() {
   std::string contentType = _request.getHeader("Content-Type");
   if (contentType.find("application/json") != std::string::npos ||
       contentType.find("text/plain") != std::string::npos) {
-    parseBody(ss);
-    if (contentLength != _request.getBody().length()) {
-      Log::getInstance().error("Invalid content length " +
-                               std::to_string(contentLength));
-      setStatusCode(400);
-      return 400;
+    if (!parseBody(ss)) {
+      return getStatusCode();
     }
   } else if (contentType.find("application/x-www-form-urlencoded") !=
              std::string::npos) {
     parseFormData(ss);
-  } else if (hasFile && _request.getHeader("filename") != "") {
+  } else if (hasFile && _request.getHeader("filename") != "" &&
+             contentLength > 0) {
     if (!isUploadAllowed()) {
       Log::getInstance().error("File upload not allowed to endpoint " +
                                _request.getUri());
@@ -251,18 +229,24 @@ bool HttpRequestParser::parseBoundary() {
   return true;
 }
 
-void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
+bool HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
   size_t i = 0;
   for (i = 0; i < len; i++) {
     if (requestLine[i] == ' ') {
       bool valid = _request.setMethod(std::string(requestLine, i));
       if (!valid) {
-        status = HttpRequestParseStatus::INVALID;
-        Log::getInstance().error("Invalid request method");
-        return;
+        setStatusCode(400);
+        Log::getInstance().error("Invalid request method " +
+                                 std::string(requestLine, i));
+        return false;
       }
       break;
     }
+  }
+  if (!isAllowedMethod(_request.getMethod())) {
+    Log::getInstance().error("Invalid method: " + _request.getMethod());
+    setStatusCode(405);
+    return false;
   }
   size_t j = i + 1;
   for (i = j; i < len; i++) {
@@ -272,21 +256,28 @@ void HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
     }
   }
   if (i == len || _request.getUri().empty() || _request.getUri()[0] != '/') {
-    status = HttpRequestParseStatus::INCOMPLETE;
-    Log::getInstance().error("Invalid URI");
-    return;
+    setStatusCode(400);
+    Log::getInstance().error("Invalid URI " + _request.getUri());
+    return false;
   }
   j = i + 1;
   _request.setHttpVersion(std::string(requestLine + j, len - j));
+  if (!validateHttpVersion()) {
+    Log::getInstance().error("Invalid HTTP version. expected HTTP/1.1 got " +
+                             _request.getHttpVersion());
+    setStatusCode(505);  // HTTP Version Not Supported
+    return false;
+  }
+  return true;
 }
 
-void HttpRequestParser::parseHeaders(std::stringstream &ss) {
+bool HttpRequestParser::parseHeaders(std::stringstream &ss) {
   std::string header;
   while ((header = getLineSanitized(ss)).length() > 0) {
     if (header.length() > MAX_HEADER_SIZE) {
       Log::getInstance().error("Header too long: " + header);
-      status = HttpRequestParseStatus::INVALID;
-      return;
+      setStatusCode(400);
+      return false;
     }
     /*
     No whitespace is allowed between the field name and colon.  In the
@@ -297,8 +288,8 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
     if (header.find(" : ") != std::string::npos) {
       Log::getInstance().error(
           "Invalid header with extra space before colon: " + header);
-      status = HttpRequestParseStatus::INVALID;
-      return;
+      setStatusCode(400);
+      return false;
     }
     size_t pos = header.find(": ");
     if (pos != std::string::npos) {
@@ -329,8 +320,8 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
       _request.setHeader(key, value);
     } else {
       Log::getInstance().error("Invalid header: " + header);
-      status = HttpRequestParseStatus::INVALID;
-      return;
+      setStatusCode(400);
+      return false;
     }
   }
   std::string host = _request.getHeader("Host");
@@ -344,28 +335,37 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
       _request.setPort("80");
     }
     status = HttpRequestParseStatus::PARSED;
-  } else {
-    status = HttpRequestParseStatus::INVALID;
-    return;
+    setStatusCode(200);
+    return true;
   }
+  setStatusCode(400);
+  return false;
 }
 
-void HttpRequestParser::parseBody(std::stringstream &ss) {
+bool HttpRequestParser::parseBody(std::stringstream &ss) {
   if (_request.getMethodEnum() == HttpRequestMethod::GET ||
       _request.getMethodEnum() == HttpRequestMethod::HEAD ||
       _request.getMethodEnum() == HttpRequestMethod::OPTIONS) {
     // While it's not strictly forbidden to send a body in a GET request,
     // it's not recommended and it's not supported by most servers.
     // This is a design decision, and it's not a requirement of the HTTP
-    status = HttpRequestParseStatus::INVALID;
-    return;
+    setStatusCode(405);
+    return false;
   }
+  size_t contentLength = _request.getContentLength();
   std::string body;
   std::string line;
   while (std::getline(ss, line)) {
     body += line;
   }
+  if (contentLength != body.length()) {
+    Log::getInstance().error("Invalid content length " +
+                             std::to_string(contentLength));
+    setStatusCode(400);
+    return false;
+  }
   _request.setBody(body);
+  return true;
 }
 
 void HttpRequestParser::parseFormData(std::stringstream &ss) {
