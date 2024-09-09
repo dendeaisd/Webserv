@@ -13,4 +13,4 @@
 #include "NodeToken.hpp"
 
 TokenNode::TokenNode()
-    : _type(TypeToken::DEFAULT), _foundLine(0), _semikolonSet(false) {}
+    : _type(TypeToken::DEFAULT), _foundLine("0"), _semikolonSet(false) {}

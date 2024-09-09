@@ -11,7 +11,7 @@
 #include "ExceptionsTokenization.hpp"
 
 Tokenization::Tokenization(std::ifstream &file) {
-  size_t currentLineNumber = 0;
+  unsigned currentLineNumber = 0;
 
   loadInvalidContextsAndDirectives();
   while (std::getline(file, _line)) {
@@ -67,9 +67,11 @@ void Tokenization::separateTokenStringsFromLine() {
   }
 }
 
-void Tokenization::lineNumberAddToLineOfTokens(size_t currentLineNumber) {
+void Tokenization::lineNumberAddToLineOfTokens(unsigned int currentLineNumber) {
+  std::string lineNumberStr = std::to_string(currentLineNumber);
+
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++)
-    (*it)->_foundLine = currentLineNumber;
+    (*it)->_foundLine = lineNumberStr;
 }
 
 void Tokenization::identifyTokenLineTypes() {

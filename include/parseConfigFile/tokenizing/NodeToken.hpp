@@ -8,12 +8,13 @@
 class TokenNode {
  public:
   TokenNode();
+  TokenNode(const TokenNode &other);
+  TokenNode &operator = (const TokenNode &other);
 
   std::string _tokenStr;
   TypeToken _type;
-  size_t _foundLine;
+  std::string _foundLine;
   bool _semikolonSet;
-
 };
 
 #endif
