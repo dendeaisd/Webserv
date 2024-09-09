@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/07 09:26:00 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/09 15:43:32 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ class Tokenization {
   void openFile(const std::string &filePath, std::ifstream &file);
   void removeCommentsFromLine();
   void separateTokenStringsFromLine();
-  void lineNumberAddToLineOfTokens(size_t currentLineNumber);
+  void lineNumberAddToLineOfTokens(unsigned int currentLineNumber);
   void identifyTokenLineTypes();
   void checkAndSetSemikolonInToken();
   void removeSemikolonFromToken();
