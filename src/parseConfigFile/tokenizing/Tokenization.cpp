@@ -82,13 +82,6 @@ void Tokenization::identifyTokenLineTypes() {
   directiveIdentification();
   locationUrlIdentification();
   valueIdentification();
-
-  for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
-    std::cout << "STR: [" << (*it)->_tokenStr << "]" << std::endl;
-    std::cout << "line number: [" << (*it)->_foundLine << "]\n";
-    std::cout << "semicolon set: [" << (*it)->_semikolonSet << "]\n";
-    std::cout << "type: [" << (*it)->_type << "]\n\n";
-  }
 }
 
 void Tokenization::checkAndSetSemikolonInToken() {
@@ -243,4 +236,14 @@ void Tokenization::locationUrlIdentification() {
     throw invalidFormat("Location is set incorrect. Line: " + _line);
   } else if (_tokensFromLine[1]->_type == TypeToken::DEFAULT)
     _tokensFromLine[1]->_type = TypeToken::URL_LOCATION;
+}
+
+void Tokenization::printTokens() {
+
+  for (auto it = _chainOfTokens.begin(); it != _chainOfTokens.end(); it++) {
+    std::cout << "STR: [" << (*it)->_tokenStr << "]" << std::endl;
+    std::cout << "line number: [" << (*it)->_foundLine << "]\n";
+    std::cout << "semicolon set: [" << (*it)->_semikolonSet << "]\n";
+    std::cout << "type: [" << (*it)->_type << "]\n\n";
+  }
 }

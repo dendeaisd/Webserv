@@ -29,6 +29,7 @@ class Tokenization {
   Tokenization(const Tokenization &) = delete;
   Tokenization &operator=(const Tokenization &) = delete;
   std::vector<TokenNode> getTokens() const;
+  void printTokens();
 
  private:
   void loadInvalidContextsAndDirectives();
