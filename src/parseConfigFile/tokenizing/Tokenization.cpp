@@ -20,6 +20,7 @@ Tokenization::Tokenization(std::ifstream &file) {
     separateTokenStringsFromLine();
     lineNumberAddToLineOfTokens(currentLineNumber);
     identifyTokenLineTypes();
+    addToLineTokensToTokenChain();
     clearTokenLine();
   }
 }
@@ -236,6 +237,12 @@ void Tokenization::locationUrlIdentification() {
     throw invalidFormat("Location is set incorrect. Line: " + _line);
   } else if (_tokensFromLine[1]->_type == TypeToken::DEFAULT)
     _tokensFromLine[1]->_type = TypeToken::URL_LOCATION;
+}
+
+void Tokenization::addToLineTokensToTokenChain() {
+  for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
+    _chainOfTokens.push_back(std::make_unique<TokenNode>(**it));
+  }
 }
 
 void Tokenization::printTokens() {
