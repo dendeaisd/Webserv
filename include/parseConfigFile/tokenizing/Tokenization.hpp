@@ -6,17 +6,17 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/09 15:43:32 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/09 15:51:02 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef TOKENIZATION_HPP
 #define TOKENIZATION_HPP
 
-#include <string>
-#include <vector>
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 
 #include "NodeToken.hpp"
 #include "TypeToken.hpp"

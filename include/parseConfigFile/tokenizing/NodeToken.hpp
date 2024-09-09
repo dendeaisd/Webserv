@@ -9,7 +9,7 @@ class TokenNode {
  public:
   TokenNode();
   TokenNode(const TokenNode &other);
-  TokenNode &operator = (const TokenNode &other);
+  TokenNode &operator=(const TokenNode &other);
 
   std::string _tokenStr;
   TypeToken _type;

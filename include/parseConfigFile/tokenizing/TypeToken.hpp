@@ -45,6 +45,6 @@ enum class TypeToken {
   VALUE = 38
 };
 
-std::ostream &operator << (std::ostream &outStream, const TypeToken &type);
+std::ostream &operator<<(std::ostream &outStream, const TypeToken &type);
 
 #endif
