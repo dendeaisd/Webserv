@@ -246,7 +246,6 @@ void Tokenization::addToLineTokensToTokenChain() {
 }
 
 void Tokenization::printTokens() {
-
   for (auto it = _chainOfTokens.begin(); it != _chainOfTokens.end(); it++) {
     std::cout << "STR: [" << (*it)->_tokenStr << "]" << std::endl;
     std::cout << "line number: [" << (*it)->_foundLine << "]\n";

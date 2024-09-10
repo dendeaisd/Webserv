@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:20:25 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/09 12:02:15 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/10 09:27:20 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ TokenNode::TokenNode(const TokenNode &other)
       _foundLine(other._foundLine),
       _semikolonSet(other._semikolonSet) {}
 
-TokenNode &TokenNode::operator = (const TokenNode &other) {
+TokenNode &TokenNode::operator=(const TokenNode &other) {
   if (this != &other) {
     _tokenStr = other._tokenStr;
     _type = other._type;
@@ -30,4 +30,3 @@ TokenNode &TokenNode::operator = (const TokenNode &other) {
   }
   return (*this);
 }
-
