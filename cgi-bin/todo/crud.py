@@ -1,11 +1,9 @@
-import cgitb
 import csv
 import datetime
 import json
 import logging
 import os
 
-cgitb.enable()
 logging.basicConfig(filename="./cgi-bin/todo/todo.log", level=logging.DEBUG)
 db = './cgi-bin/todo/todo.csv'
 
@@ -17,7 +15,6 @@ def get_todo_list():
 	with open(db, 'r') as f:
 		reader = csv.DictReader(f)
 		todo_list = list(reader)
-	logging.debug(f"Todo list: {todo_list}")
 	for item in todo_list:
 		item['done'] = True if item['done'] == 'True' else False
 	return todo_list
@@ -103,9 +100,7 @@ def handle_delete_request(todo_list, envp):
 def main():
 	envp = os.environ
 	method = envp['REQUEST_METHOD']
-	logging.debug(f"Environment Variables: {envp}")
 	todo_list = get_todo_list()
-	logging.debug(f"Method: {method}")
 	response = ''
 	if method == 'GET':
 		response += 'HTTP/1.1 200 OK\r\n'
@@ -125,7 +120,6 @@ def main():
 		print('HTTP/1.1 405 Method Not Allowed\r\n')
 		return
 	json_list = json.dumps(todo_list)
-	logging.debug(f"JSON List: {json_list}")
 	response += 'Content-Type: application/json\r\n'
 	response += 'Content-Length: {}\r\n'.format(len(json_list) + 1)
 	response += '\r\n'

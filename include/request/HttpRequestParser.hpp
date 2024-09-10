@@ -9,7 +9,6 @@
 #include <iostream>
 #include <sstream>
 
-// #include "../FileUpload.hpp"  // path was not correct, i changed it
 #include "HttpMaps.hpp"
 #include "HttpRequest.hpp"
 #include "HttpRequestEnums.hpp"
@@ -34,7 +33,7 @@ class HttpRequestParser {
   HttpFileUploadStatus currentFileUploadStatus;
   std::string currentFileUploadName;
   size_t total_read;
-  void electHandler();
+  bool electHandler();
   void parseRequestLine(char *requestLine, size_t len);
   void parseHeaders(std::stringstream &ss);
   void parseBody(std::stringstream &ss);

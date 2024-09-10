@@ -110,6 +110,12 @@ bool Client::handleContinue() {
 bool Client::execute() {
   auto request = _parser.getHttpRequest();
   switch (request.getHandler()) {
+    case HttpRequestHandler::BENCHMARK: {
+      _response.setStatusCode(200);
+      std::string responseString = _response.getResponse();
+      send(_fd, responseString.c_str(), responseString.length(), 0);
+      break;
+    }
     case HttpRequestHandler::CGI: {
       Log::getInstance().debug("Successful request. CGI");
       auto cgi = std::make_shared<CGI>(_fd, request);
@@ -138,7 +144,8 @@ bool Client::execute() {
     case HttpRequestHandler::SEND_UPLOADED_FILE: {
       Log::getInstance().debug("Successful request. Send Uploaded File");
       _response.setStatusCode(200);
-      std::string mimeType = HttpMaps::getMimeType(request.getUri());
+      std::string mimeType =
+          HttpMaps::getInstance().getMimeType(request.getUri());
       _response.setFile("." + request.getUri(), mimeType);
       _response.sendResponse(_fd);
       break;

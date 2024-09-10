@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/08/26 18:20:59 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/04 20:33:16 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 #include <cstring>
 #include <memory>
+#include <sstream>
+#include <string>
 
 ServerContext::ServerContext() {
   _listenValue.clear();
@@ -37,7 +39,7 @@ void ServerContext::serverSaveDirectiveValue(const std::string &key,
   else if (key == "root")
     _rootValue = value;
   else if (key == "listen")
-    _listenValue.push_back(value);
+    addListen(value);
 }
 
 void ServerContext::locationSaveDirectiveValue(const std::string &key,
@@ -64,11 +66,32 @@ void ServerContext::printServerContent() const {
     listen_it++;
   }
 
+  for (auto it = _portWithAdressListenValue.begin();
+       it != _portWithAdressListenValue.end(); it++) {
+    std::cout << "listen: adress [" << (*it).first << "] port [" << (*it).second
+              << "]\n";
+  }
+
   auto it_location = _locationContext.begin();
 
   std::cout << std::endl;
   while (it_location != _locationContext.end()) {
     (*it_location)->printLocation();
     it_location++;
+  }
+}
+
+void ServerContext::addListen(const std::string &value) {
+  int port;
+  std::istringstream stream(value);
+
+  if (value.find(':') == std::string::npos) {
+    stream >> port;
+    _listenValue.push_back(port);
+  } else if (value.find(':') != std::string::npos) {
+    std::string adress;
+    std::getline(stream, adress, ':');
+    stream >> port;
+    _portWithAdressListenValue.push_back(std::make_pair(adress, port));
   }
 }

@@ -42,7 +42,7 @@ HttpRequest HttpRequestParser::getHttpRequest() {
   }
 }
 
-void HttpRequestParser::electHandler() {
+bool HttpRequestParser::electHandler() {
   if (isCgiRequest()) {
     request.setHandler(HttpRequestHandler::CGI);
   } else if (isFaviconRequest()) {
@@ -61,9 +61,13 @@ void HttpRequestParser::electHandler() {
   } else if (request.getUri() == "/uploads" &&
              request.getMethodEnum() == HttpRequestMethod::POST) {
     request.setHandler(HttpRequestHandler::FILE_UPLOAD);
+  } else if (request.getUri() == "/benchmark") {
+    request.setHandler(HttpRequestHandler::BENCHMARK);
+    return false;
   } else {
     request.setHandler(HttpRequestHandler::STATIC);
   }
+  return true;
 }
 
 bool HttpRequestParser::isCgiRequest() {
@@ -140,6 +144,10 @@ int HttpRequestParser::parse() {
     return 505;  // HTTP Version Not Supported
   }
   Log::getInstance().debug("HTTP version validated");
+  bool shouldProceed = electHandler();
+  if (!shouldProceed) {
+    return 200;
+  }
   parseHeaders(ss);
   if (status == HttpRequestParseStatus::INVALID) return 400;
   Log::getInstance().debug("Headers parsed");
@@ -151,7 +159,7 @@ int HttpRequestParser::parse() {
   }
   Log::getInstance().debug("Content length validated");
   injectUploadFormIfNeeded();
-  electHandler();
+
   if (request.getHandler() == HttpRequestHandler::SEND_UPLOADED_FILE) {
     // check if file exists
     std::string filename =
@@ -274,7 +282,8 @@ void HttpRequestParser::parseHeaders(std::stringstream &ss) {
     size_t pos = header.find(": ");
     if (pos != std::string::npos) {
       std::string key = header.substr(0, pos);
-      if (HttpMaps::headerSet.find(key) == HttpMaps::headerSet.end()) {
+      bool validHeader = HttpMaps::getInstance().isHeaderValid(key);
+      if (!validHeader) {
         Log::getInstance().debug("Unknown header: " + key +
                                  " found in request " + request.getUri());
         // Unknown headers are ignored to improve server performance and
@@ -436,29 +445,6 @@ bool HttpRequestParser::askForContinue() {
   }
   status = HttpRequestParseStatus::PARSED;
   return true;
-}
-
-int readAllAvailable(std::stringstream &ss, int _clientFd) {
-  char buffer[MAX_BUFFER_SIZE + 1];
-  int total_read = 0;
-  int bytes_read = 0;
-  while (true) {
-    bytes_read = read(_clientFd, buffer, MAX_BUFFER_SIZE);
-    if (bytes_read > 0) {
-      buffer[bytes_read] = '\0';
-      ss << buffer;
-      total_read += bytes_read;
-    } else if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-      continue;
-    } else {
-      if (bytes_read < 0) {
-        Log::getInstance().error(std::strerror(errno));
-      }
-      close(_clientFd);
-      break;
-    }
-  }
-  return total_read;
 }
 
 int readMore(std::stringstream &ss, int _clientFd) {
@@ -659,17 +645,12 @@ int HttpRequestParser::handshake() {
 }
 
 bool HttpRequestParser::validateHttpVersion() {
-  if (HttpMaps::httpRequestVersionMap.find(request.getHttpVersion()) !=
-      HttpMaps::httpRequestVersionMap.end()) {
-    request.setHttpVersion(HttpMaps::httpRequestVersionMap.at(
-        HttpMaps::httpRequestVersionMap.find(request.getHttpVersion())->first));
-    if (request.getHttpVersionEnum() != HttpRequestVersion::HTTP_1_1)
-      return false;
-    return true;
-  } else {
-    request.setHttpVersion(HttpRequestVersion::UNKNOWN);
+  auto version =
+      HttpMaps::getInstance().getVersionEnum(request.getHttpVersion());
+  request.setHttpVersion(version);
+  if (request.getHttpVersionEnum() != HttpRequestVersion::HTTP_1_1)
     return false;
-  }
+  return true;
 }
 
 void HttpRequestParser::parseQueryParams(std::string query) {

@@ -1,8 +1,6 @@
-import cgitb
 import os
 import logging
 
-cgitb.enable()
 
 logging.basicConfig(filename="./cgi-bin/todo/todo.log", level=logging.DEBUG)
 
@@ -45,6 +43,7 @@ def get_todo_app():
 			response += "\r\n"
 			response += content
 	else:
+		logging.error(f"Method not allowed: {method}")
 		response = "HTTP/1.1 405 Method Not Allowed\r\n"
 	print(response)
 
