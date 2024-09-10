@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ConfigFile.cpp                                     :+:      :+:    :+:   */
+/*   SyntaxAnalysis.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/03 22:12:08 by ramymoussa       ###   ########.fr       */
+/*   Updated: 2024/09/04 22:07:17 by ramymoussa       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ConfigFile.hpp"
+#include "SyntaxAnalysis.hpp"
 
 #include <string.h>
 
@@ -22,13 +22,13 @@
 #include "HttpContext.hpp"
 #include "ServerContext.hpp"
 
-ConfigFile::ConfigFile() {
+SyntaxAnalysis::SyntaxAnalysis() {
   _workerProcessesValue.clear();
   _pidValue.clear();
   _errorLogValue.clear();
 }
 
-void ConfigFile::printConfigFileContent() {
+void SyntaxAnalysis::printConfigFileContent() {
   std::cout << "-Main-\n"
             << "worker process: [" << _workerProcessesValue << "]" << std::endl
             << "pid: [" << _pidValue << "]" << std::endl
@@ -36,7 +36,7 @@ void ConfigFile::printConfigFileContent() {
   _httpContext.printHttpContent();
 }
 
-void ConfigFile::parseConfiguration(const std::string &fileName) {
+void SyntaxAnalysis::parseConfiguration(const std::string &fileName) {
   std::fstream file;
   std::string line;
 
@@ -54,7 +54,7 @@ void ConfigFile::parseConfiguration(const std::string &fileName) {
   }
 }
 
-void ConfigFile::setCurrentState(const std::string &line) {
+void SyntaxAnalysis::setCurrentState(const std::string &line) {
   if (_state == StoringStates::MAIN_CONTEXT && line.find("http") != line.npos)
     _state = StoringStates::HTTPS_CONTEXT;
   else if (_state == StoringStates::HTTPS_CONTEXT &&
@@ -74,12 +74,12 @@ void ConfigFile::setCurrentState(const std::string &line) {
     _state = StoringStates::SERVER_CONTEXT_IN_HTTP;
 }
 
-void ConfigFile::possibleNewServerContextSetup(const std::string &line) {
+void SyntaxAnalysis::possibleNewServerContextSetup(const std::string &line) {
   if (isStoringState(line, StoringStates::SERVER_CONTEXT_IN_HTTP) == true)
     _httpContext.addNewEmptyServer();
 }
 
-void ConfigFile::trackBrackets(const std::string &line) {
+void SyntaxAnalysis::trackBrackets(const std::string &line) {
   EBracketStatus status = transferStateToBracketStatus();
   for (auto c : line) {
     if (c == '#')
@@ -91,7 +91,7 @@ void ConfigFile::trackBrackets(const std::string &line) {
   }
 }
 
-EBracketStatus ConfigFile::transferStateToBracketStatus() {
+EBracketStatus SyntaxAnalysis::transferStateToBracketStatus() {
   switch (_state) {
     case StoringStates::MAIN_CONTEXT:
       return (MAIN_BRACKET);
@@ -106,7 +106,7 @@ EBracketStatus ConfigFile::transferStateToBracketStatus() {
   return (MAIN_BRACKET);
 }
 
-void ConfigFile::mainContextSaveDirective(const std::string &line) {
+void SyntaxAnalysis::mainContextSaveDirective(const std::string &line) {
   if (_state != StoringStates::MAIN_CONTEXT) return;
   if (line.find("worker_processes") != line.npos)
     _workerProcessesValue = getValue(line);
@@ -116,7 +116,7 @@ void ConfigFile::mainContextSaveDirective(const std::string &line) {
     _errorLogValue = getValue(line);
 }
 
-std::string ConfigFile::getValue(const std::string &line) {
+std::string SyntaxAnalysis::getValue(const std::string &line) {
   std::istringstream stream(line);
   std::string oneValue;
   std::string value;
@@ -129,7 +129,7 @@ std::string ConfigFile::getValue(const std::string &line) {
   return (value);
 }
 
-void ConfigFile::httpContextSave(const std::string &line) {
+void SyntaxAnalysis::httpContextSave(const std::string &line) {
   if (_state != StoringStates::HTTPS_CONTEXT ||
       isStoringState(line, StoringStates::HTTPS_CONTEXT) == true)
     return;
@@ -139,7 +139,7 @@ void ConfigFile::httpContextSave(const std::string &line) {
   _httpContext.httpSaveDirectiveValue(key, value);
 }
 
-std::string ConfigFile::getKey(const std::string &line) {
+std::string SyntaxAnalysis::getKey(const std::string &line) {
   std::istringstream stream(line);
   std::string key;
 
@@ -147,7 +147,7 @@ std::string ConfigFile::getKey(const std::string &line) {
   return (key);
 }
 
-void ConfigFile::serverContextSave(const std::string &line) {
+void SyntaxAnalysis::serverContextSave(const std::string &line) {
   if (_state != StoringStates::SERVER_CONTEXT_IN_HTTP ||
       isStoringState(line, StoringStates::SERVER_CONTEXT_IN_HTTP) == true ||
       numberOfWordsSeparatedBySpaces(line) < 2)
@@ -157,7 +157,7 @@ void ConfigFile::serverContextSave(const std::string &line) {
   _httpContext.serverSaveContextOrDirective(key, value);
 }
 
-void ConfigFile::locationContextSave(const std::string &line) {
+void SyntaxAnalysis::locationContextSave(const std::string &line) {
   if (_state != StoringStates::LOCATION_CONTEXT_IN_SERVER ||
       numberOfWordsSeparatedBySpaces(line) < 2 ||
       isStoringState(line, StoringStates::LOCATION_CONTEXT_IN_SERVER) == true)
@@ -167,7 +167,7 @@ void ConfigFile::locationContextSave(const std::string &line) {
   _httpContext._serverContext.back()->locationSaveDirectiveValue(key, value);
 }
 
-void ConfigFile::removeWhiteSpacesFront(std::string &str) {
+void SyntaxAnalysis::removeWhiteSpacesFront(std::string &str) {
   if (str[0] != ' ') return;
   int whiteSpaces;
 
@@ -177,7 +177,7 @@ void ConfigFile::removeWhiteSpacesFront(std::string &str) {
   str.erase(0, whiteSpaces);
 }
 
-int ConfigFile::numberOfWordsSeparatedBySpaces(const std::string &str) {
+int SyntaxAnalysis::numberOfWordsSeparatedBySpaces(const std::string &str) {
   std::stringstream stream(str);
   std::string oneWord;
   unsigned int numberOfWords;
@@ -189,7 +189,8 @@ int ConfigFile::numberOfWordsSeparatedBySpaces(const std::string &str) {
   return (numberOfWords);
 }
 
-bool ConfigFile::isStoringState(const std::string &line, StoringStates state) {
+bool SyntaxAnalysis::isStoringState(const std::string &line,
+                                    StoringStates state) {
   std::istringstream stream(line);
   std::string onState;
   std::string stateAsStr;
@@ -201,7 +202,8 @@ bool ConfigFile::isStoringState(const std::string &line, StoringStates state) {
   return (false);
 }
 
-void ConfigFile::getStateAsString(std::string &stateStr, StoringStates &state) {
+void SyntaxAnalysis::getStateAsString(std::string &stateStr,
+                                      StoringStates &state) {
   switch (state) {
     case StoringStates::HTTPS_CONTEXT:
       stateStr = "http";
@@ -217,7 +219,7 @@ void ConfigFile::getStateAsString(std::string &stateStr, StoringStates &state) {
   }
 }
 
-void ConfigFile::possibleNewLocationSetup(std::string &line) {
+void SyntaxAnalysis::possibleNewLocationSetup(std::string &line) {
   if (isStoringState(line, StoringStates::LOCATION_CONTEXT_IN_SERVER) == false)
     return;
   std::istringstream stream(line);

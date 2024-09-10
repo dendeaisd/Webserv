@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stack>
+#include <string>
 
 #include "HttpContext.hpp"
 
@@ -20,9 +21,9 @@ enum EBracketStatus {
   LOCATION_BRACKET = 3
 };
 
-class ConfigFile {
+class SyntaxAnalysis {
  public:
-  ConfigFile();
+  SyntaxAnalysis();
 
   void printConfigFileContent();
   void parseConfiguration(const std::string &fileName);

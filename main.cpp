@@ -10,7 +10,7 @@
 #include "./include/cgi/CGIFileManager.hpp"
 #include "./include/log/Log.hpp"
 #include "./include/networking/Server.hpp"
-#include "ConfigFile.hpp"
+#include "SyntaxAnalysis.hpp"
 
 #define PORT 8080
 
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   try {
-    auto config = ConfigFile();
+    auto config = SyntaxAnalysis();
     config.parseConfiguration(configFile);
     config.printConfigFileContent();
     Log::getInstance().configure("NOLOG");
