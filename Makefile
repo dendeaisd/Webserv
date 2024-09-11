@@ -3,6 +3,7 @@ CC          :=  c++
 CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g
 
 INCLUDE_DIRS := -I./include -I./tester                                   \
+								-I./include/parseConfigFile                              \
 								-I./include/parseConfigFile/syntaxAnalysis               \
 								-I./include/parseConfigFile/tokenizing
 TESTER_MAIN := tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
