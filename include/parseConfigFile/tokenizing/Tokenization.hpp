@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/09 15:51:02 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/11 17:20:45 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class Tokenization {
   Tokenization() = delete;
   Tokenization(const Tokenization &) = delete;
   Tokenization &operator=(const Tokenization &) = delete;
-  std::vector<TokenNode> getTokens() const;
+  std::vector<std::unique_ptr<TokenNode> > getTokens();
   void printTokens();
 
  private:
