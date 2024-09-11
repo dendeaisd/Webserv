@@ -253,3 +253,8 @@ void Tokenization::printTokens() {
     std::cout << "type: [" << (*it)->_type << "]\n\n";
   }
 }
+
+std::vector<std::unique_ptr<TokenNode> > Tokenization::getTokens() {
+  if (_chainOfTokens.empty()) throw EmptyVectorOfTokens();
+  return (std::move(_chainOfTokens));
+}
