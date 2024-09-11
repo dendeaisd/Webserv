@@ -26,14 +26,28 @@ enum EBracketStatus {
 
 class SyntaxAnalysis {
  public:
+  SyntaxAnalysis() = delete;
+  SyntaxAnalysis(const SyntaxAnalysis &) = delete;
+  SyntaxAnalysis &operator=(const SyntaxAnalysis &other) = delete;
+  SyntaxAnalysis(std::vector<std::unique_ptr<TokenNode> > &token);
+  ~SyntaxAnalysis();
 
-  void printConfigFileContent();
-  void parseConfiguration(const std::string &fileName);
+  void undefinedTokenCheck();
+  void setCurrentState();
+  void directiveStateSetSave(const StoringStates &state);
+  void moveToNextTokenSave();
 
+  void trackBrackets();
+  EBracketStatus getCurrentBracketStatus();
 
  private:
+  ConfigFile _config;
   StoringStates _state;
+  bool _tokenIsHandled;
+  std::vector<std::unique_ptr<TokenNode>>::iterator _it;
+
   std::stack<char> _bracketStatus[4];
+  std::vector<std::unique_ptr<TokenNode>> _tokens;
 };
 
 #endif
