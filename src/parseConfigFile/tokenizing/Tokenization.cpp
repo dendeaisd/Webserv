@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "ExceptionsTokenization.hpp"
+#include "ExceptionsParsing.hpp"
 
 Tokenization::Tokenization(std::ifstream &file) {
   unsigned currentLineNumber = 0;
@@ -49,7 +49,7 @@ void Tokenization::loadInvalidContextsAndDirectives() {
 
 void Tokenization::openFile(const std::string &filePath, std::ifstream &file) {
   file.open(filePath);
-  if (file.is_open() == false) throw cantOpenFile(filePath);
+  if (file.is_open() == false) throw CantOpenFile(filePath);
 }
 
 void Tokenization::removeCommentsFromLine() {
@@ -112,7 +112,7 @@ void Tokenization::bracketIdentification() {
     else if (((*it)->_tokenStr.find('{') != std::string::npos ||
               (*it)->_tokenStr.find('}') != std::string::npos) &&
              (*it)->_tokenStr.size() != 1)
-      throw invalidFormat("Breacktets neeed to be seperated by spaces");
+      throw InvalidFormat("Breacktets neeed to be seperated by spaces");
   }
 }
 
@@ -125,7 +125,7 @@ void Tokenization::contextIdentification() {
     else if ((*it)->_tokenStr == "location")
       (*it)->_type = TypeToken::LOCATION;
     else if (isInvalidContext((*it)->_tokenStr) == true)
-      throw invalidContext((*it)->_tokenStr + " context is not implemented");
+      throw InvalidContext((*it)->_tokenStr + " context is not implemented");
   }
 }
 
@@ -143,7 +143,7 @@ bool Tokenization::isInvalidDirective(const std::string &directive) {
 void Tokenization::directiveIdentification() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     if (isInvalidDirective((*it)->_tokenStr) == true)
-      throw invalidDirective((*it)->_tokenStr);
+      throw InvalidDirective((*it)->_tokenStr);
     else if ((*it)->_tokenStr == "ssl_certificate")
       (*it)->_type = TypeToken::SSL_CERTIFICATE;
     else if ((*it)->_tokenStr == "ssl_certificate_key")
@@ -214,7 +214,7 @@ void Tokenization::valueIdentification() {
 
   if (_tokensFromLine.size() < 2 &&
       _tokensFromLine.back()->_semikolonSet == false)
-    throw invalidFormat("semikolon not set at end of line " +
+    throw InvalidFormat("semikolon not set at end of line " +
                         _tokensFromLine.back()->_tokenStr);
 
   for (auto it = _tokensFromLine.begin() + 1; it != _tokensFromLine.end();
@@ -234,7 +234,7 @@ void Tokenization::locationUrlIdentification() {
       _tokensFromLine.front()->_type != TypeToken::LOCATION)
     return;
   else if (_tokensFromLine.size() < 2 || _tokensFromLine.size() > 3) {
-    throw invalidFormat("Location is set incorrect. Line: " + _line);
+    throw InvalidFormat("Location is set incorrect. Line: " + _line);
   } else if (_tokensFromLine[1]->_type == TypeToken::DEFAULT)
     _tokensFromLine[1]->_type = TypeToken::URL_LOCATION;
 }
