@@ -1,10 +1,10 @@
 NAME        :=  webserv
 CC          :=  c++
-CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g
+CFLAGS       :=  -Wall -Wextra -Werror -std=c++17 -g -fsanitize=address
 
 INCLUDE_DIRS := -I./include -I./tester                                   \
 								-I./include/parseConfigFile                              \
-								-I./include/parseConfigFile/syntaxAnalysis               \
+								-I./include/parseConfigFile/semanticAnalysis             \
 								-I./include/parseConfigFile/tokenizing
 TESTER_MAIN := tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
 SRC_MAIN := main.cpp

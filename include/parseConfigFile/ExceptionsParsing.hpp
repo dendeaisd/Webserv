@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/11 16:38:57 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/12 18:16:48 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ class InvalidSetting : public ExceptionsParsing {
 class NoOpeningBracketFound : public ExceptionsParsing {
  public:
   NoOpeningBracketFound(const std::string &message)
-      : ExceptionsParsing("No Closing bracket found. Line " + message) {}
+      : ExceptionsParsing("No opening bracket found. Line " + message) {}
 };
 
 class MissingSymbol : public ExceptionsParsing {
@@ -61,8 +61,26 @@ class MissingSymbol : public ExceptionsParsing {
 };
 
 class EmptyVectorOfTokens : public ExceptionsParsing {
-  public:
-    EmptyVectorOfTokens()
-      : ExceptionsParsing("Can't get empty tokens") {}
+ public:
+  EmptyVectorOfTokens() : ExceptionsParsing("Can't get empty tokens") {}
+};
 
+class DirectiveValueNotTerminatedWithSemicolon : public ExceptionsParsing {
+ public:
+  DirectiveValueNotTerminatedWithSemicolon(const std::string &message)
+      : ExceptionsParsing(
+            "Directive value is not terminated by semicolon. line " + message) {
+  }
+};
+
+class NoClosingBracketFound : public ExceptionsParsing {
+  public:
+    NoClosingBracketFound()
+      : ExceptionsParsing("Missing closing bracket") {}
+};
+
+class InvalidCharacterFound : public ExceptionsParsing {
+  public:
+    InvalidCharacterFound(const std::string &message)
+    : ExceptionsParsing("Invalid character found. Line " + message) {}
 };

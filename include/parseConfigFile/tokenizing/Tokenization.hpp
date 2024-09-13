@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/11 17:20:45 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/13 09:39:17 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <memory>
 #include <set>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -28,7 +29,7 @@ class Tokenization {
   Tokenization() = delete;
   Tokenization(const Tokenization &) = delete;
   Tokenization &operator=(const Tokenization &) = delete;
-  std::vector<std::unique_ptr<TokenNode> > getTokens();
+  std::vector<std::vector<std::unique_ptr<TokenNode>>> getTokens();
   void printTokens();
 
  private:
@@ -48,8 +49,12 @@ class Tokenization {
   void valueIdentification();
   bool validDirective(std::string &directive);
   void locationUrlIdentification();
-  void addToLineTokensToTokenChain();
+  void trackBreackets();
+  void invalidCharacterCheck() const;
+  bool isValidSpecialCharacter(char c) const;
+  void addToLineTokensToDoubleVectorOfTokens();
   void clearTokenLine();
+  void leftBracketsCheck();
 
   std::string _line;
   std::vector<std::unique_ptr<TokenNode>> _tokensFromLine;
@@ -57,6 +62,7 @@ class Tokenization {
   std::set<std::string> _invalidContext;
   std::set<std::string> _invalidDirective;
   std::set<std::string> _directiveValid;
+  std::stack<char> _bracketCount;
 };
 
 #endif

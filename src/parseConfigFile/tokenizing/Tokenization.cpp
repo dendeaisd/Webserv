@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -20,9 +21,12 @@ Tokenization::Tokenization(std::ifstream &file) {
     separateTokenStringsFromLine();
     lineNumberAddToLineOfTokens(currentLineNumber);
     identifyTokenLineTypes();
-    addToLineTokensToTokenChain();
+    trackBreackets();
+    invalidCharacterCheck();
+    addToLineTokensToDoubleVectorOfTokens();
     clearTokenLine();
   }
+  leftBracketsCheck();
 }
 
 void Tokenization::loadInvalidContextsAndDirectives() {
@@ -86,10 +90,15 @@ void Tokenization::identifyTokenLineTypes() {
 }
 
 void Tokenization::checkAndSetSemikolonInToken() {
-  for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
-    size_t pos = (*it)->_tokenStr.size() - 1;
-    if ((*it)->_tokenStr[pos] == ';') (*it)->_semikolonSet = true;
-  }
+  if (_tokensFromLine.size() < 1) return;
+  size_t pos = _tokensFromLine.back()->_tokenStr.size() - 1;
+  if (validDirective(_tokensFromLine.front()->_tokenStr) == true &&
+      _tokensFromLine.back()->_tokenStr[pos] == ';')
+    _tokensFromLine.back()->_semikolonSet = true;
+  else if (validDirective(_tokensFromLine.front()->_tokenStr) == true &&
+           _tokensFromLine.back()->_tokenStr[pos] != ';')
+    throw DirectiveValueNotTerminatedWithSemicolon(
+        _tokensFromLine.front()->_foundLine + " :" + _line);
 }
 
 void Tokenization::removeSemikolonFromToken() {
@@ -99,16 +108,12 @@ void Tokenization::removeSemikolonFromToken() {
   }
 }
 
-void Tokenization::clearTokenLine() { _tokensFromLine.clear(); }
-
 void Tokenization::bracketIdentification() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
-    if ((*it)->_tokenStr.find('{') != std::string::npos &&
-        (*it)->_tokenStr.size() == 1)
+    if ((*it)->_tokenStr[0] == '{')
       (*it)->_type = TypeToken::OPEN_BRACKET;
-    else if ((*it)->_tokenStr.find('}') != std::string::npos &&
-             (*it)->_tokenStr.size() == 1)
-      (*it)->_type = TypeToken::OPEN_BRACKET;
+    else if ((*it)->_tokenStr[0] == '}')
+      (*it)->_type = TypeToken::CLOSING_BRACKET;
     else if (((*it)->_tokenStr.find('{') != std::string::npos ||
               (*it)->_tokenStr.find('}') != std::string::npos) &&
              (*it)->_tokenStr.size() != 1)
@@ -116,16 +121,18 @@ void Tokenization::bracketIdentification() {
   }
 }
 
+void Tokenization::clearTokenLine() { _tokensFromLine.clear(); }
+
 void Tokenization::contextIdentification() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
-    if ((*it)->_tokenStr == "http")
+    if (isInvalidContext((*it)->_tokenStr) == true)
+      throw InvalidContext((*it)->_tokenStr + " context is not implemented");
+    else if ((*it)->_tokenStr == "http")
       (*it)->_type = TypeToken::HTTP;
     else if ((*it)->_tokenStr == "server")
       (*it)->_type = TypeToken::SERVER;
     else if ((*it)->_tokenStr == "location")
       (*it)->_type = TypeToken::LOCATION;
-    else if (isInvalidContext((*it)->_tokenStr) == true)
-      throw InvalidContext((*it)->_tokenStr + " context is not implemented");
   }
 }
 
@@ -239,22 +246,59 @@ void Tokenization::locationUrlIdentification() {
     _tokensFromLine[1]->_type = TypeToken::URL_LOCATION;
 }
 
-void Tokenization::addToLineTokensToTokenChain() {
+void Tokenization::trackBreackets() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
-    _chainOfTokens.push_back(std::make_unique<TokenNode>(**it));
+    if ((*it)->_type == TypeToken::OPEN_BRACKET)
+      _bracketCount.push('{');
+    else if ((*it)->_type == TypeToken::CLOSING_BRACKET &&
+             _bracketCount.size() > 0)
+      _bracketCount.pop();
+    else if ((*it)->_type == TypeToken::CLOSING_BRACKET &&
+             _bracketCount.size() == 0)
+      throw NoOpeningBracketFound((*it)->_foundLine + ": " + _line);
   }
+}
+
+void Tokenization::invalidCharacterCheck() const {
+  for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
+    for (int i = 0; (*it)->_tokenStr[i] != '\0'; i++) {
+      if (std::isalnum((*it)->_tokenStr[i]) == false &&
+          isValidSpecialCharacter((*it)->_tokenStr[i]) == false)
+        throw InvalidCharacterFound(_tokensFromLine.front()->_foundLine + ": " +
+                                    _line);
+    }
+  }
+}
+
+bool Tokenization::isValidSpecialCharacter(char c) const {
+  if (c == ';' || c == '{' || c == '}' || c == '#' || c == '.' || c == '/' ||
+      c == ':' || c == '=' || c == '-' || c == '_' || c == '?' || c == '&' ||
+      c == '+')
+    return (true);
+  return (false);
+}
+
+void Tokenization::addToLineTokensToDoubleVectorOfTokens() {
+  _doubleVectorOfTokens.push_back(std::move(_tokensFromLine));
 }
 
 void Tokenization::printTokens() {
-  for (auto it = _chainOfTokens.begin(); it != _chainOfTokens.end(); it++) {
-    std::cout << "STR: [" << (*it)->_tokenStr << "]" << std::endl;
-    std::cout << "line number: [" << (*it)->_foundLine << "]\n";
-    std::cout << "semicolon set: [" << (*it)->_semikolonSet << "]\n";
-    std::cout << "type: [" << (*it)->_type << "]\n\n";
+  for (auto it = _doubleVectorOfTokens.begin();
+       it != _doubleVectorOfTokens.end(); it++) {
+    for (auto iter = (*it).begin(); iter != (*it).end(); iter++) {
+      std::cout << "STR: [" << (*iter)->_tokenStr << "]" << std::endl;
+      std::cout << "line number: [" << (*iter)->_foundLine << "]\n";
+      std::cout << "semicolon set: [" << (*iter)->_semikolonSet << "]\n";
+      std::cout << "type: [" << (*iter)->_type << "]\n\n";
+    }
   }
 }
 
-std::vector<std::unique_ptr<TokenNode> > Tokenization::getTokens() {
-  if (_chainOfTokens.empty()) throw EmptyVectorOfTokens();
-  return (std::move(_chainOfTokens));
+std::vector<std::vector<std::unique_ptr<TokenNode>>> Tokenization::getTokens() {
+  if (_doubleVectorOfTokens.empty()) throw EmptyVectorOfTokens();
+  return (std::move(_doubleVectorOfTokens));
+}
+
+void Tokenization::leftBracketsCheck() {
+  if (_bracketCount.size() != 0) throw NoClosingBracketFound();
 }
