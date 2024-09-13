@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/31 16:06:22 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/13 09:39:17 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/13 10:02:50 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ class Tokenization {
   void trackBreackets();
   void invalidCharacterCheck() const;
   bool isValidSpecialCharacter(char c) const;
+  void undefinedTokenCheck();
   void addToLineTokensToDoubleVectorOfTokens();
   void clearTokenLine();
   void leftBracketsCheck();

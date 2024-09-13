@@ -23,6 +23,7 @@ Tokenization::Tokenization(std::ifstream &file) {
     identifyTokenLineTypes();
     trackBreackets();
     invalidCharacterCheck();
+    undefinedTokenCheck();
     addToLineTokensToDoubleVectorOfTokens();
     clearTokenLine();
   }
@@ -302,3 +303,11 @@ std::vector<std::vector<std::unique_ptr<TokenNode>>> Tokenization::getTokens() {
 void Tokenization::leftBracketsCheck() {
   if (_bracketCount.size() != 0) throw NoClosingBracketFound();
 }
+
+void Tokenization::undefinedTokenCheck() {
+  for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
+    if ((*it)->_type == TypeToken::DEFAULT)
+      throw CantIdentifySetting((*it)->_foundLine + ": " + (*it)->_tokenStr);
+  }
+}
+

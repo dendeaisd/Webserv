@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/12 18:16:48 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/13 10:08:17 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,13 +74,19 @@ class DirectiveValueNotTerminatedWithSemicolon : public ExceptionsParsing {
 };
 
 class NoClosingBracketFound : public ExceptionsParsing {
-  public:
-    NoClosingBracketFound()
-      : ExceptionsParsing("Missing closing bracket") {}
+ public:
+  NoClosingBracketFound() : ExceptionsParsing("Missing closing bracket") {}
 };
 
 class InvalidCharacterFound : public ExceptionsParsing {
-  public:
-    InvalidCharacterFound(const std::string &message)
-    : ExceptionsParsing("Invalid character found. Line " + message) {}
+ public:
+  InvalidCharacterFound(const std::string &message)
+      : ExceptionsParsing("Invalid character found. Line " + message) {}
+};
+
+class CantIdentifySetting : public ExceptionsParsing {
+ public:
+  CantIdentifySetting(const std::string &message)
+      : ExceptionsParsing("Can't identify setting in config. Line " + message) {
+  }
 };
