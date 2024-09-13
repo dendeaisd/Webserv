@@ -52,8 +52,8 @@ class Tokenization {
   void clearTokenLine();
 
   std::string _line;
-  std::vector<std::unique_ptr<TokenNode> > _tokensFromLine;
-  std::vector<std::unique_ptr<TokenNode> > _chainOfTokens;
+  std::vector<std::unique_ptr<TokenNode>> _tokensFromLine;
+  std::vector<std::vector<std::unique_ptr<TokenNode>>> _doubleVectorOfTokens;
   std::set<std::string> _invalidContext;
   std::set<std::string> _invalidDirective;
   std::set<std::string> _directiveValid;
