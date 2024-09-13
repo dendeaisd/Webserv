@@ -1,5 +1,5 @@
-#ifndef CONFIG_FILE_HPP
-#define CONFIG_FILE_HPP
+#ifndef SEMANTIC_ANALYSIS_HPP
+#define SEMANTIC_ANALYSIS_HPP
 
 #include <iostream>
 #include <stack>
@@ -24,13 +24,13 @@ enum EBracketStatus {
   LOCATION_BRACKET = 3
 };
 
-class SyntaxAnalysis {
+class SemanticAnalysis {
  public:
-  SyntaxAnalysis() = delete;
-  SyntaxAnalysis(const SyntaxAnalysis &) = delete;
-  SyntaxAnalysis &operator=(const SyntaxAnalysis &other) = delete;
-  SyntaxAnalysis(std::vector<std::unique_ptr<TokenNode> > &token);
-  ~SyntaxAnalysis();
+  SemanticAnalysis() = delete;
+  SemanticAnalysis(const SemanticAnalysis &) = delete;
+  SemanticAnalysis &operator=(const SemanticAnalysis &other) = delete;
+  SemanticAnalysis(std::vector<std::unique_ptr<TokenNode> > &token);
+  ~SemanticAnalysis();
 
   void undefinedTokenCheck();
   void setCurrentState();

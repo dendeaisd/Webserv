@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   SyntaxAnalysis.cpp                                 :+:      :+:    :+:   */
+/*   semanticAnalysis.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/11 17:23:03 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/12 14:48:46 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "SyntaxAnalysis.hpp"
+#include "SemanticAnalysis.hpp"
 
 #include <string.h>
 
@@ -26,7 +26,7 @@
 #include "HttpContext.hpp"
 #include "ServerContext.hpp"
 
-SyntaxAnalysis::SyntaxAnalysis(
+SemanticAnalysis::SemanticAnalysis(
     std::vector<std::unique_ptr<TokenNode> > &token) {
   _tokens = std::move(token);
   _it = _tokens.begin();
@@ -37,9 +37,9 @@ SyntaxAnalysis::SyntaxAnalysis(
   }
 }
 
-SyntaxAnalysis::~SyntaxAnalysis() {}
+SemanticAnalysis::~SemanticAnalysis() {}
 
-void SyntaxAnalysis::setCurrentState() {
+void SemanticAnalysis::setCurrentState() {
   if (_state == StoringStates::MAIN_CONTEXT && (*_it)->_type == TypeToken::HTTP)
     directiveStateSetSave(StoringStates::HTTPS_CONTEXT);
   else if (_state == StoringStates::HTTPS_CONTEXT &&
@@ -59,7 +59,11 @@ void SyntaxAnalysis::setCurrentState() {
     _state = StoringStates::SERVER_CONTEXT;
 }
 
-void SyntaxAnalysis::directiveStateSetSave(const StoringStates &state) {
+void SemanticAnalysis::directiveStateSetSave(const StoringStates &state) {
+  if ((*_it)->_type == TypeToken::LOCATION) {
+    moveToNextTokenSave();
+  }
+  
   moveToNextTokenSave();
   if ((*_it)->_type != TypeToken::OPEN_BRACKET)
     throw MissingSymbol((*_it)->_foundLine + ": " + (*_it)->_tokenStr);
@@ -67,14 +71,14 @@ void SyntaxAnalysis::directiveStateSetSave(const StoringStates &state) {
   _tokenIsHandled = true;
 }
 
-void SyntaxAnalysis::moveToNextTokenSave() {
+void SemanticAnalysis::moveToNextTokenSave() {
   if (_it != _tokens.end() && (_it + 1) != _tokens.end())
     _it++;
   else
     throw MissingSymbol((*_it)->_foundLine + ": " + (*_it)->_tokenStr);
 }
 
-void SyntaxAnalysis::trackBrackets() {
+void SemanticAnalysis::trackBrackets() {
   EBracketStatus status = getCurrentBracketStatus();
   if ((*_it)->_type == TypeToken::OPEN_BRACKET && _tokenIsHandled == true)
     _bracketStatus[status].push('{');
@@ -86,7 +90,7 @@ void SyntaxAnalysis::trackBrackets() {
     throw NoOpeningBracketFound((*_it)->_foundLine + ": " + (*_it)->_tokenStr);
 }
 
-EBracketStatus SyntaxAnalysis::getCurrentBracketStatus() {
+EBracketStatus SemanticAnalysis::getCurrentBracketStatus() {
   switch (_state) {
     case StoringStates::MAIN_CONTEXT:
       return (MAIN_BRACKET);
