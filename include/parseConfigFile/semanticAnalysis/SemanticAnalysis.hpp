@@ -2,16 +2,17 @@
 #define SEMANTIC_ANALYSIS_HPP
 
 #include <iostream>
+#include <memory>
 #include <stack>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "ConfigFile.hpp"
 #include "NodeToken.hpp"
 
-enum class StoringStates {
 typedef std::vector<std::vector<std::unique_ptr<TokenNode>>> TokenStructure;
+
+enum class State {
   MAIN_CONTEXT = 0,
   HTTPS_CONTEXT = 1,
   SERVER_CONTEXT = 2,
@@ -34,18 +35,30 @@ class SemanticAnalysis {
   ~SemanticAnalysis();
 
   void setCurrentState();
+  bool OneTokenInLineIsADirective() noexcept;
+  bool httpValidLine() noexcept;
+  bool serverValidLine() noexcept;
+  bool locationValidLine() noexcept;
+  bool backSwitchState(State state, EBracketStatus bracket) noexcept;
 
   void trackBrackets();
-  EBracketStatus getCurrentBracketStatus();
+  bool bracketInLineOfTokens() noexcept;
+  EBracketStatus getCurrentBracketStatus() noexcept;
+  bool validDirectiveLine() noexcept;
+  bool openBracketStateIs(TypeToken expectedType, State currentState) noexcept;
+  bool moveStateBackFrom(State currentState) noexcept;
+  bool validClosingBracket() noexcept;
 
+  std::string currentLine();
  private:
   ConfigFile _config;
-  StoringStates _state;
-  bool _tokenIsHandled;
-  std::vector<std::unique_ptr<TokenNode>>::iterator _it;
-
+  State _state;
   std::stack<char> _bracketStatus[4];
-  std::vector<std::unique_ptr<TokenNode>> _tokens;
+  std::vector<std::unique_ptr<TokenNode>> _tokenLine;
 };
+
+std::ostream &operator<<(std::ostream &outStream, const State &type);
+
+
 
 #endif

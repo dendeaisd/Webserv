@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   semanticAnalysis.cpp                               :+:      :+:    :+:   */
+/*   SemanticAnalysis.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/12 14:48:46 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/16 16:08:02 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,67 +39,164 @@ SemanticAnalysis::SemanticAnalysis(TokenStructure &token) {
 SemanticAnalysis::~SemanticAnalysis() {}
 
 void SemanticAnalysis::setCurrentState() {
-  if (_state == StoringStates::MAIN_CONTEXT && (*_it)->_type == TypeToken::HTTP)
-    directiveStateSetSave(StoringStates::HTTPS_CONTEXT);
-  else if (_state == StoringStates::HTTPS_CONTEXT &&
-           (*_it)->_type == TypeToken::SERVER)
-    directiveStateSetSave(StoringStates::SERVER_CONTEXT);
-  /* else if (_state == StoringStates::SERVER_CONTEXT &&
-           (*_it)->_type == TypeToken::LOCATION)
-    directiveStateSetSave(StoringStates::LOCATION_CONTEXT); */
-  else if (_state == StoringStates::HTTPS_CONTEXT &&
-           _bracketStatus[HTTP_BRACKET].size() == 0)
-    _state = StoringStates::MAIN_CONTEXT;
-  else if (_state == StoringStates::SERVER_CONTEXT &&
-           _bracketStatus[SERVER_BRACKET].size() == 0)
-    _state = StoringStates::HTTPS_CONTEXT;
-  else if (_state == StoringStates::LOCATION_CONTEXT &&
-           _bracketStatus[LOCATION_BRACKET].size() == 0)
-    _state = StoringStates::SERVER_CONTEXT;
-}
+  if (OneTokenInLineIsADirective() == false && bracketInLineOfTokens() == false)
+    return;
 
-void SemanticAnalysis::directiveStateSetSave(const StoringStates &state) {
-  if ((*_it)->_type == TypeToken::LOCATION) {
-    moveToNextTokenSave();
-  }
-  
-  moveToNextTokenSave();
-  if ((*_it)->_type != TypeToken::OPEN_BRACKET)
-    throw MissingSymbol((*_it)->_foundLine + ": " + (*_it)->_tokenStr);
-  _state = state;
-  _tokenIsHandled = true;
-}
-
-void SemanticAnalysis::moveToNextTokenSave() {
-  if (_it != _tokens.end() && (_it + 1) != _tokens.end())
-    _it++;
+  if (httpValidLine() == true)
+    _state = State::HTTPS_CONTEXT;
+  else if (serverValidLine() == true)
+    _state = State::SERVER_CONTEXT;
+  else if (locationValidLine() == true)
+    _state = State::LOCATION_CONTEXT;
+  else if (backSwitchState(State::HTTPS_CONTEXT,
+                           EBracketStatus::HTTP_BRACKET) == true)
+    _state = State::MAIN_CONTEXT;
+  else if (backSwitchState(State::SERVER_CONTEXT,
+                           EBracketStatus::SERVER_BRACKET) == true)
+    _state = State::HTTPS_CONTEXT;
+  else if (backSwitchState(State::LOCATION_CONTEXT,
+                           EBracketStatus::LOCATION_BRACKET) == true)
+    _state = State::SERVER_CONTEXT;
   else
-    throw MissingSymbol((*_it)->_foundLine + ": " + (*_it)->_tokenStr);
+    throw InvalidDirective(_tokenLine.front()->_foundLine + ": " +
+                           currentLine());
+}
+
+bool SemanticAnalysis::OneTokenInLineIsADirective() noexcept {
+  for (auto it = _tokenLine.begin(); it != _tokenLine.end(); it++) {
+    if ((*it)->_type == TypeToken::HTTP)
+      return (true);
+    else if ((*it)->_type == TypeToken::SERVER)
+      return (true);
+    else if ((*it)->_type == TypeToken::LOCATION)
+      return (true);
+  }
+  return (false);
+}
+
+bool SemanticAnalysis::httpValidLine() noexcept {
+  if (_state == State::MAIN_CONTEXT &&
+      _tokenLine.front()->_type == TypeToken::HTTP && _tokenLine.size() == 2 &&
+      _tokenLine.back()->_type == TypeToken::OPEN_BRACKET)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::serverValidLine() noexcept {
+  if (_state == State::HTTPS_CONTEXT &&
+      _tokenLine.front()->_type == TypeToken::SERVER &&
+      _tokenLine.size() == 2 &&
+      _tokenLine.back()->_type == TypeToken::OPEN_BRACKET)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::locationValidLine() noexcept {
+  if (_state == State::SERVER_CONTEXT &&
+      _tokenLine.front()->_type == TypeToken::LOCATION &&
+      _tokenLine.size() == 3 &&
+      _tokenLine.back()->_type == TypeToken::OPEN_BRACKET &&
+      _tokenLine[1]->_type == TypeToken::URL_LOCATION)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::backSwitchState(State state,
+                                       EBracketStatus bracket) noexcept {
+  if (_state == state && _bracketStatus[bracket].size() == 0 &&
+      validClosingBracket() == true)
+    return (true);
+  return (false);
 }
 
 void SemanticAnalysis::trackBrackets() {
+  if (bracketInLineOfTokens() == false) return;
   EBracketStatus status = getCurrentBracketStatus();
-  if ((*_it)->_type == TypeToken::OPEN_BRACKET && _tokenIsHandled == true)
+
+  if (validDirectiveLine() == true)
     _bracketStatus[status].push('{');
-  else if ((*_it)->_type == TypeToken::CLOSING_BRACKET &&
-           _bracketStatus[status].size() > 0)
+  else if (validClosingBracket() && _bracketStatus[status].size() > 0)
     _bracketStatus[status].pop();
-  else if ((*_it)->_type == TypeToken::CLOSING_BRACKET &&
-           _bracketStatus[status].size() > 0)
-    throw NoOpeningBracketFound((*_it)->_foundLine + ": " + (*_it)->_tokenStr);
+  else
+    throw InvalidBracket(_tokenLine.front()->_foundLine + ": " + currentLine());
 }
 
-EBracketStatus SemanticAnalysis::getCurrentBracketStatus() {
-  switch (_state) {
-    case StoringStates::MAIN_CONTEXT:
-      return (MAIN_BRACKET);
-    case StoringStates::HTTPS_CONTEXT:
-      return (HTTP_BRACKET);
-    case StoringStates::SERVER_CONTEXT:
-      return (SERVER_BRACKET);
-    case StoringStates::LOCATION_CONTEXT:
-      return (LOCATION_BRACKET);
-      break;
+bool SemanticAnalysis::bracketInLineOfTokens() noexcept {
+  for (auto it = _tokenLine.begin(); it != _tokenLine.end(); it++) {
+    if ((*it)->_type == TypeToken::OPEN_BRACKET)
+      return (true);
+    else if ((*it)->_type == TypeToken::CLOSING_BRACKET)
+      return (true);
   }
+  return (false);
+}
+
+EBracketStatus SemanticAnalysis::getCurrentBracketStatus() noexcept {
+  if (openBracketStateIs(TypeToken::HTTP, State::MAIN_CONTEXT) == true)
+    return (HTTP_BRACKET);
+  else if (openBracketStateIs(TypeToken::SERVER, State::HTTPS_CONTEXT) == true)
+    return (SERVER_BRACKET);
+  else if (openBracketStateIs(TypeToken::LOCATION, State::SERVER_CONTEXT) ==
+           true)
+    return (LOCATION_BRACKET);
+  else if (moveStateBackFrom(State::HTTPS_CONTEXT) == true)
+    return (HTTP_BRACKET);
+  else if (moveStateBackFrom(State::SERVER_CONTEXT) == true)
+    return (SERVER_BRACKET);
+  else if (moveStateBackFrom(State::LOCATION_CONTEXT) == true)
+    return (LOCATION_BRACKET);
   return (MAIN_BRACKET);
+}
+
+bool SemanticAnalysis::validDirectiveLine() noexcept {
+  if (httpValidLine() == true)
+    return (true);
+  else if (serverValidLine() == true)
+    return (true);
+  else if (locationValidLine() == true)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::openBracketStateIs(TypeToken expectedType,
+                                          State currentState) noexcept {
+  if (_state == currentState && _tokenLine.front()->_type == expectedType &&
+      validDirectiveLine())
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::moveStateBackFrom(State currentState) noexcept {
+  if (_state == currentState && validClosingBracket() == true) return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::validClosingBracket() noexcept {
+  if (_tokenLine.size() == 1 &&
+      _tokenLine.front()->_type == TypeToken::CLOSING_BRACKET)
+    return (true);
+  return (false);
+}
+
+std::string SemanticAnalysis::currentLine() {
+  std::string currentStr;
+  for (auto it = _tokenLine.begin(); it != _tokenLine.end(); it++) {
+    if (it != (_tokenLine.end() - 1))
+      currentStr + (*it)->_tokenStr + " ";
+    else 
+      currentStr + (*it)->_tokenStr;
+  }
+  return (currentStr);
+}
+
+std::ostream &operator<<(std::ostream &outStream, const State &type) {
+  if (type == State::MAIN_CONTEXT)
+    outStream << "MAIN_CONTEXT    ";
+  else if (type == State::HTTPS_CONTEXT)
+    outStream << "HTTPS_CONTEXT   ";
+  else if (type == State::SERVER_CONTEXT)
+    outStream << "SERVER_CONTEXT  ";
+  else if (type == State::LOCATION_CONTEXT)
+    outStream << "LOCATION_CONTEXT";
+  return (outStream);
 }
