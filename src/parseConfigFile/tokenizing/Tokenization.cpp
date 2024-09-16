@@ -280,7 +280,8 @@ bool Tokenization::isValidSpecialCharacter(char c) const {
 }
 
 void Tokenization::addToLineTokensToDoubleVectorOfTokens() {
-  _doubleVectorOfTokens.push_back(std::move(_tokensFromLine));
+  if (_tokensFromLine.size() > 0)
+    _doubleVectorOfTokens.push_back(std::move(_tokensFromLine));
 }
 
 void Tokenization::printTokens() {
@@ -310,4 +311,3 @@ void Tokenization::undefinedTokenCheck() {
       throw CantIdentifySetting((*it)->_foundLine + ": " + (*it)->_tokenStr);
   }
 }
-
