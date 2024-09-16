@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/13 10:08:17 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/16 15:04:27 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ class CantOpenFile : public ExceptionsParsing {
 class InvalidDirective : public ExceptionsParsing {
  public:
   InvalidDirective(const std::string &message)
-      : ExceptionsParsing("Invalide directive in config file: " + message) {}
+      : ExceptionsParsing("Invalide directive in config fine line " + message) {}
 };
 
 class InvalidSetting : public ExceptionsParsing {
@@ -89,4 +89,10 @@ class CantIdentifySetting : public ExceptionsParsing {
   CantIdentifySetting(const std::string &message)
       : ExceptionsParsing("Can't identify setting in config. Line " + message) {
   }
+};
+
+class InvalidBracket : public ExceptionsParsing {
+ public:
+  InvalidBracket(const std::string &message)
+      : ExceptionsParsing("Invalid bracket set. Line " + message) {}
 };
