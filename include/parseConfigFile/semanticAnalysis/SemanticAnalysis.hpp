@@ -11,6 +11,7 @@
 #include "NodeToken.hpp"
 
 enum class StoringStates {
+typedef std::vector<std::vector<std::unique_ptr<TokenNode>>> TokenStructure;
   MAIN_CONTEXT = 0,
   HTTPS_CONTEXT = 1,
   SERVER_CONTEXT = 2,
@@ -29,13 +30,10 @@ class SemanticAnalysis {
   SemanticAnalysis() = delete;
   SemanticAnalysis(const SemanticAnalysis &) = delete;
   SemanticAnalysis &operator=(const SemanticAnalysis &other) = delete;
-  SemanticAnalysis(std::vector<std::unique_ptr<TokenNode> > &token);
+  SemanticAnalysis(TokenStructure &token);
   ~SemanticAnalysis();
 
-  void undefinedTokenCheck();
   void setCurrentState();
-  void directiveStateSetSave(const StoringStates &state);
-  void moveToNextTokenSave();
 
   void trackBrackets();
   EBracketStatus getCurrentBracketStatus();

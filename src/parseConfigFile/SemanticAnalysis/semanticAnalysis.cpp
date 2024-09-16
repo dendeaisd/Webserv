@@ -16,24 +16,23 @@
 
 #include <cstring>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <stack>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "ExceptionsParsing.hpp"
 #include "HttpContext.hpp"
 #include "ServerContext.hpp"
 
-SemanticAnalysis::SemanticAnalysis(
-    std::vector<std::unique_ptr<TokenNode> > &token) {
-  _tokens = std::move(token);
-  _it = _tokens.begin();
-  while (_it != _tokens.end()) {
-    setCurrentState();
+SemanticAnalysis::SemanticAnalysis(TokenStructure &token) {
+  _state = State::MAIN_CONTEXT;
+
+  for (auto it = token.begin(); it != token.end(); it++) {
+    _tokenLine = std::move((*it));
     trackBrackets();
-    _it++;
+    setCurrentState();
   }
 }
 
