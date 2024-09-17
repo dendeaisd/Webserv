@@ -16,7 +16,9 @@ server_name
 ssl_certificate
 ssl_certificate_key
 include
+pid
 prox_pass
+worker_processes
 alias
 try_files
 error_page
@@ -28,3 +30,5 @@ client_max_body_size
 allow_methods
 return
 autoindex
+error_log
+proxy_pass

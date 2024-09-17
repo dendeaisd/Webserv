@@ -127,7 +127,8 @@ void Tokenization::clearTokenLine() { _tokensFromLine.clear(); }
 void Tokenization::contextIdentification() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     if (isInvalidContext((*it)->_tokenStr) == true)
-      throw InvalidContext((*it)->_tokenStr + " context is not implemented");
+      throw InvalidContext((*it)->_tokenStr +
+                           " context is not implemented: " + _line);
     else if ((*it)->_tokenStr == "http")
       (*it)->_type = TypeToken::HTTP;
     else if ((*it)->_tokenStr == "server")
@@ -151,9 +152,15 @@ bool Tokenization::isInvalidDirective(const std::string &directive) {
 void Tokenization::directiveIdentification() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     if (isInvalidDirective((*it)->_tokenStr) == true)
-      throw InvalidDirective((*it)->_tokenStr);
+      throw InvalidDirective((*it)->_foundLine + ": " + _line);
+    else if ((*it)->_tokenStr == "worker_processes")
+      (*it)->_type = TypeToken::WORKER_PROCESS;
+    else if ((*it)->_tokenStr == "pid")
+      (*it)->_type = TypeToken::PID;
     else if ((*it)->_tokenStr == "ssl_certificate")
       (*it)->_type = TypeToken::SSL_CERTIFICATE;
+    else if ((*it)->_tokenStr == "error_log")
+      (*it)->_type = TypeToken::ERROR_LOG;
     else if ((*it)->_tokenStr == "ssl_certificate_key")
       (*it)->_type = TypeToken::SSL_CERTIFICATE_KEY;
     else if ((*it)->_tokenStr == "index")
@@ -188,7 +195,7 @@ void Tokenization::directiveIdentification() {
       (*it)->_type = TypeToken::SSL_CERTIFICATE_KEY;
     else if ((*it)->_tokenStr == "include")
       (*it)->_type = TypeToken::INCLUDE;
-    else if ((*it)->_tokenStr == "prox_pass")
+    else if ((*it)->_tokenStr == "proxy_pass")
       (*it)->_type = TypeToken::PROXY_PASS;
     else if ((*it)->_tokenStr == "alias")
       (*it)->_type = TypeToken::ALIAS;
