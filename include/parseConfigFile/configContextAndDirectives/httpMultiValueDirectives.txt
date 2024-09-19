@@ -1,0 +1,4 @@
+proxy_cache_use_stale
+gzip_types
+proxy_set_header
+proxy_cache_valid

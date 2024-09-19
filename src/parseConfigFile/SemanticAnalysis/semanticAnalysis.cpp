@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/16 16:08:02 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/19 20:17:34 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,71 @@
 
 SemanticAnalysis::SemanticAnalysis(TokenStructure &token) {
   _state = State::MAIN_CONTEXT;
+  _httpAlreadySet = false;
 
+  loadDirectives();
   for (auto it = token.begin(); it != token.end(); it++) {
     _tokenLine = std::move((*it));
     trackBrackets();
     setCurrentState();
+    possibleCreationOfNewContext();
+    saveDirectiveValue();
+    // std::cout << "State: " << _state << " Found line:" <<
+    // _tokenLine.front()->_foundLine << std::endl;
   }
+  _config.printConfigFile();
 }
 
 SemanticAnalysis::~SemanticAnalysis() {}
+
+void SemanticAnalysis::loadDirectives() {
+  std::string path = "include/parseConfigFile/configContextAndDirectives/";
+
+  std::ifstream mainValidDirective;
+  std::ifstream httpValidDirective;
+  std::ifstream multipleHttpValidDirective;
+  std::ifstream singleHttpValidDirective;
+  std::ifstream serverValidDirectives;
+  std::ifstream multiServerValidDirec;
+  std::ifstream singleServerValDirec;
+
+  openFile(path + "mainDirectiveValid.txt", mainValidDirective);
+  openFile(path + "httpValidDirectives.txt", httpValidDirective);
+  openFile(path + "httpMultiValueDirectives.txt", multipleHttpValidDirective);
+  openFile(path + "httpSingleValueDirective.txt", singleHttpValidDirective);
+  openFile(path + "serverValidDirectives.txt", serverValidDirectives);
+  openFile(path + "serverMultiValueDirective.txt", multiServerValidDirec);
+  openFile(path + "serverSingleValDirec.txt", singleServerValDirec);
+
+  fillWithFileContent(_mainValidDirective, mainValidDirective);
+  fillWithFileContent(_httpValidDirective, httpValidDirective);
+  fillWithFileContent(_httpMultipleValueValidDirective,
+                      multipleHttpValidDirective);
+  fillWithFileContent(_httpSingleValueValidDirective, singleHttpValidDirective);
+  fillWithFileContent(_serverValidDirective, serverValidDirectives);
+  fillWithFileContent(_serverMultiValidDirective, multiServerValidDirec);
+  fillWithFileContent(_serverSingleValDirec, singleServerValDirec);
+
+  mainValidDirective.close();
+  httpValidDirective.close();
+  multipleHttpValidDirective.close();
+  singleHttpValidDirective.close();
+  serverValidDirectives.close();
+  multiServerValidDirec.close();
+  singleServerValDirec.close();
+}
+
+void SemanticAnalysis::fillWithFileContent(std::set<std::string> &directive,
+                                           std::ifstream &file) {
+  std::string oneLine;
+  while (std::getline(file, oneLine)) directive.insert(oneLine);
+}
+
+void SemanticAnalysis::openFile(const std::string &filePath,
+                                std::ifstream &file) {
+  file.open(filePath);
+  if (file.is_open() == false) throw CantOpenFile(filePath);
+}
 
 void SemanticAnalysis::setCurrentState() {
   if (OneTokenInLineIsADirective() == false && bracketInLineOfTokens() == false)

@@ -1,0 +1,9 @@
+geoip_country
+proxy_cache_path
+proxy_cache
+proxy_cache_use_stale
+gzip
+gzip_types
+limit_req_zone
+proxy_set_header
+proxy_cache_valid

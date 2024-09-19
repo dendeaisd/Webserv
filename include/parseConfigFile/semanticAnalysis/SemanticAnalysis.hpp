@@ -36,6 +36,10 @@ class SemanticAnalysis {
   SemanticAnalysis(TokenStructure &token);
   ~SemanticAnalysis();
 
+  void loadDirectives();
+  void openFile(const std::string &filePath, std::ifstream &file);
+  void fillWithFileContent(std::set<std::string> &, std::ifstream &);
+
   void setCurrentState();
   bool OneTokenInLineIsADirective() noexcept;
   bool canEnterHttpContext() noexcept;
@@ -56,6 +60,7 @@ class SemanticAnalysis {
   void createLocationContext() noexcept;
   bool validServerLine() noexcept;
   bool validLocationLine() noexcept;
+
   void saveDirectiveValue();
   void mainDirectiveSave();
   void httpSaveDirective();
@@ -74,15 +79,30 @@ class SemanticAnalysis {
   bool canDirectiveBeSaved(TypeToken) const noexcept;
   bool serverValidDirective() const noexcept;
   bool isValueEmpty(TypeToken) const noexcept;
+
   std::string getThrowMessage() noexcept;
   std::string currentLine() noexcept;
+
  private:
   ConfigFile _config;
+
   State _state;
   bool _httpAlreadySet;
   std::stack<char> _bracketStatus[4];
+
+  std::set<std::string> _mainValidDirective;
+  std::set<std::string> _httpValidDirective;
+  std::set<std::string> _httpMultipleValueValidDirective;
+  std::set<std::string> _httpSingleValueValidDirective;
+  std::set<std::string> _serverValidDirective;
+  std::set<std::string> _serverMultiValidDirective;
+  std::set<std::string> _serverSingleValDirec;
+  std::set<std::string> _locationValidDirective;
+
   std::vector<std::unique_ptr<TokenNode>> _tokenLine;
 };
+
+#include "SemanticAnalysis.tpp"
 
 std::ostream &operator<<(std::ostream &outStream, const State &type);
 
