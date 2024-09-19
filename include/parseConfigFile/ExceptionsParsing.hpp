@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/16 15:04:27 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/19 20:15:04 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,8 @@ class CantOpenFile : public ExceptionsParsing {
 class InvalidDirective : public ExceptionsParsing {
  public:
   InvalidDirective(const std::string &message)
-      : ExceptionsParsing("Invalide directive in config fine line " + message) {}
+      : ExceptionsParsing("Invalide directive in config fine line " + message) {
+  }
 };
 
 class InvalidSetting : public ExceptionsParsing {
@@ -95,4 +96,31 @@ class InvalidBracket : public ExceptionsParsing {
  public:
   InvalidBracket(const std::string &message)
       : ExceptionsParsing("Invalid bracket set. Line " + message) {}
+};
+
+class InvalidMainDirective : public ExceptionsParsing {
+ public:
+  InvalidMainDirective(const std::string &message)
+      : ExceptionsParsing("Invalid directive in main context. Line" + message) {
+  }
+};
+
+class InvalidHttpDirective : public ExceptionsParsing {
+ public:
+  InvalidHttpDirective(const std::string &message)
+      : ExceptionsParsing("Invalid directive in http context. Line" + message) {
+  }
+};
+
+class DirectiveWasAlradySet : public ExceptionsParsing {
+ public:
+  DirectiveWasAlradySet(const std::string &message)
+      : ExceptionsParsing("Directive has been set already. Line " + message) {}
+};
+
+class DirectiveSetAtWrongPossition : public ExceptionsParsing {
+ public:
+  DirectiveSetAtWrongPossition(const std::string &message)
+      : ExceptionsParsing("Directive is set at wrong Possition. Line " +
+                          message) {}
 };
