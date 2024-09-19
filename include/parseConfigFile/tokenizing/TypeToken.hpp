@@ -18,11 +18,12 @@ enum class TypeToken {
   SERVER_NAME = 11,
   SSL_CERTIFICATE = 12,
   SSL_CERTIFICATE_KEY = 13,
+  INCLUDE = 18,
   INDEX = 14,
   ROOT = 15,
   LISTEN = 16,
+  CLIENT_MAX_BODY_SIZE = 34,
   URL_LOCATION = 17,
-  INCLUDE = 18,
   PROXY_PASS = 19,
   ALIAS = 20,
   TRY_FILES = 21,
@@ -31,6 +32,8 @@ enum class TypeToken {
   DENY = 24,
   CGI = 25,
   REWRITE = 26,
+  AUTO_INDEX = 35,
+  RETURN = 37,
   SERVER = 27,
   HTTP = 28,
   LOCATION = 29,
@@ -38,10 +41,7 @@ enum class TypeToken {
   CLOSING_BRACKET = 31,
   DEFAULT = 32,
   PROXY_CACHE_PATH = 33,
-  CLIENT_MAX_BODY_SIZE = 34,
-  AUTO_INDEX = 35,
   ALLOW_METHODS = 36,
-  RETURN = 37,
   VALUE = 38
 };
 
