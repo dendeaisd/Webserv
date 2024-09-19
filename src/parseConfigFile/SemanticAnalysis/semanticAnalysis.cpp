@@ -221,6 +221,275 @@ bool SemanticAnalysis::validLocationLine() noexcept {
   return (false);
 }
 
+void SemanticAnalysis::saveDirectiveValue() {
+  mainDirectiveSave();
+  httpSaveDirective();
+}
+
+void SemanticAnalysis::mainDirectiveSave() {
+  if (isDirectiveInLine(_mainValidDirective) == false) return;
+
+  if (isValidMainDirective() == false)
+    throw InvalidMainDirective(_tokenLine.front()->_foundLine + ": " +
+                               currentLine());
+  else if (canDirectiveBeSaved(TypeToken::PID) == true)
+    _config._pidValue = _tokenLine[1]->_tokenStr;
+  else if (canDirectiveBeSaved(TypeToken::WORKER_PROCESS) == true)
+    _config._workerProcessesValue = _tokenLine[1]->_tokenStr;
+  else if (canDirectiveBeSaved(TypeToken::ERROR_LOG) == true)
+    _config._errorLogValue = _tokenLine[1]->_tokenStr;
+  else
+    throw DirectiveWasAlradySet(getThrowMessage());
+}
+
+void SemanticAnalysis::httpSaveDirective() {
+  if (isDirectiveInLine(_httpValidDirective) == false) return;
+
+  if (isValidHttpDirective() == false)
+    throw InvalidHttpDirective(getThrowMessage());
+  else if (canDirectiveBeSaved(TypeToken::GEO_IP_COUNTRY) == true)
+    _config._httpContext._geoipCountryValue = _tokenLine[1]->_tokenStr;
+  else if (canDirectiveBeSaved(TypeToken::PROXY_CACHE_PATH) == true)
+    _config._httpContext._proxyCachePathValue = _tokenLine[1]->_tokenStr;
+  else if (canDirectiveBeSaved(TypeToken::PROXY_CACHE) == true)
+    _config._httpContext._proxyCacheValue = _tokenLine[1]->_tokenStr;
+  else if (canDirectiveBeSaved(TypeToken::GZIP) == true)
+    _config._httpContext._gzipValue = _tokenLine[1]->_tokenStr;
+  else if (canDirectiveBeSaved(TypeToken::LIMIT_RED_ZONE) == true)
+    _config._httpContext._limitReqZoneValue = _tokenLine[1]->_tokenStr;
+  else if (canDirectiveBeSaved(TypeToken::PROXY_CACHE_USE_STALE) == true)
+    saveMultipleDirectiveValue(_config._httpContext._proxyCacheUseStaleValue);
+  else if (canDirectiveBeSaved(TypeToken::GZIP_TYPES) == true)
+    saveMultipleDirectiveValue(_config._httpContext._gzipTypesValue);
+  else if (_tokenLine.front()->_type == TypeToken::PROXY_SET_HEADER)
+    saveMultipleDirectiveValue(_config._httpContext._proxySetHeaderValue);
+  else if (_tokenLine.front()->_type == TypeToken::PROXY_CACHE_VALID)
+    saveMultipleDirectiveValue(_config._httpContext._proxyCacheValidValue);
+}
+
+void SemanticAnalysis::serverSaveDirective() {
+  if (isDirectiveInLine(_serverValidDirective) == false) return;
+
+  if (serverValidDirective() == false)
+    throw InvalidHttpDirective(getThrowMessage());
+
+  std::string value = _tokenLine[1]->_tokenStr;
+  if (canDirectiveBeSaved(TypeToken::CLIENT_MAX_BODY_SIZE))
+    _config._httpContext._serverContext.back()->_clientMaxBodySizeValue = value;
+  else if (canDirectiveBeSaved(TypeToken::SSL_CERTIFICATE))
+    _config._httpContext._serverContext.back()->_sslCertificateValue = value;
+  else if (canDirectiveBeSaved(TypeToken::SSL_CERTIFICATE_KEY))
+    _config._httpContext._serverContext.back()->_sslCertificateKeyValue = value;
+  else if (canDirectiveBeSaved(TypeToken::ROOT))
+    _config._httpContext._serverContext.back()->_rootValue = value;
+  else if (canDirectiveBeSaved(TypeToken::INDEX))
+    saveMultipleDirectiveValue(
+        _config._httpContext._serverContext.back()->_indexValue);
+  else if (canDirectiveBeSaved(TypeToken::SERVER_NAME))
+    saveMultipleDirectiveValue(
+        _config._httpContext._serverContext.back()->_serverNameValue);
+  else if (canDirectiveBeSaved(TypeToken::SERVER_NAME))
+    saveMultipleDirectiveValue(
+        _config._httpContext._serverContext.back()->_serverNameValue);
+  else if (_tokenLine.front()->_type == TypeToken::LISTEN)
+
+}
+
+void SemanticAnalysis::listenSave() {
+  if (_state != State::SERVER_CONTEXT)
+    throw DirectiveSetAtWrongPossition(getThrowMessage());
+}
+
+
+bool SemanticAnalysis::isDirectiveInLine(
+    std::set<std::string> &contextType) noexcept {
+  for (auto it = _tokenLine.begin(); it != _tokenLine.end(); it++) {
+    if (contextType.find((*it)->_tokenStr) != contextType.end()) return (true);
+  }
+  return (false);
+}
+
+bool SemanticAnalysis::isValidMainDirective() noexcept {
+  if (_mainValidDirective.find(_tokenLine.front()->_tokenStr) !=
+          _mainValidDirective.end() &&
+      _tokenLine.size() == 2 && _tokenLine[1]->_type == TypeToken::VALUE &&
+      _state == State::MAIN_CONTEXT)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::isValidHttpDirective() noexcept {
+  if (multipleValueValidDirective(_httpMultipleValueValidDirective) == true &&
+      _state == State::HTTPS_CONTEXT)
+    return (true);
+  else if (isValidSingleValueDirective(_httpSingleValueValidDirective) ==
+               true &&
+           _state == State::HTTPS_CONTEXT)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::multipleValueValidDirective(
+    std::set<std::string> &contextType) noexcept {
+  if (contextType.find(_tokenLine.front()->_tokenStr) == contextType.end())
+    return (false);
+  else if (_tokenLine.size() < 2)
+    return (false);
+  else if (_tokenLine.back()->_semikolonSet == false)
+    return (false);
+
+  for (auto it = (_tokenLine.begin() + 1); it != _tokenLine.end(); it++) {
+    if ((*it)->_type != TypeToken::VALUE) return (false);
+  }
+  return (true);
+}
+
+bool SemanticAnalysis::isValidSingleValueDirective(
+    std::set<std::string> &contextType) noexcept {
+  if (contextType.find(_tokenLine.front()->_tokenStr) != contextType.end() &&
+      _tokenLine.size() == 2)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::canDirectiveBeSaved(TypeToken type) const noexcept {
+  if (_tokenLine.front()->_type == type && isValueEmpty(type) == true)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::serverValidDirective() const noexcept {
+  if (multipleValueValidDirective(_serverMultiValidDirective) == true &&
+      _state == State::SERVER_CONTEXT)
+    return (true);
+  else if (isValidSingleValueDirective(_serverSingleValDirec) == true &&
+           _state == State::SERVER_CONTEXT)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
+  switch (token) {
+    case TypeToken::WORKER_PROCESS:
+      if (_config._workerProcessesValue.empty() == true) return (true);
+    case TypeToken::PID:
+      if (_config._pidValue.empty() == true) return (true);
+    case TypeToken::ERROR_LOG:
+      if (_config._errorLogValue.empty() == true) return (true);
+    case TypeToken::GEO_IP_COUNTRY:
+      if (_config._httpContext._geoipCountryValue.empty() == true)
+        return (true);
+    case TypeToken::PROXY_CACHE:
+      if (_config._httpContext._proxyCacheValue.empty() == true) return (true);
+    case TypeToken::PROXY_CACHE_USE_STALE:
+      if (_config._httpContext._proxyCacheUseStaleValue.empty() == true)
+        return (true);
+    case TypeToken::GZIP:
+      if (_config._httpContext._gzipValue.empty() == true) return (true);
+    case TypeToken::GZIP_TYPES:
+      if (_config._httpContext._gzipTypesValue.empty() == true) return (true);
+    case TypeToken::LIMIT_RED_ZONE:
+      if (_config._httpContext._limitReqZoneValue.empty() == true)
+        return (true);
+    case TypeToken::PROXY_SET_HEADER:
+      if (_config._httpContext._proxySetHeaderValue.empty() == true)
+        return (true);
+    case TypeToken::PROXY_CACHE_VALID:
+      if (_config._httpContext._proxyCacheValidValue.empty() == true)
+        return (true);
+    case TypeToken::PROXY_CACHE_PATH:
+      if (_config._httpContext._proxyCachePathValue.empty() == true)
+        return (true);
+    case TypeToken::SERVER_NAME:
+      if (_config._httpContext._serverContext.back()
+              ->_serverNameValue.empty() == true)
+        return (true);
+    case TypeToken::SSL_CERTIFICATE:
+      if (_config._httpContext._serverContext.back()
+              ->_sslCertificateValue.empty() == true)
+        return (true);
+    case TypeToken::SSL_CERTIFICATE_KEY:
+      if (_config._httpContext._serverContext.back()
+              ->_sslCertificateKeyValue.empty() == true)
+        return (true);
+    case TypeToken::LISTEN:
+      if (_config._httpContext._serverContext.back()->_listenValue.empty() ==
+          true)
+      case TypeToken::CLIENT_MAX_BODY_SIZE:
+        if (_config._httpContext._serverContext.back()
+                ->_clientMaxBodySizeValue.empty() == true)
+          return (true);
+    case TypeToken::INDEX:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_indexValue.empty() == true)
+        return (true);
+    case TypeToken::ROOT:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_rootValue.empty() == true)
+        return (true);
+      return (true);
+    case TypeToken::PROXY_PASS:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_proxyPassValue.empty() == true)
+        return (true);
+    case TypeToken::ALIAS:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_aliasValue.empty() == true)
+        return (true);
+    case TypeToken::TRY_FILES:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_tryFilesValue.empty() == true)
+        return (true);
+    case TypeToken::ERROR_PAGE:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_errorPageValue.empty() == true)
+        return (true);
+    case TypeToken::ACCESS_LOG:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_accessLogValue.empty() == true)
+        return (true);
+    case TypeToken::DENY:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_denyValue.empty() == true)
+        return (true);
+    case TypeToken::CGI:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_cgi.empty() == true)
+        return (true);
+    case TypeToken::REWRITE:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_rewriteValue.empty() == true)
+        return (true);
+    case TypeToken::AUTO_INDEX:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_autoIndexValue.empty() == true)
+        return (true);
+    case TypeToken::RETURN:
+      if (_config._httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_returnValue.empty() == true)
+        return (true);
+    default:
+      break;
+  }
+  return (false);
+}
+
+std::string SemanticAnalysis::getThrowMessage() noexcept {
+  return (_tokenLine.front()->_foundLine + ": " + currentLine());
+}
+
   std::string currentStr;
   for (auto it = _tokenLine.begin(); it != _tokenLine.end(); it++) {
     if (it != (_tokenLine.end() - 1))
