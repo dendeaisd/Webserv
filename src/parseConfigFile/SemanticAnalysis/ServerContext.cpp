@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/04 20:33:16 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/17 11:50:26 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,32 +24,6 @@ ServerContext::ServerContext() {
   _sslCertificateKeyValue.clear();
   _indexValue.clear();
   _rootValue.clear();
-}
-
-void ServerContext::serverSaveDirectiveValue(const std::string &key,
-                                             const std::string &value) {
-  if (key == "server_name")
-    _serverNameValue = value;
-  else if (key == "ssl_certificate_key")
-    _sslCertificateKeyValue = value;
-  else if (key == "ssl_certificate_key")
-    _sslCertificateKeyValue = value;
-  else if (key == "index")
-    _indexValue = value;
-  else if (key == "root")
-    _rootValue = value;
-  else if (key == "listen")
-    addListen(value);
-}
-
-void ServerContext::locationSaveDirectiveValue(const std::string &key,
-                                               const std::string &value) {
-  _locationContext.back()->locationSaveDirectiveValue(key, value);
-}
-
-void ServerContext::createNewLocation(const std::string &url) {
-  _locationContext.push_back(std::make_unique<Location>());
-  _locationContext.back()->initializeLocation(url);
 }
 
 void ServerContext::printServerContent() const {

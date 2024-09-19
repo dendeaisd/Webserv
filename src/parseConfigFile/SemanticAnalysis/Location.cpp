@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/04 21:27:53 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/17 12:22:10 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@ Location::Location() {
   _statusCodeAndUrlReturnValue.second.clear();
   _returnStatusCodeValue = 0;
 }
-
-void Location::initializeLocation(const std::string &url) { _urlValue = url; }
 
 void Location::locationSaveDirectiveValue(const std::string &key,
                                           const std::string &value) {
