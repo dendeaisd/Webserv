@@ -51,6 +51,11 @@ class SemanticAnalysis {
   bool moveStateBackFrom(State currentState) noexcept;
   bool validClosingBracket() noexcept;
 
+  void possibleCreationOfNewContext() noexcept;
+  void createServerContext() noexcept;
+  void createLocationContext() noexcept;
+  bool validServerLine() noexcept;
+  bool validLocationLine() noexcept;
  private:
   ConfigFile _config;
   State _state;

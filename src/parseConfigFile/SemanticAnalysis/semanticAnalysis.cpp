@@ -181,7 +181,46 @@ bool SemanticAnalysis::validClosingBracket() noexcept {
   return (false);
 }
 
-std::string SemanticAnalysis::currentLine() {
+void SemanticAnalysis::possibleCreationOfNewContext() noexcept {
+  if (validLocationLine() == true)
+    createLocationContext();
+  else if (validServerLine() == true)
+    createServerContext();
+}
+
+void SemanticAnalysis::createServerContext() noexcept {
+  _config._httpContext._serverContext.push_back(
+      std::make_unique<ServerContext>());
+  // std::cout << "NEW SERVER\n";
+}
+
+void SemanticAnalysis::createLocationContext() noexcept {
+  _config._httpContext._serverContext.back()->_locationContext.push_back(
+      std::make_unique<Location>());
+
+  _config._httpContext._serverContext.back()
+      ->_locationContext.back()
+      ->_urlValue = _tokenLine[1]->_tokenStr;
+  // std::cout << "NEW LOCATION\n";
+}
+
+bool SemanticAnalysis::validServerLine() noexcept {
+  if (_state == State::SERVER_CONTEXT && _tokenLine.size() == 2 &&
+      _tokenLine.front()->_type == TypeToken::SERVER &&
+      _tokenLine.back()->_type == TypeToken::OPEN_BRACKET)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::validLocationLine() noexcept {
+  if (_state == State::LOCATION_CONTEXT && _tokenLine.size() == 3 &&
+      _tokenLine.front()->_type == TypeToken::LOCATION &&
+      _tokenLine.back()->_type == TypeToken::OPEN_BRACKET &&
+      _tokenLine[1]->_type == TypeToken::URL_LOCATION)
+    return (true);
+  return (false);
+}
+
   std::string currentStr;
   for (auto it = _tokenLine.begin(); it != _tokenLine.end(); it++) {
     if (it != (_tokenLine.end() - 1))
