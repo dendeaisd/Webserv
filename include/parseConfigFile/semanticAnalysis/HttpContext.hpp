@@ -11,28 +11,24 @@ class HttpContext {
  public:
   HttpContext();
 
-  void addNewEmptyServer();
-  void httpSaveDirectiveValue(const std::string &directive,
-                              const std::string &value);
-  void serverSaveContextOrDirective(const std::string &key,
-                                    const std::string &value);
-  void printHttpContent();
+  void printHttpContent() const noexcept;
 
   std::string _geoipCountryValue;
   std::string _proxyCachePathValue;
   std::string _proxyCacheValue;
-  std::string _proxyCacheUseStaleValue;
   std::string _gzipValue;
-  std::string _gzipTypesValue;  // got multiple values could be saved seperaded!
   std::string _limitReqZoneValue;
 
+  std::vector<std::string> _proxyCacheUseStaleValue;
+  std::vector<std::string> _gzipTypesValue;
   std::vector<std::string> _proxySetHeaderValue;
   std::vector<std::string> _proxyCacheValidValue;
   std::vector<std::unique_ptr<ServerContext> > _serverContext;
 
  private:
+  void typeFormatPrint(const std::string &type, const std::string &value) const noexcept;
   void printVectorOfStrings(const std::vector<std::string> &vec,
-                            const std::string valueType) const;
+                            const std::string valueType) const noexcept;
   // std::string _indexValue; // Do we need that in the http context?
   // std::string _rootValue; // Do we need that in the http context?
   // std::string _upstreamValue; // Do we inplement that???

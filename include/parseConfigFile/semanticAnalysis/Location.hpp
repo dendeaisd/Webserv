@@ -25,7 +25,11 @@ class Location {
   std::string _errorPageValue;
   std::string _accessLogValue;
   std::string _denyValue;
+  std::string _returnValue;
+  std::string _autoIndexValue;
+
   int _returnStatusCodeValue;
+
   std::pair<int, std::string> _statusCodeAndUrlReturnValue;
   std::unordered_map<std::string, std::string> _cgi;
   std::vector<std::string> _rewriteValue;
