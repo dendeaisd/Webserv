@@ -74,6 +74,8 @@ class SemanticAnalysis {
   bool canDirectiveBeSaved(TypeToken) const noexcept;
   bool serverValidDirective() const noexcept;
   bool isValueEmpty(TypeToken) const noexcept;
+  std::string getThrowMessage() noexcept;
+  std::string currentLine() noexcept;
  private:
   ConfigFile _config;
   State _state;

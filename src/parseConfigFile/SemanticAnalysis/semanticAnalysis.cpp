@@ -59,8 +59,7 @@ void SemanticAnalysis::setCurrentState() {
                            EBracketStatus::LOCATION_BRACKET) == true)
     _state = State::SERVER_CONTEXT;
   else
-    throw InvalidDirective(_tokenLine.front()->_foundLine + ": " +
-                           currentLine());
+    throw InvalidDirective(getThrowMessage());
 }
 
 bool SemanticAnalysis::OneTokenInLineIsADirective() noexcept {
@@ -490,12 +489,13 @@ std::string SemanticAnalysis::getThrowMessage() noexcept {
   return (_tokenLine.front()->_foundLine + ": " + currentLine());
 }
 
+std::string SemanticAnalysis::currentLine() noexcept {
   std::string currentStr;
   for (auto it = _tokenLine.begin(); it != _tokenLine.end(); it++) {
     if (it != (_tokenLine.end() - 1))
-      currentStr + (*it)->_tokenStr + " ";
-    else 
-      currentStr + (*it)->_tokenStr;
+      currentStr += (*it)->_tokenStr + " ";
+    else
+      currentStr += (*it)->_tokenStr;
   }
   return (currentStr);
 }
