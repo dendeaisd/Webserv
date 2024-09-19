@@ -56,9 +56,28 @@ class SemanticAnalysis {
   void createLocationContext() noexcept;
   bool validServerLine() noexcept;
   bool validLocationLine() noexcept;
+  void saveDirectiveValue();
+  void mainDirectiveSave();
+  void httpSaveDirective();
+  void serverSaveDirective();
+
+
+  template <typename  T>
+  void saveMultipleDirectiveValue(std::vector<T> &) noexcept;
+  void listenSave();
+
+  bool isDirectiveInLine(std::set<std::string> &) noexcept;
+  bool isValidMainDirective() noexcept;
+  bool isValidHttpDirective() noexcept;
+  bool multipleValueValidDirective(std::set<std::string> &) noexcept;
+  bool isValidSingleValueDirective(std::set<std::string> &) noexcept;
+  bool canDirectiveBeSaved(TypeToken) const noexcept;
+  bool serverValidDirective() const noexcept;
+  bool isValueEmpty(TypeToken) const noexcept;
  private:
   ConfigFile _config;
   State _state;
+  bool _httpAlreadySet;
   std::stack<char> _bracketStatus[4];
   std::vector<std::unique_ptr<TokenNode>> _tokenLine;
 };
