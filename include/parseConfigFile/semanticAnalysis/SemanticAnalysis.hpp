@@ -38,20 +38,19 @@ class SemanticAnalysis {
 
   void setCurrentState();
   bool OneTokenInLineIsADirective() noexcept;
-  bool httpValidLine() noexcept;
-  bool serverValidLine() noexcept;
-  bool locationValidLine() noexcept;
+  bool canEnterHttpContext() noexcept;
+  bool canEnterServerContext() noexcept;
+  bool canEnterLocationContext() noexcept;
   bool backSwitchState(State state, EBracketStatus bracket) noexcept;
 
   void trackBrackets();
   bool bracketInLineOfTokens() noexcept;
   EBracketStatus getCurrentBracketStatus() noexcept;
-  bool validDirectiveLine() noexcept;
+  bool canTransitionToNewContext() noexcept;
   bool openBracketStateIs(TypeToken expectedType, State currentState) noexcept;
   bool moveStateBackFrom(State currentState) noexcept;
   bool validClosingBracket() noexcept;
 
-  std::string currentLine();
  private:
   ConfigFile _config;
   State _state;
