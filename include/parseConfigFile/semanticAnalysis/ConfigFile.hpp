@@ -3,6 +3,7 @@
 
 #include "HttpContext.hpp"
 #include <string>
+#include <memory>
 
 class ConfigFile {
  public:

@@ -6,6 +6,7 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "ConfigFile.hpp"
 #include "NodeToken.hpp"
@@ -23,7 +24,8 @@ enum EBracketStatus {
   MAIN_BRACKET = 0,
   HTTP_BRACKET = 1,
   SERVER_BRACKET = 2,
-  LOCATION_BRACKET = 3
+  LOCATION_BRACKET = 3,
+  ERROR = 4
 };
 
 class SemanticAnalysis {

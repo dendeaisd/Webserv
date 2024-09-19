@@ -42,11 +42,12 @@ void SemanticAnalysis::setCurrentState() {
   if (OneTokenInLineIsADirective() == false && bracketInLineOfTokens() == false)
     return;
 
-  if (httpValidLine() == true)
+  if (canEnterHttpContext() == true && _httpAlreadySet == false) {
     _state = State::HTTPS_CONTEXT;
-  else if (serverValidLine() == true)
+    _httpAlreadySet = true;
+  } else if (canEnterServerContext() == true)
     _state = State::SERVER_CONTEXT;
-  else if (locationValidLine() == true)
+  else if (canEnterLocationContext() == true)
     _state = State::LOCATION_CONTEXT;
   else if (backSwitchState(State::HTTPS_CONTEXT,
                            EBracketStatus::HTTP_BRACKET) == true)
@@ -74,7 +75,7 @@ bool SemanticAnalysis::OneTokenInLineIsADirective() noexcept {
   return (false);
 }
 
-bool SemanticAnalysis::httpValidLine() noexcept {
+bool SemanticAnalysis::canEnterHttpContext() noexcept {
   if (_state == State::MAIN_CONTEXT &&
       _tokenLine.front()->_type == TypeToken::HTTP && _tokenLine.size() == 2 &&
       _tokenLine.back()->_type == TypeToken::OPEN_BRACKET)
@@ -82,7 +83,7 @@ bool SemanticAnalysis::httpValidLine() noexcept {
   return (false);
 }
 
-bool SemanticAnalysis::serverValidLine() noexcept {
+bool SemanticAnalysis::canEnterServerContext() noexcept {
   if (_state == State::HTTPS_CONTEXT &&
       _tokenLine.front()->_type == TypeToken::SERVER &&
       _tokenLine.size() == 2 &&
@@ -91,7 +92,7 @@ bool SemanticAnalysis::serverValidLine() noexcept {
   return (false);
 }
 
-bool SemanticAnalysis::locationValidLine() noexcept {
+bool SemanticAnalysis::canEnterLocationContext() noexcept {
   if (_state == State::SERVER_CONTEXT &&
       _tokenLine.front()->_type == TypeToken::LOCATION &&
       _tokenLine.size() == 3 &&
@@ -111,9 +112,11 @@ bool SemanticAnalysis::backSwitchState(State state,
 
 void SemanticAnalysis::trackBrackets() {
   if (bracketInLineOfTokens() == false) return;
-  EBracketStatus status = getCurrentBracketStatus();
 
-  if (validDirectiveLine() == true)
+  EBracketStatus status = getCurrentBracketStatus();
+  if (status == ERROR) throw InvalidDirective(getThrowMessage());
+
+  if (canTransitionToNewContext() == true)
     _bracketStatus[status].push('{');
   else if (validClosingBracket() && _bracketStatus[status].size() > 0)
     _bracketStatus[status].pop();
@@ -145,15 +148,15 @@ EBracketStatus SemanticAnalysis::getCurrentBracketStatus() noexcept {
     return (SERVER_BRACKET);
   else if (moveStateBackFrom(State::LOCATION_CONTEXT) == true)
     return (LOCATION_BRACKET);
-  return (MAIN_BRACKET);
+  return (ERROR);
 }
 
-bool SemanticAnalysis::validDirectiveLine() noexcept {
-  if (httpValidLine() == true)
+bool SemanticAnalysis::canTransitionToNewContext() noexcept {
+  if (canEnterHttpContext() == true)
     return (true);
-  else if (serverValidLine() == true)
+  else if (canEnterServerContext() == true)
     return (true);
-  else if (locationValidLine() == true)
+  else if (canEnterLocationContext() == true)
     return (true);
   return (false);
 }
@@ -161,7 +164,7 @@ bool SemanticAnalysis::validDirectiveLine() noexcept {
 bool SemanticAnalysis::openBracketStateIs(TypeToken expectedType,
                                           State currentState) noexcept {
   if (_state == currentState && _tokenLine.front()->_type == expectedType &&
-      validDirectiveLine())
+      canTransitionToNewContext())
     return (true);
   return (false);
 }
