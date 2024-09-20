@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/17 12:22:10 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/20 10:33:51 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,11 @@
 
 Location::Location() {
   _urlValue.clear();
-  _rootValue.clear();
+//  _rootValue.clear();
   _proxyPassValue.clear();
   _aliasValue.clear();
   _tryFilesValue.clear();
-  _indexValue.clear();
+//  _indexValue.clear();
   _errorPageValue.clear();
   _accessLogValue.clear();
   _denyValue.clear();
@@ -31,6 +31,7 @@ Location::Location() {
   _returnStatusCodeValue = 0;
 }
 
+/*
 void Location::locationSaveDirectiveValue(const std::string &key,
                                           const std::string &value) {
   if (key == "root")
@@ -56,7 +57,9 @@ void Location::locationSaveDirectiveValue(const std::string &key,
   else if (key == "return")
     addReturn(value);
 }
+*/
 
+/*
 void Location::cgiSetSeparatedValue(const std::string &value) {
   std::string fileType;
   std::string pathToInterpreter;
@@ -66,16 +69,17 @@ void Location::cgiSetSeparatedValue(const std::string &value) {
   stream >> pathToInterpreter;
   _cgi.insert({fileType, pathToInterpreter});
 }
+*/
 
 void Location::printLocation() {
   std::cout << "-LOCATION-\n";
   std::cout << "url: [" << _urlValue << "]" << std::endl
-            << "root: [" << _rootValue << "]" << std::endl
+//            << "root: [" << _rootValue << "]" << std::endl
             << "include: [" << _includeValue << "]" << std::endl
             << "proxy pass: [" << _proxyPassValue << "]" << std::endl
             << "alias: [" << _aliasValue << "]" << std::endl
             << "try files: [" << _tryFilesValue << "]" << std::endl
-            << "index: [" << _indexValue << "]" << std::endl
+//            << "index: [" << _indexValue << "]" << std::endl
             << "error page: [" << _errorPageValue << "]" << std::endl
             << "access log: [" << _accessLogValue << "]" << std::endl
             << "deny: [" << _denyValue << "]\n"
@@ -101,6 +105,7 @@ void Location::printLocation() {
   std::cout << std::endl;
 }
 
+/*
 void Location::addReturn(const std::string &value) {
   std::istringstream stream(value);
 
@@ -117,3 +122,4 @@ void Location::addReturn(const std::string &value) {
     _statusCodeAndUrlReturnValue.second = url;
   }
 }
+*/

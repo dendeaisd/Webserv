@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/12 11:37:24 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/19 17:55:43 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/20 10:48:51 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void HttpContext::printVectorOfStrings(
   int i;
   i = 0;
   while (it != vec.end()) {
-    std::cout << "[" << i << "] " << valueType << ": " << " "<< *it << std::endl;
+    std::cout << "[" << i << "] " << valueType << ": [" << *it << "]\n";
     it++;
     i++;
   }

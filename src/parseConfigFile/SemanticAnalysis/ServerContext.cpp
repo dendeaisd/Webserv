@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/17 11:50:26 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/20 10:53:57 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,25 +26,16 @@ ServerContext::ServerContext() {
   _rootValue.clear();
 }
 
-void ServerContext::printServerContent() const {
-  std::cout << "-Server-\n"
-            << "ssl certificate: [" << _sslCertificateValue << "]" << std::endl
-            << "ssl certificate key: [" << _sslCertificateKeyValue << "]"
-            << std::endl
-            << "index: [" << _indexValue << "]" << std::endl
-            << "root: [" << _rootValue << "]" << std::endl;
-
-  auto listen_it = _listenValue.begin();
-  while (listen_it != _listenValue.end()) {
-    std::cout << "listen: [" << *listen_it << "]" << std::endl;
-    listen_it++;
-  }
-
-  for (auto it = _portWithAdressListenValue.begin();
-       it != _portWithAdressListenValue.end(); it++) {
-    std::cout << "listen: adress [" << (*it).first << "] port [" << (*it).second
-              << "]\n";
-  }
+void ServerContext::printServerContent() const noexcept {
+  std::cout << "-Server-\n";
+  printTypeFormat("client_max_body_size", _clientMaxBodySizeValue);
+  printTypeFormat("ssl_certificate", _sslCertificateValue);
+  printTypeFormat("ssl_certificate_key", _sslCertificateKeyValue);
+  printTypeFormat("root", _rootValue);
+  vectorPrint(_indexValue, "index");
+  vectorPrint(_serverNameValue, "server");
+  vectorPrint(_listenValue, "listen");
+  vectorPrint(_portWithAdressListenValue, "listen");
 
   auto it_location = _locationContext.begin();
 
@@ -55,6 +46,23 @@ void ServerContext::printServerContent() const {
   }
 }
 
+void ServerContext::printTypeFormat(const std::string &type,
+                                    const std::string &value) const noexcept {
+  std::cout << type << ": [" << value << "]\n";
+}
+
+void ServerContext::vectorPrint(
+    const std::vector<std::pair<std::string, int>> &vec,
+    const std::string &type) const noexcept {
+  int i = 0;
+  for (auto it = vec.begin(); it != vec.end(); it++) {
+    std::cout << "["<< i << "] " << type << ": [" << (*it).first << "] ["
+              << (*it).second << "]\n";
+    i++;
+  }
+};
+
+/*
 void ServerContext::addListen(const std::string &value) {
   int port;
   std::istringstream stream(value);
@@ -69,3 +77,4 @@ void ServerContext::addListen(const std::string &value) {
     _portWithAdressListenValue.push_back(std::make_pair(adress, port));
   }
 }
+*/

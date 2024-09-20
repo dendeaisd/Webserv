@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/19 20:17:34 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/20 12:01:47 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,9 @@ void SemanticAnalysis::loadDirectives() {
   std::ifstream serverValidDirectives;
   std::ifstream multiServerValidDirec;
   std::ifstream singleServerValDirec;
+  std::ifstream locationValDirec;
+  std::ifstream locationMultiValDirec;
+  std::ifstream locationSingleValDirec;
 
   openFile(path + "mainDirectiveValid.txt", mainValidDirective);
   openFile(path + "httpValidDirectives.txt", httpValidDirective);
@@ -63,6 +66,9 @@ void SemanticAnalysis::loadDirectives() {
   openFile(path + "serverValidDirectives.txt", serverValidDirectives);
   openFile(path + "serverMultiValueDirective.txt", multiServerValidDirec);
   openFile(path + "serverSingleValDirec.txt", singleServerValDirec);
+  openFile(path + "locationValDirec.txt", locationValDirec);
+  openFile(path + "locationMultiValDirec.txt", locationMultiValDirec);
+  openFile(path + "locationSingleValDirec.txt", locationSingleValDirec);
 
   fillWithFileContent(_mainValidDirective, mainValidDirective);
   fillWithFileContent(_httpValidDirective, httpValidDirective);
@@ -72,6 +78,9 @@ void SemanticAnalysis::loadDirectives() {
   fillWithFileContent(_serverValidDirective, serverValidDirectives);
   fillWithFileContent(_serverMultiValidDirective, multiServerValidDirec);
   fillWithFileContent(_serverSingleValDirec, singleServerValDirec);
+  fillWithFileContent(_locationValidDirective, locationValDirec);
+  fillWithFileContent(_multiLocationValDirec, locationMultiValDirec);
+  fillWithFileContent(_singleLocationValDirec, locationSingleValDirec);
 
   mainValidDirective.close();
   httpValidDirective.close();
@@ -80,6 +89,9 @@ void SemanticAnalysis::loadDirectives() {
   serverValidDirectives.close();
   multiServerValidDirec.close();
   singleServerValDirec.close();
+  locationValDirec.close();
+  locationMultiValDirec.close();
+  locationSingleValDirec.close();
 }
 
 void SemanticAnalysis::fillWithFileContent(std::set<std::string> &directive,
@@ -279,6 +291,7 @@ bool SemanticAnalysis::validLocationLine() noexcept {
 void SemanticAnalysis::saveDirectiveValue() {
   mainDirectiveSave();
   httpSaveDirective();
+  serverSaveDirective();
 }
 
 void SemanticAnalysis::mainDirectiveSave() {
@@ -346,7 +359,61 @@ void SemanticAnalysis::serverSaveDirective() {
   else if (canDirectiveBeSaved(TypeToken::SERVER_NAME))
     saveMultipleDirectiveValue(
         _config._httpContext._serverContext.back()->_serverNameValue);
-  else if (_tokenLine.front()->_type == TypeToken::LISTEN)
+  // else if (_tokenLine.front()->_type == TypeToken::LISTEN)
+}
+
+void SemanticAnalysis::locationSaveDirective() {
+  if (isDirectiveInLine(_locationValidDirective) == false) return;
+
+  if (locationValidDirective() == false)
+    throw InvalidHttpDirective(getThrowMessage());
+
+  std::string value = _tokenLine[1]->_tokenStr;
+  if (canDirectiveBeSaved(TypeToken::PROXY_PASS))
+    _config._httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_proxyPassValue = value;
+  else if (canDirectiveBeSaved(TypeToken::ALIAS))
+    _config._httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_aliasValue = value;
+  else if (canDirectiveBeSaved(TypeToken::AUTO_INDEX))
+    _config._httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_autoIndexValue = value;
+  else if (_tokenLine.front()->_type == TypeToken::TRY_FILES &&
+           _state == State::LOCATION_CONTEXT)
+    saveMultipleDirectiveValue(_config._httpContext._serverContext.back()
+                                   ->_locationContext.back()
+                                   ->_tryFilesValue);
+  else if (_tokenLine.front()->_type == TypeToken::ERROR_PAGE &&
+           _state == State::LOCATION_CONTEXT)
+    saveMultipleDirectiveValue(_config._httpContext._serverContext.back()
+                                   ->_locationContext.back()
+                                   ->_errorPageValue);
+  else if (_tokenLine.front()->_type == TypeToken::ERROR_PAGE &&
+           _state == State::LOCATION_CONTEXT)
+    saveMultipleDirectiveValue(_config._httpContext._serverContext.back()
+                                   ->_locationContext.back()
+                                   ->_errorPageValue);
+  else if (_tokenLine.front()->_type == TypeToken::ACCESS_LOG &&
+           _state == State::LOCATION_CONTEXT)
+    saveMultipleDirectiveValue(_config._httpContext._serverContext.back()
+                                   ->_locationContext.back()
+                                   ->_accessLogValue);
+  else if (_tokenLine.front()->_type == TypeToken::INCLUDE &&
+           _state == State::LOCATION_CONTEXT)
+    saveMultipleDirectiveValue(_config._httpContext._serverContext.back()
+                                   ->_locationContext.back()
+                                   ->_includeValue);
+  else if (_tokenLine.front()->_type == TypeToken::DENY &&
+           _state == State::LOCATION_CONTEXT)
+    saveMultipleDirectiveValue(_config._httpContext._serverContext.back()
+                                   ->_locationContext.back()
+                                   ->_denyValue);
+  /*
+   * return value implementation
+  */
 
 }
 
@@ -354,7 +421,6 @@ void SemanticAnalysis::listenSave() {
   if (_state != State::SERVER_CONTEXT)
     throw DirectiveSetAtWrongPossition(getThrowMessage());
 }
-
 
 bool SemanticAnalysis::isDirectiveInLine(
     std::set<std::string> &contextType) noexcept {
@@ -385,7 +451,7 @@ bool SemanticAnalysis::isValidHttpDirective() noexcept {
 }
 
 bool SemanticAnalysis::multipleValueValidDirective(
-    std::set<std::string> &contextType) noexcept {
+    const std::set<std::string> &contextType) const noexcept {
   if (contextType.find(_tokenLine.front()->_tokenStr) == contextType.end())
     return (false);
   else if (_tokenLine.size() < 2)
@@ -400,7 +466,7 @@ bool SemanticAnalysis::multipleValueValidDirective(
 }
 
 bool SemanticAnalysis::isValidSingleValueDirective(
-    std::set<std::string> &contextType) noexcept {
+    const std::set<std::string> &contextType) const noexcept {
   if (contextType.find(_tokenLine.front()->_tokenStr) != contextType.end() &&
       _tokenLine.size() == 2)
     return (true);
@@ -419,6 +485,16 @@ bool SemanticAnalysis::serverValidDirective() const noexcept {
     return (true);
   else if (isValidSingleValueDirective(_serverSingleValDirec) == true &&
            _state == State::SERVER_CONTEXT)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::locationValidDirective() const noexcept {
+  if (multipleValueValidDirective(_multiLocationValDirec) == true &&
+      _state == State::LOCATION_CONTEXT)
+    return (true);
+  else if (isValidSingleValueDirective(_singleLocationValDirec) == true &&
+           _state == State::LOCATION_CONTEXT)
     return (true);
   return (false);
 }
@@ -475,14 +551,12 @@ bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
                 ->_clientMaxBodySizeValue.empty() == true)
           return (true);
     case TypeToken::INDEX:
-      if (_config._httpContext._serverContext.back()
-              ->_locationContext.back()
-              ->_indexValue.empty() == true)
+      if (_config._httpContext._serverContext.back()->_indexValue.empty() ==
+          true)
         return (true);
     case TypeToken::ROOT:
-      if (_config._httpContext._serverContext.back()
-              ->_locationContext.back()
-              ->_rootValue.empty() == true)
+      if (_config._httpContext._serverContext.back()->_rootValue.empty() ==
+          true)
         return (true);
       return (true);
     case TypeToken::PROXY_PASS:

@@ -11,8 +11,8 @@ class ServerContext {
  public:
   ServerContext();
 
-  void printServerContent() const;
-  void addListen(const std::string &value);
+  void printServerContent() const noexcept;
+  //void addListen(const std::string &value);
 
   std::string _clientMaxBodySizeValue;
   std::string _sslCertificateValue;
@@ -24,9 +24,23 @@ class ServerContext {
 
   /*_listenValue should store only a vector of ints that contains the ports*/
   std::vector<int> _listenValue;
-  std::vector<std::pair<std::string, int> > _portWithAdressListenValue;
+  std::vector<std::pair<std::string, int>> _portWithAdressListenValue;
 
-  std::vector<std::unique_ptr<Location> > _locationContext;
+  std::vector<std::unique_ptr<Location>> _locationContext;
+
+ private:
+  void printTypeFormat(const std::string &type,
+                       const std::string &value) const noexcept;
+  template <typename T>
+  void vectorPrint(const std::vector<T> &vec,
+                   const std::string &type) const noexcept {
+    int i = 0;
+    for (auto it = vec.begin(); it != vec.end(); it++) {
+      std::cout << "[" << i << "] " << type << ": [" << (*it) << "]\n";
+      i++;
+    }
+  }
+  void vectorPrint(const std::vector<std::pair<std::string, int>> &vec,
+                   const std::string &type) const noexcept;
 };
-
 #endif

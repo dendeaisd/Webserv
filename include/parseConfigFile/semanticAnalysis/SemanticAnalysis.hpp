@@ -3,10 +3,10 @@
 
 #include <iostream>
 #include <memory>
+#include <set>
 #include <stack>
 #include <string>
 #include <vector>
-#include <set>
 
 #include "ConfigFile.hpp"
 #include "NodeToken.hpp"
@@ -65,19 +65,22 @@ class SemanticAnalysis {
   void mainDirectiveSave();
   void httpSaveDirective();
   void serverSaveDirective();
+  void locationSaveDirective();
 
-
-  template <typename  T>
+  template <typename T>
   void saveMultipleDirectiveValue(std::vector<T> &) noexcept;
   void listenSave();
 
   bool isDirectiveInLine(std::set<std::string> &) noexcept;
   bool isValidMainDirective() noexcept;
   bool isValidHttpDirective() noexcept;
-  bool multipleValueValidDirective(std::set<std::string> &) noexcept;
-  bool isValidSingleValueDirective(std::set<std::string> &) noexcept;
+  bool multipleValueValidDirective(
+      const std::set<std::string> &) const noexcept;
+  bool isValidSingleValueDirective(
+      const std::set<std::string> &) const noexcept;
   bool canDirectiveBeSaved(TypeToken) const noexcept;
   bool serverValidDirective() const noexcept;
+  bool locationValidDirective() const noexcept;
   bool isValueEmpty(TypeToken) const noexcept;
 
   std::string getThrowMessage() noexcept;
@@ -98,6 +101,8 @@ class SemanticAnalysis {
   std::set<std::string> _serverMultiValidDirective;
   std::set<std::string> _serverSingleValDirec;
   std::set<std::string> _locationValidDirective;
+  std::set<std::string> _multiLocationValDirec;
+  std::set<std::string> _singleLocationValDirec;
 
   std::vector<std::unique_ptr<TokenNode>> _tokenLine;
 };
@@ -105,7 +110,5 @@ class SemanticAnalysis {
 #include "SemanticAnalysis.tpp"
 
 std::ostream &operator<<(std::ostream &outStream, const State &type);
-
-
 
 #endif
