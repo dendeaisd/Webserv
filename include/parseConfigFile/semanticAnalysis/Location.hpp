@@ -14,27 +14,26 @@ class Location {
                                   const std::string &value);
   void printLocation();
 
-
   std::string _urlValue;
 
 //  std::string _rootValue;
-  std::string _includeValue;
+//  std::string _indexValue;
   std::string _proxyPassValue;
   std::string _aliasValue;
-  std::string _tryFilesValue;
-//  std::string _indexValue;
-  std::string _errorPageValue;
-  std::string _accessLogValue;
-  std::string _denyValue;
   std::string _autoIndexValue;
 
   bool returnSet;
-  std::string _returnValue;
   int _returnStatusCodeValue;
   std::pair<int, std::string> _statusCodeAndUrlReturnValue;
 
-  std::unordered_map<std::string, std::string> _cgi;
+  std::vector<std::string> _denyValue;
+  std::vector<std::string> _returnValue;
+  std::vector<std::string> _includeValue;
   std::vector<std::string> _rewriteValue;
+  std::vector<std::string> _tryFilesValue;
+  std::vector<std::string> _errorPageValue;
+  std::vector<std::string> _accessLogValue;
+  std::unordered_map<std::string, std::string> _cgi;
 
  private:
   void cgiSetSeparatedValue(const std::string &value);
