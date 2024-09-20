@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/20 10:33:51 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/20 13:09:52 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,13 @@
 #include <sstream>
 
 Location::Location() {
+  //  _indexValue.clear();
+  //  _rootValue.clear();
+  _returnSet = false;
   _urlValue.clear();
-//  _rootValue.clear();
   _proxyPassValue.clear();
   _aliasValue.clear();
   _tryFilesValue.clear();
-//  _indexValue.clear();
   _errorPageValue.clear();
   _accessLogValue.clear();
   _denyValue.clear();
