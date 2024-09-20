@@ -1,0 +1,9 @@
+include
+prox_pass
+alias
+try_files
+error_page
+access_log
+deny
+return
+autoindex
