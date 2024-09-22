@@ -1,0 +1,3 @@
+pid
+worker_processes
+error_log

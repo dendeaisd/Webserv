@@ -78,4 +78,3 @@ fclean:
 
 re: fclean all
 
-.PHONY: all clean fclean re docker-build docker-run docker-purge

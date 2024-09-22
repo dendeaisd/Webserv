@@ -201,7 +201,6 @@ image_filter_transparency
 image_filter_watermark
 image_filter_watermark_position
 image_filter_webp_quality
-include
 internal
 ip_hash
 js_import
@@ -347,7 +346,6 @@ proxy_next_upstream
 proxy_next_upstream_timeout
 proxy_next_upstream_tries
 proxy_no_cache
-proxy_pass
 proxy_pass_error_message
 proxy_pass_header
 proxy_pass_request_body
