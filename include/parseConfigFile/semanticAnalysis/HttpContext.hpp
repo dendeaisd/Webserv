@@ -26,7 +26,8 @@ class HttpContext {
   std::vector<std::unique_ptr<ServerContext> > _serverContext;
 
  private:
-  void typeFormatPrint(const std::string &type, const std::string &value) const noexcept;
+  void typeFormatPrint(const std::string &type,
+                       const std::string &value) const noexcept;
   void printVectorOfStrings(const std::vector<std::string> &vec,
                             const std::string valueType) const noexcept;
   // std::string _indexValue; // Do we need that in the http context?
