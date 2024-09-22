@@ -1,3 +1,3 @@
-prox_pass
+proxy_pass
 alias
 autoindex

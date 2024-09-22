@@ -36,6 +36,7 @@ class SemanticAnalysis {
   SemanticAnalysis(TokenStructure &token);
   ~SemanticAnalysis();
 
+  void preSetup();
   void loadDirectives();
   void openFile(const std::string &filePath, std::ifstream &file);
   void fillWithFileContent(std::set<std::string> &, std::ifstream &);

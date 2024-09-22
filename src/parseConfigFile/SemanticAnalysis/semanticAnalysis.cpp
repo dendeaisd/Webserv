@@ -27,20 +27,23 @@
 #include "ServerContext.hpp"
 
 SemanticAnalysis::SemanticAnalysis(TokenStructure &token) {
-  _state = State::MAIN_CONTEXT;
-  _httpAlreadySet = false;
-
-  loadDirectives();
+  preSetup();
   for (auto it = token.begin(); it != token.end(); it++) {
     _tokenLine = std::move((*it));
     trackBrackets();
     setCurrentState();
     possibleCreationOfNewContext();
     saveDirectiveValue();
-    // std::cout << "State: " << _state << " Found line:" <<
-    // _tokenLine.front()->_foundLine << std::endl;
   }
-  _config.printConfigFile();
+  _config->printConfigFile();
+}
+
+void SemanticAnalysis::preSetup() {
+  _state = State::MAIN_CONTEXT;
+  _httpAlreadySet = false;
+
+  _config = std::make_unique<ConfigFile>();
+  loadDirectives();
 }
 
 SemanticAnalysis::~SemanticAnalysis() {}

@@ -1,5 +1,5 @@
 include
-prox_pass
+proxy_pass
 alias
 try_files
 error_page
