@@ -24,7 +24,7 @@ Server::Server(std::vector<int>& ports, std::unique_ptr<ConfigFile>&& config) {
     newSocket->bindSocket(port);
     newSocket->listenSocket(SOMAXCONN);
     newSocket->setNonBlocking();
-    _pollManager.addSocket(newSocket->getSocketFd(), port);
+    _pollManager.addSocket(newSocket->getSocketFd(), POLLIN, port);
     _serverSockets.push_back(newSocket);
     Log::getInstance().debug("Server listening on port " +
                              std::to_string(port));
@@ -60,7 +60,6 @@ void Server::handleEvents() {
         }
       }
     }
-	Log::getInstance().debug("fd: " + std::to_string(fd) + " revents: " + std::to_string(revents));
     if (revents & POLLIN) {
       Log::getInstance().debug("POLLIN event on fd " + std::to_string(fd));
       handlePollInEvent(fd, fds[i].events);
@@ -170,6 +169,13 @@ void Server::buildPortToServer() {
       _portToServerContextMap[serverPort] = server;
     }
   }
+
+  // print it please
+  for (auto it = _portToServerContextMap.begin();
+       it != _portToServerContextMap.end(); ++it) {
+    Log::getInstance().debug("Port: " + std::to_string(it->first) +
+                             " Server: " + it->second->_serverNameValue.at(0));
+  }
 }
 
 void Server::handleNewConnection(int serverFd) {
@@ -188,12 +194,25 @@ void Server::handleNewConnection(int serverFd) {
   }
   int new_socket = (*it)->acceptConnection(&address, &addrlen);
   if (new_socket >= 0) {
+    // TODO: update this TEMP solution with a proper
+    // server context that is stored in the _portToServerContextMap
     Log::getInstance().debug("New connection on port " +
                              std::to_string(serverPort));
-    auto serverContext = _portToServerContextMap[serverPort];
+    std::shared_ptr<ServerContext> serverContext = nullptr;
+    auto ctx = _portToServerContextMap.find(serverPort);
+    if (ctx == _portToServerContextMap.end()) {
+      Log::getInstance().error("Server context not found for port " +
+                               std::to_string(serverPort));
+      serverContext = (*_config->_httpContext._serverContext.begin());
+    } else {
+      serverContext = ctx->second;
+    }
+    // END OF TEMP SOLUTION
+    Log::getInstance().debug("Server context: " +
+                             serverContext->_serverNameValue.at(0));
     Client* new_client = new Client(new_socket, serverContext);
     _clients.push_back(new_client);
-    _pollManager.addSocket(new_socket, serverPort);
+    _pollManager.addSocket(new_socket, POLLIN, serverPort);
     _fdToClientMap[new_socket] = new_client;
   }
 }
