@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/22 16:16:58 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/22 17:00:19 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,46 +49,45 @@ void Location::printLocation() {
 }
 
 void Location::printTypeFormat(const std::string &type,
-                     const std::string &value) const noexcept {
+                               const std::string &value) const noexcept {
   std::cout << type << ": [" << value << "]\n";
 }
 
 void Location::printVecOfStrings(const std::vector<std::string> &vec,
-                       const std::string &type) const noexcept {
+                                 const std::string &type) const noexcept {
   int i = 0;
   for (auto it = vec.begin(); it != vec.end(); it++, i++) {
     std::cout << "[" << i << "] " << type << ": " << (*it) << std::endl;
   }
 }
 
+/*
+   void Location::cgiSetSeparatedValue(const std::string &value) {
+   std::string fileType;
+   std::string pathToInterpreter;
+   std::istringstream stream(value);
 
-  /*
-     void Location::cgiSetSeparatedValue(const std::string &value) {
-     std::string fileType;
-     std::string pathToInterpreter;
-     std::istringstream stream(value);
+   stream >> fileType;
+   stream >> pathToInterpreter;
+   _cgi.insert({fileType, pathToInterpreter});
+   }
+   */
 
-     stream >> fileType;
-     stream >> pathToInterpreter;
-     _cgi.insert({fileType, pathToInterpreter});
-     }
-     */
+/*
+void Location::addReturn(const std::string &value) {
+  std::istringstream stream(value);
 
-  /*
-  void Location::addReturn(const std::string &value) {
-    std::istringstream stream(value);
+  int statusCode;
+  std::string url;
 
-    int statusCode;
-    std::string url;
+  stream >> statusCode;
+  stream >> url;
 
-    stream >> statusCode;
-    stream >> url;
-
-    if (url.empty() == true) {
-      _returnStatusCodeValue = statusCode;
-    } else {
-      _statusCodeAndUrlReturnValue.first = statusCode;
-      _statusCodeAndUrlReturnValue.second = url;
-    }
+  if (url.empty() == true) {
+    _returnStatusCodeValue = statusCode;
+  } else {
+    _statusCodeAndUrlReturnValue.first = statusCode;
+    _statusCodeAndUrlReturnValue.second = url;
   }
-  */
+}
+*/
