@@ -127,13 +127,11 @@ bool HttpResponse::sendResponse(int fd) {
       ssize_t bytesSent =
           send(fd, buffer + totalSent, bytesToSend - totalSent, 0);
       if (bytesSent < 0) {
-        Log::getInstance().error("Failed to send file: " + _file +
-                                 ". Error: " + std::strerror(errno));
-        if (errno == EWOULDBLOCK || errno == EAGAIN) {
-          // sleep a bit
-          std::this_thread::sleep_for(std::chrono::milliseconds(100));
-          continue;
-        }
+        // if (errno == EWOULDBLOCK || errno == EAGAIN) {
+        //   // sleep a bit
+        //   std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        //   continue;
+        // }
         return false;
       }
       totalSent += bytesSent;

@@ -76,7 +76,6 @@ std::string Client::generateDirectoryListing(const std::string& path,
                                              const std::string& requestUri,
                                              const std::string& inject) {
   std::stringstream ss;
-  // (void)inject;
   ss << "<html><body>";
   ss << inject;
   ss << "<h1>Directory Listing for " << path << "</h1><ul>";
