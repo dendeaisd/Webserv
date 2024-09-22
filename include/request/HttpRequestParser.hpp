@@ -23,20 +23,22 @@ class HttpRequestParser {
   HttpRequest getHttpRequest();
   int parse();
   int handshake();
+  int getStatusCode();
   ~HttpRequestParser();
 
  private:
   int _clientFd;
-  HttpRequest request;
-  std::string raw;
-  std::string boundary;
+  HttpRequest _request;
+  std::string _raw;
+  std::string _boundary;
+  int _statusCode;
   HttpFileUploadStatus currentFileUploadStatus;
   std::string currentFileUploadName;
   size_t total_read;
   bool electHandler();
-  void parseRequestLine(char *requestLine, size_t len);
-  void parseHeaders(std::stringstream &ss);
-  void parseBody(std::stringstream &ss);
+  bool parseRequestLine(char *requestLine, size_t len);
+  bool parseHeaders(std::stringstream &ss);
+  bool parseBody(std::stringstream &ss);
   void parseFormData(std::stringstream &ss);
   bool handleFileUpload(std::stringstream &ss);
   bool handleOctetStream(std::stringstream &ss);
@@ -55,4 +57,5 @@ class HttpRequestParser {
   void injectUploadFormIfNeeded();
   bool writeToFile(std::string filename, std::stringstream &ss);
   bool parseBoundary();
+  void setStatusCode(int code);
 };

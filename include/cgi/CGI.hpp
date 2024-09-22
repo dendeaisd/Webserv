@@ -5,34 +5,38 @@
 #include <string>
 
 #include "../request/HttpRequest.hpp"
+#include "../response/HttpResponse.hpp"
 #include "CGIFileManager.hpp"
 
 class CGI {
  public:
   CGI(int fd, HttpRequest &request);
-  ~CGI() {}
+  ~CGI();
   bool run();
   bool wait();
-  int load();
+  bool handleResponse();
 
  private:
-  int fd_;
-  int pipeInFd_[2];
-  int pipeOutFd_[2];
-  int pid_;
+  int _fd;
+  int _pipeInFd[2];
+  int _pipeOutFd[2];
+  int _pid;
   bool _unableToExecute;
-  std::string _response;
   std::string _stream;
   std::string _script;
   std::string _language;
   std::string _urlArg;
   HttpRequest _request;
+  HttpResponse _response;
   CGI();
   void executeCGI();
   void killChild();
   bool handleTimeout();
   bool handleError(std::string logMessage);
   bool tunnelData();
+
+  void sendInternalErrorResponse();
+  void sendTimeoutResponse();
 };
 
 #endif

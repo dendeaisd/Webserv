@@ -6,7 +6,7 @@
 
 #include "../../include/log/Log.hpp"
 #include "../../include/request/HttpMaps.hpp"
-#define TIMEOUT 30
+#define TIMEOUT 10
 
 HttpRequest::HttpRequest()
     : _httpRequestMethod(HttpRequestMethod::UNKNOWN),
@@ -27,6 +27,9 @@ HttpRequest::HttpRequest()
 HttpRequest::~HttpRequest() {
   _queryParams.clear();
   _headers.clear();
+  _formData.clear();
+  _attachments.clear();
+  _injections.clear();
 }
 
 std::string HttpRequest::getMethod() { return _method; }

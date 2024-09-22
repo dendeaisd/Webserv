@@ -42,32 +42,26 @@ void Server::handleEvents() {
   std::vector<struct pollfd>& fds = _pollManager.getFds();
 
   for (size_t i = 0; i < fds.size(); ++i) {
-    if (fds[i].revents & POLLIN) {
-      auto it = std::find_if(_serverSockets.begin(), _serverSockets.end(),
-                             [fd = fds[i].fd](std::shared_ptr<Socket> socket) {
-                               return socket->getSocketFd() == fd;
-                             });
-      if (it != _serverSockets.end()) {
-        handleNewConnection((*it)->getSocketFd());
-      } else {
-        handleClientRequest(fds[i].fd);
+    int fd = fds[i].fd;
+    short revents = fds[i].revents;
+    if (Event::getInstance().hasEvent(fd)) {
+      if (Event::getInstance().getEvent(fd)->wait()) {
+        auto client = _fdToClientMap.find(fd);
+        if (client != _fdToClientMap.end()) {
+          client->second->setReadyForResponse(true);
+          fds[i].events = POLLOUT;
+        }
       }
     }
-  }
-  removeCGIEvents();
-}
-
-void Server::removeCGIEvents() {
-  std::vector<int> eventsToRemove;
-  for (auto it = Event::getInstance().getEvents().begin();
-       it != Event::getInstance().getEvents().end(); ++it) {
-    if (it->second->wait()) {
-      Log::getInstance().info("Removing CGI event");
-      eventsToRemove.push_back(it->first);
+    if (revents & POLLIN) {
+      handlePollInEvent(fd, fds[i].events);
+    } else if (revents & POLLOUT) {
+      handlePollOutEvent(fd, fds[i].events);
+    } else if (revents & POLLHUP) {
+      handlePollHupEvent(fd);
+    } else if (revents & POLLERR) {
+      handlePollErrEvent(fd);
     }
-  }
-  for (int eventId : eventsToRemove) {
-    Event::getInstance().removeEvent(eventId);
   }
 }
 
@@ -93,8 +87,69 @@ void Server::processClientRequest(std::vector<Client*>::iterator& it) {
   }
 }
 
+bool Server::isServerSocket(int fd) {
+  return std::any_of(_serverSockets.begin(), _serverSockets.end(),
+                     [fd](std::shared_ptr<Socket> socket) {
+                       return socket->getSocketFd() == fd;
+                     });
+}
+
+void Server::handlePollInEvent(int fd, short& events) {
+  if (isServerSocket(fd)) {
+    handleNewConnection(fd);
+  } else {
+    auto client = _fdToClientMap.find(fd);
+    if (client != _fdToClientMap.end() && client->second->isReadyForRequest()) {
+      handleClientRequest(fd);
+    }
+
+    // If client is ready for response, set events to POLLOUT
+    if (client != _fdToClientMap.end() &&
+        client->second->isReadyForResponse()) {
+      events = POLLOUT;
+    }
+  }
+}
+
+void Server::handlePollOutEvent(int fd, short& events) {
+  auto client = _fdToClientMap.find(fd);
+  auto it =
+      std::find_if(_clients.begin(), _clients.end(),
+                   [fd](Client* client) { return client->getFd() == fd; });
+  if (client != _fdToClientMap.end() && client->second->isReadyForResponse()) {
+    if (!client->second->execute()) {
+      cleanupClient(it);
+      return;
+    }
+    events = POLLIN;
+  }
+}
+
+void Server::handlePollHupEvent(int fd) {
+  Log::getInstance().debug("Connection closed by client");
+  auto it =
+      std::find_if(_clients.begin(), _clients.end(),
+                   [fd](Client* client) { return client->getFd() == fd; });
+  if (it != _clients.end()) {
+    cleanupClient(it);
+  }
+}
+
+void Server::handlePollErrEvent(int fd) {
+  Log::getInstance().error("Error on socket " + std::to_string(fd) + ": " +
+                           std::strerror(errno));
+  auto it =
+      std::find_if(_clients.begin(), _clients.end(),
+                   [fd](Client* client) { return client->getFd() == fd; });
+  if (it != _clients.end()) {
+    cleanupClient(it);
+  }
+}
+
 void Server::cleanupClient(std::vector<Client*>::iterator& it) {
+  _fdToClientMap.erase((*it)->getFd());
   _pollManager.removeSocket((*it)->getFd());
+  close((*it)->getFd());
   delete *it;
   _clients.erase(it);
 }
@@ -117,5 +172,6 @@ void Server::handleNewConnection(int serverFd) {
     Client* new_client = new Client(new_socket);
     _clients.push_back(new_client);
     _pollManager.addSocket(new_socket);
+    _fdToClientMap[new_socket] = new_client;
   }
 }

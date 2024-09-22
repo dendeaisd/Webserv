@@ -1,3 +1,5 @@
+#ifndef HTTPRESPONSE_HPP
+#define HTTPRESPONSE_HPP
 #include <string>
 #include <unordered_map>
 
@@ -6,6 +8,7 @@ class HttpResponse {
   HttpResponse(int status = -1);
   ~HttpResponse();
   void setStatusCode(int statusCode);
+  int getStatusCode();
   void setBody(std::string body);
   void setHeader(std::string key, std::string value);
   std::string getResponse();
@@ -32,3 +35,5 @@ class HttpResponse {
   std::string loadFile();
   void sendHeaders(int fd);
 };
+
+#endif  // HTTPRESPONSE_HPP
