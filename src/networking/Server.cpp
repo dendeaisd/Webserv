@@ -8,11 +8,14 @@
 #include <cstring>
 #include <iostream>
 #include <memory>
+#include "ConfigFile.hpp"
 
 #include "../../include/Event.hpp"
 #include "../../include/log/Log.hpp"
 
-Server::Server(std::vector<int>& ports) {
+Server::Server(std::vector<int>& ports, std::unique_ptr<ConfigFile>&& config) {
+  _config = std::move(config);
+  config->printConfigFile();
   for (int port : ports) {
     auto newSocket = std::make_shared<Socket>(AF_INET, SOCK_STREAM, 0);
     newSocket->setSocketOption(SOL_SOCKET, SO_REUSEADDR, 1);

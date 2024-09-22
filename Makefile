@@ -1,10 +1,10 @@
 NAME			:=  webserv
 CC          	:=  c++
-CFLAGS      	:=  -Wall -Wextra -Werror -std=c++17 -g
-
+CFLAGS      	:=  -std=c++17 -g ## -Wall -Wextra -Werror
 INCLUDE_DIRS	:=	-I./include -I./tester                                  		\
-					-I./include/parseConfigFile/syntaxAnalysis               		\
-					-I./include/parseConfigFile/tokenizing
+					-I./include/parseConfigFile/semanticAnalysis               		\
+					-I./include/parseConfigFile/tokenizing							\
+					-I./include/parseConfigFile										
 TESTER_MAIN 	:= tester/main.cpp tester/TestCase.cpp tester/TestRequest.cpp
 SRC_MAIN 		:= main.cpp
 
@@ -16,13 +16,13 @@ SRC         	:=  $(wildcard src/*.cpp) $(wildcard src/networking/*.cpp) 			\
 					$(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp)             \
 					$(wildcard src/response/*.cpp)                                  \
 					$(wildcard src/parseConfigFile/*.cpp)                			\
-					$(wildcard src/parseConfigFile/syntaxAnalysis/*.cpp)            \
+					$(wildcard src/parseConfigFile/semanticAnalysis/*.cpp)          \
 					$(wildcard src/parseConfigFile/tokenizing/*.cpp)
 
 OBJ         	:=  $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRC))
-OBJ_MAIN 		:= $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRC_MAIN))
-OBJ_TESTER 		:= $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(TESTER_MAIN))
-DEP				:= $(OBJ:.o=.d)
+OBJ_MAIN 		:=  $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRC_MAIN))
+OBJ_TESTER 		:=  $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(TESTER_MAIN))
+DEP				:=  $(OBJ:.o=.d)
 
 # Suggested usage: make -j <executable>
 all: $(OBJ_DIR) $(NAME)

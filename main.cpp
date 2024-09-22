@@ -6,11 +6,12 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include "./include/cgi/CGIFileManager.hpp"
 #include "./include/log/Log.hpp"
 #include "./include/networking/Server.hpp"
-#include "SyntaxAnalysis.hpp"
+#include "ParseConfigFile.hpp"
 
 #define PORT 8080
 
@@ -24,13 +25,12 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   try {
-    auto config = SyntaxAnalysis();
-    config.parseConfiguration(configFile);
-    config.printConfigFileContent();
+    auto config = std::make_shared<ParseConfigFile>(configFile);
+    auto parsed = config->getConfigFile();
     Log::getInstance().configure("DEBUG");
     CGIFileManager::getInstance().configure("./cgi-bin");
     std::vector<int> ports = {8080, 8081, 8082};
-    Server server(ports);
+    Server server(ports, std::move(parsed));
     server.run();
   } catch (const socketException& e) {
     std::cerr << "Socket error: " << e.what() << std::endl;
