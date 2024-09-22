@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/22 16:13:07 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/22 17:06:40 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void ServerContext::vectorPrint(
     const std::string &type) const noexcept {
   int i = 0;
   for (auto it = vec.begin(); it != vec.end(); it++) {
-    std::cout << "["<< i << "] " << type << ": [" << (*it).first << "] ["
+    std::cout << "[" << i << "] " << type << ": [" << (*it).first << "] ["
               << (*it).second << "]\n";
     i++;
   }
