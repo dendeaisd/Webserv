@@ -88,7 +88,7 @@ class SemanticAnalysis {
   std::string currentLine() noexcept;
 
  private:
-  ConfigFile _config;
+  std::unique_ptr<ConfigFile> _config;
 
   State _state;
   bool _httpAlreadySet;
