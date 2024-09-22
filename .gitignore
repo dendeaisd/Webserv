@@ -45,3 +45,4 @@ hello.txt
 ./logs/server_*
 *.log
 ./webserv
+webserv
