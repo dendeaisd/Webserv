@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/20 13:09:52 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/22 15:02:54 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,98 +29,65 @@ Location::Location() {
   _denyValue.clear();
   _statusCodeAndUrlReturnValue.first = 0;
   _statusCodeAndUrlReturnValue.second.clear();
-  _returnStatusCodeValue = 0;
 }
-
-/*
-void Location::locationSaveDirectiveValue(const std::string &key,
-                                          const std::string &value) {
-  if (key == "root")
-    _rootValue = value;
-  else if (key == "proxy_pass")
-    _proxyPassValue = value;
-  else if (key == "alias")
-    _aliasValue = value;
-  else if (key == "try_files")
-    _tryFilesValue = value;
-  else if (key == "index")
-    _indexValue = value;
-  else if (key == "error_page")
-    _errorPageValue = value;
-  else if (key == "access_log")
-    _accessLogValue = value;
-  else if (key == "deny")
-    _denyValue = value;
-  else if (key == "include")
-    _includeValue = value;
-  else if (key == "cgi")
-    cgiSetSeparatedValue(value);
-  else if (key == "return")
-    addReturn(value);
-}
-*/
-
-/*
-void Location::cgiSetSeparatedValue(const std::string &value) {
-  std::string fileType;
-  std::string pathToInterpreter;
-  std::istringstream stream(value);
-
-  stream >> fileType;
-  stream >> pathToInterpreter;
-  _cgi.insert({fileType, pathToInterpreter});
-}
-*/
 
 void Location::printLocation() {
   std::cout << "-LOCATION-\n";
-  std::cout << "url: [" << _urlValue << "]" << std::endl
-//            << "root: [" << _rootValue << "]" << std::endl
-            << "include: [" << _includeValue << "]" << std::endl
-            << "proxy pass: [" << _proxyPassValue << "]" << std::endl
-            << "alias: [" << _aliasValue << "]" << std::endl
-            << "try files: [" << _tryFilesValue << "]" << std::endl
-//            << "index: [" << _indexValue << "]" << std::endl
-            << "error page: [" << _errorPageValue << "]" << std::endl
-            << "access log: [" << _accessLogValue << "]" << std::endl
-            << "deny: [" << _denyValue << "]\n"
-            << "return: status code [" << _statusCodeAndUrlReturnValue.first
-            << "] url [" << _statusCodeAndUrlReturnValue.second << "]\n"
-            << "return: status code [" << _returnStatusCodeValue << "]\n";
 
-  auto it_rewrite = _rewriteValue.begin();
+  printTypeFormat("url", _urlValue);
+  printTypeFormat("proxy_pass", _proxyPassValue);
+  printTypeFormat("alias", _aliasValue);
+  printVecOfStrings(_denyValue, "deny");
+  printVecOfStrings(_includeValue, "include");
+  printVecOfStrings(_rewriteValue, "rewrite");
+  printVecOfStrings(_tryFilesValue, "try_files");
+  printVecOfStrings(_errorPageValue, "error_page");
+  printVecOfStrings(_accessLogValue, "access_log");
 
-  while (it_rewrite != _rewriteValue.end()) {
-    std::cout << "rewrite: [" << *it_rewrite << "]" << std::endl;
-    it_rewrite++;
-  }
-
-  auto it_cgi = _cgi.begin();
-
-  while (it_cgi != _cgi.end()) {
-    std::cout << "GCI: "
-              << "file type: [" << (*it_cgi).first << "] path to interpreter: ["
-              << (*it_cgi).second << "]\n";
-    it_cgi++;
-  }
   std::cout << std::endl;
 }
 
-/*
-void Location::addReturn(const std::string &value) {
-  std::istringstream stream(value);
+void Location::printTypeFormat(const std::string &type,
+                     const std::string &value) const noexcept {
+  std::cout << type << ": [" << value << "]\n";
+}
 
-  int statusCode;
-  std::string url;
-
-  stream >> statusCode;
-  stream >> url;
-
-  if (url.empty() == true) {
-    _returnStatusCodeValue = statusCode;
-  } else {
-    _statusCodeAndUrlReturnValue.first = statusCode;
-    _statusCodeAndUrlReturnValue.second = url;
+void Location::printVecOfStrings(const std::vector<std::string> &vec,
+                       const std::string &type) const noexcept {
+  int i = 0;
+  for (auto it = vec.begin(); it != vec.end(); it++, i++) {
+    std::cout << "[" << i << "] " << type << ": " << (*it) << std::endl;
   }
 }
-*/
+
+
+  /*
+     void Location::cgiSetSeparatedValue(const std::string &value) {
+     std::string fileType;
+     std::string pathToInterpreter;
+     std::istringstream stream(value);
+
+     stream >> fileType;
+     stream >> pathToInterpreter;
+     _cgi.insert({fileType, pathToInterpreter});
+     }
+     */
+
+  /*
+  void Location::addReturn(const std::string &value) {
+    std::istringstream stream(value);
+
+    int statusCode;
+    std::string url;
+
+    stream >> statusCode;
+    stream >> url;
+
+    if (url.empty() == true) {
+      _returnStatusCodeValue = statusCode;
+    } else {
+      _statusCodeAndUrlReturnValue.first = statusCode;
+      _statusCodeAndUrlReturnValue.second = url;
+    }
+  }
+  */
