@@ -19,7 +19,7 @@ class Location {
   std::string _autoIndexValue;
 
   bool _returnSet;
-  std::pair<int, std::string> _statusCodeAndUrlReturnValue;
+  std::pair<int, std::string> _returnValues;
 
 //  std::vector<std::string> _indexValue;
   std::vector<std::string> _denyValue;
