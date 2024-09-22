@@ -20,6 +20,7 @@ class Server {
   PollManager _pollManager;
   std::vector<Client*> _clients;
   std::unordered_map<int, Client*> _fdToClientMap;
+  std::unordered_map<int, std::shared_ptr<ServerContext>> _portToServerContextMap;
   std::unique_ptr<ConfigFile> _config;
 
   void handleEvents();
@@ -31,6 +32,7 @@ class Server {
   void handleClientRequest(int fd);
   void processClientRequest(std::vector<Client*>::iterator& it);
   void handleClientResponse(int fd);
+  void buildPortToServer();
   void cleanupClient(std::vector<Client*>::iterator& it);
   bool isServerSocket(int fd);
 };

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   SemanticAnalysis.cpp                               :+:      :+:    :+:   */
+/*   semanticAnalysis.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
+/*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/22 16:52:12 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/22 19:08:24 by ramoussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,7 +260,7 @@ void SemanticAnalysis::possibleCreationOfNewContext() noexcept {
 
 void SemanticAnalysis::createServerContext() noexcept {
   _config->_httpContext._serverContext.push_back(
-      std::make_unique<ServerContext>());
+      std::make_shared<ServerContext>());
   // std::cout << "NEW SERVER\n";
 }
 

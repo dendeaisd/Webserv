@@ -13,12 +13,13 @@
 
 PollManager::PollManager() {}
 
-void PollManager::addSocket(int fd, int events) {
+void PollManager::addSocket(int fd, int events, int port) {
   struct pollfd pfd;
   pfd.fd = fd;
   pfd.events = events;
   pfd.revents = 0;
   _fds.push_back(pfd);
+  _fdToPortMap[fd] = port;
 }
 
 void PollManager::removeSocket(int fd) {
