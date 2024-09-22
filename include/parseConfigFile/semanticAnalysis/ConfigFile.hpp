@@ -1,9 +1,10 @@
 #ifndef CONFIG_FILE
 #define CONFIG_FILE
 
-#include "HttpContext.hpp"
-#include <string>
 #include <memory>
+#include <string>
+
+#include "HttpContext.hpp"
 
 class ConfigFile {
  public:

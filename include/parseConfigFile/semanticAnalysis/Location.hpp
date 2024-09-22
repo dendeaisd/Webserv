@@ -13,7 +13,7 @@ class Location {
 
   std::string _urlValue;
 
-//  std::string _rootValue;
+  //  std::string _rootValue;
   std::string _proxyPassValue;
   std::string _aliasValue;
   std::string _autoIndexValue;
@@ -21,7 +21,7 @@ class Location {
   bool _returnSet;
   std::pair<int, std::string> _returnValues;
 
-//  std::vector<std::string> _indexValue;
+  //  std::vector<std::string> _indexValue;
   std::vector<std::string> _denyValue;
   std::vector<std::string> _includeValue;
   std::vector<std::string> _rewriteValue;
@@ -35,7 +35,8 @@ class Location {
   // void addReturn(const std::string &value);
   void printTypeFormat(const std::string &type,
                        const std::string &value) const noexcept;
-  void printVecOfStrings(const std::vector<std::string> &vec, const std::string &type) const noexcept;
+  void printVecOfStrings(const std::vector<std::string> &vec,
+                         const std::string &type) const noexcept;
 };
 
 #endif  // LOCATION_HPP
