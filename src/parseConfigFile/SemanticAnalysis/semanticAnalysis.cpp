@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/22 16:32:23 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/22 16:52:12 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -568,11 +568,11 @@ bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
           return (true);
     case TypeToken::INDEX:
       if (_config->_httpContext._serverContext.back()->_indexValue.empty() ==
-              true)
+          true)
         return (true);
     case TypeToken::ROOT:
       if (_config->_httpContext._serverContext.back()->_rootValue.empty() ==
-              true)
+          true)
         return (true);
     case TypeToken::PROXY_PASS:
       if (_config->_httpContext._serverContext.back()
