@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/22 16:03:23 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/22 16:32:23 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -387,6 +387,7 @@ void SemanticAnalysis::locationSaveDirective() {
     _config->_httpContext._serverContext.back()
         ->_locationContext.back()
         ->_autoIndexValue = value;
+  /*
   else if (canDirectiveBeSaved(TypeToken::ROOT))
     _config->_httpContext._serverContext.back()
         ->_locationContext.back()
@@ -396,6 +397,7 @@ void SemanticAnalysis::locationSaveDirective() {
     saveMultipleDirectiveValue(_config->_httpContext._serverContext.back()
                                    ->_locationContext.back()
                                    ->_indexValue);
+                                   */
   else if (_tokenLine.front()->_type == TypeToken::TRY_FILES &&
            _state == State::LOCATION_CONTEXT)
     saveMultipleDirectiveValue(_config->_httpContext._serverContext.back()
@@ -628,6 +630,10 @@ bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
       break;
   }
   return (false);
+}
+
+std::unique_ptr<ConfigFile> SemanticAnalysis::getConfigFile() {
+  return (std::move(_config));
 }
 
 std::string SemanticAnalysis::getThrowMessage() noexcept {

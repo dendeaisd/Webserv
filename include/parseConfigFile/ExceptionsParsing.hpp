@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/19 20:15:04 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/22 14:12:50 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,19 +108,26 @@ class InvalidMainDirective : public ExceptionsParsing {
 class InvalidHttpDirective : public ExceptionsParsing {
  public:
   InvalidHttpDirective(const std::string &message)
-      : ExceptionsParsing("Invalid directive in http context. Line" + message) {
-  }
+      : ExceptionsParsing("Invalid directive in http context. Line " +
+                          message) {}
 };
 
-class DirectiveWasAlradySet : public ExceptionsParsing {
+class DirectiveWasAlreadySet : public ExceptionsParsing {
  public:
-  DirectiveWasAlradySet(const std::string &message)
+  DirectiveWasAlreadySet(const std::string &message)
       : ExceptionsParsing("Directive has been set already. Line " + message) {}
 };
 
-class DirectiveSetAtWrongPossition : public ExceptionsParsing {
+class DirectiveSetAtWrongPosition : public ExceptionsParsing {
  public:
-  DirectiveSetAtWrongPossition(const std::string &message)
-      : ExceptionsParsing("Directive is set at wrong Possition. Line " +
+  DirectiveSetAtWrongPosition(const std::string &message)
+      : ExceptionsParsing("Directive is set at wrong Position. Line " +
+                          message) {}
+};
+
+class InvalidLocationDirective : public ExceptionsParsing {
+ public:
+  InvalidLocationDirective(const std::string &message)
+      : ExceptionsParsing("Invalid directive in location context. Line " +
                           message) {}
 };

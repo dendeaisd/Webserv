@@ -30,11 +30,15 @@ enum EBracketStatus {
 
 class SemanticAnalysis {
  public:
-  SemanticAnalysis() = delete;
-  SemanticAnalysis(const SemanticAnalysis &) = delete;
-  SemanticAnalysis &operator=(const SemanticAnalysis &other) = delete;
-  SemanticAnalysis(TokenStructure &token);
-  ~SemanticAnalysis();
+   SemanticAnalysis() = delete;
+   SemanticAnalysis(const SemanticAnalysis &) = delete;
+   SemanticAnalysis &operator=(const SemanticAnalysis &other) = delete;
+   SemanticAnalysis(TokenStructure &token);
+   ~SemanticAnalysis();
+
+  std::unique_ptr<ConfigFile> getConfigFile();
+
+ private:
 
   void preSetup();
   void loadDirectives();
@@ -87,7 +91,6 @@ class SemanticAnalysis {
   std::string getThrowMessage() noexcept;
   std::string currentLine() noexcept;
 
- private:
   std::unique_ptr<ConfigFile> _config;
 
   State _state;

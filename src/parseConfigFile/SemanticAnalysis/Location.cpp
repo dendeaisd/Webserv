@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/22 15:02:54 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/22 16:16:58 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ void Location::printLocation() {
   printTypeFormat("url", _urlValue);
   printTypeFormat("proxy_pass", _proxyPassValue);
   printTypeFormat("alias", _aliasValue);
+  printTypeFormat("auto_index", _autoIndexValue);
   printVecOfStrings(_denyValue, "deny");
   printVecOfStrings(_includeValue, "include");
   printVecOfStrings(_rewriteValue, "rewrite");

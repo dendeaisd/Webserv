@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/20 10:53:57 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/22 16:13:07 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void ServerContext::printServerContent() const noexcept {
   printTypeFormat("ssl_certificate_key", _sslCertificateKeyValue);
   printTypeFormat("root", _rootValue);
   vectorPrint(_indexValue, "index");
-  vectorPrint(_serverNameValue, "server");
+  vectorPrint(_serverNameValue, "server_name");
   vectorPrint(_listenValue, "listen");
   vectorPrint(_portWithAdressListenValue, "listen");
 
