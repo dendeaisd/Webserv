@@ -5,8 +5,8 @@
 #include <unistd.h>
 
 #include <iostream>
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "./include/cgi/CGIFileManager.hpp"
 #include "./include/log/Log.hpp"
@@ -29,8 +29,8 @@ int main(int argc, char* argv[]) {
     auto parsed = parser.getConfigFile();
     Log::getInstance().configure("DEBUG");
     if (!parsed) {
-    std::cerr << "Parsed ConfigFile is null." << std::endl;
-    return 1;
+      std::cerr << "Parsed ConfigFile is null." << std::endl;
+      return 1;
     }
     CGIFileManager::getInstance().configure(*parsed, "./cgi-bin");
     std::vector<int> ports = {8080, 8081, 8082};
