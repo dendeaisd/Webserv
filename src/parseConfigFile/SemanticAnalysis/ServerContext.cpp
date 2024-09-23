@@ -6,17 +6,17 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 18:15:16 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 18:57:35 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerContext.hpp"
 
 #include <cstring>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <limits>
 
 ServerContext::ServerContext() {
   _listenValue.clear();
