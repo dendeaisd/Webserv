@@ -7,8 +7,8 @@
 
 namespace fs = std::filesystem;
 
-void CGIFileManager::configure(
-  const ConfigFile& configFile, std::string cgiDir) {
+void CGIFileManager::configure(const ConfigFile& configFile,
+                               std::string cgiDir) {
   // TEMP map for cgi executors
   if (_configured) {
     Log::getInstance().warning("CGIFileManager already configured");
@@ -25,12 +25,16 @@ void CGIFileManager::configure(
   size_t newMappings = collectExecutorMappings(configFile);
   collectExecutorMappings(configFile);
   cgiDir_ = cgiDir;
-      if (newMappings == 0) {
-        std::cout << "No executor mappings found in the configuration file." << std::endl;    } else {
-      std::cout << newMappings << " executor mappings found in the configuration file." << std::endl;
+  if (newMappings == 0) {
+    std::cout << "No executor mappings found in the configuration file."
+              << std::endl;
+  } else {
+    std::cout << newMappings
+              << " executor mappings found in the configuration file."
+              << std::endl;
   }
   mapCGIDir(cgiDir_);
-  for (auto &file : cgiFiles_) {
+  for (auto& file : cgiFiles_) {
     std::cout << file.path << " " << file.executor << std::endl;
   }
 }
@@ -44,14 +48,14 @@ size_t CGIFileManager::collectExecutorMappings(const ConfigFile& configFile) {
     for (const auto& locationPtr : serverContext._locationContext) {
       const Location& location = *locationPtr;
       for (const auto& cgiPair : location._cgi) {
-          const std::string& extension = cgiPair.first;
-          const std::string& executor = cgiPair.second;
-          cgiExecutors_[extension] = executor;
-        }
+        const std::string& extension = cgiPair.first;
+        const std::string& executor = cgiPair.second;
+        cgiExecutors_[extension] = executor;
+      }
     }
   }
-  //TODO: convert this to a void func and remove the return 
-  //  statement once the _cgi is populated
+  // TODO: convert this to a void func and remove the return
+  //   statement once the _cgi is populated
   size_t newMappings = cgiExecutors_.size() - initialSize;
   return newMappings;
 }
@@ -59,7 +63,7 @@ size_t CGIFileManager::collectExecutorMappings(const ConfigFile& configFile) {
 std::string CGIFileManager::getExecutor(std::string scriptPath) {
   size_t dotPos = scriptPath.find_last_of('.');
   if (dotPos == std::string::npos) {
-      return "";
+    return "";
   }
   std::string extension = scriptPath.substr(dotPos);
   auto it = cgiExecutors_.find(extension);
@@ -70,7 +74,7 @@ std::string CGIFileManager::getExecutor(std::string scriptPath) {
 }
 
 void CGIFileManager::mapCGIDir(std::string cgiDir) {
-  for (const auto &entry : fs::directory_iterator(cgiDir)) {
+  for (const auto& entry : fs::directory_iterator(cgiDir)) {
     if (entry.is_regular_file()) {
       std::string path = entry.path().string();
       std::string extension = path.substr(path.find_last_of('.'));

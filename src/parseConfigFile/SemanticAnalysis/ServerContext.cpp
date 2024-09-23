@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 14:44:37 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 15:46:24 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ void ServerContext::listenPrint() const noexcept {
   i = 0;
   for (auto it = _portWithAddressListenValue.begin();
        it != _portWithAddressListenValue.end(); it++) {
-    std::cout << "[" << i << "] Listen IP and Port: [" << (*it).first
-              << "] [" << (*it).second << "]\n";
+    std::cout << "[" << i << "] Listen IP and Port: [" << (*it).first << "] ["
+              << (*it).second << "]\n";
   }
 }

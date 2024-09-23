@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 15:33:04 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 15:48:07 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,6 @@ class InvalidServerDirective : public ExceptionsParsing {
 };
 
 class ListenNotSet : public ExceptionsParsing {
-  public:
-    ListenNotSet()
-      : ExceptionsParsing("Listen is not set in server.") {}
+ public:
+  ListenNotSet() : ExceptionsParsing("Listen is not set in server.") {}
 };

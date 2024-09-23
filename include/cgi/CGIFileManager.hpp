@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <vector>
+
 #include "ConfigFile.hpp"
 
 struct CGIFile {
@@ -22,8 +23,7 @@ class CGIFileManager {
     static CGIFileManager _instance;
     return _instance;
   }
-  void configure(const ConfigFile& configFile,
-          std::string cgiDir);
+  void configure(const ConfigFile &configFile, std::string cgiDir);
 
  private:
   bool _configured;
@@ -33,7 +33,7 @@ class CGIFileManager {
   std::map<std::string, std::string> cgiExecutors_;
   std::string cgiDir_;
   void mapCGIDir(std::string cgiDir);
-  size_t collectExecutorMappings(const ConfigFile& configFile);
+  size_t collectExecutorMappings(const ConfigFile &configFile);
 };
 
 #endif
