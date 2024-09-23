@@ -25,8 +25,8 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   try {
-    auto config = std::make_shared<ParseConfigFile>(configFile);
-    auto parsed = config->getConfigFile();
+    ParseConfigFile parser(configFile);
+    auto parsed = parser.getConfigFile();
     Log::getInstance().configure("DEBUG");
     CGIFileManager::getInstance().configure("./cgi-bin");
     std::vector<int> ports = {8080, 8081, 8082};
