@@ -28,6 +28,7 @@ class Location {
   std::vector<std::string> _tryFilesValue;
   std::vector<std::string> _errorPageValue;
   std::vector<std::string> _accessLogValue;
+  std::vector<std::string> _allowMethods;
   std::unordered_map<std::string, std::string> _cgi;
 
  private:
