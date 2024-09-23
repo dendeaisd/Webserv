@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   SemanticAnalysis.cpp                               :+:      :+:    :+:   */
+/*   semanticAnalysis.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/22 16:52:12 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 11:04:23 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -515,6 +515,23 @@ bool SemanticAnalysis::locationValidDirective() const noexcept {
   return (false);
 }
 
+bool SemanticAnalysis::validLocationValues() const noexcept {
+  if (_tokenLine.size() != 2) return (false);
+
+  unsigned int port;
+  std::string ipAddress;
+  std::istringstream stream(_tokenLine[1].tokenStr);
+
+  if (_tokenLine[1].find(':') == std::npos)
+    stream >> port;
+  else if (_tokenLine[1].find(':') != std::npos) {
+    std::getline(stream, ipAddress, ':');
+    std::getline(stream, port, ':');
+  }
+  if (port < 0 || port > 65535) return (false);
+  return (true);
+}
+
 bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
   switch (token) {
     case TypeToken::WORKER_PROCESS:
@@ -632,8 +649,59 @@ bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
   return (false);
 }
 
+bool SemanticAnalysis::validListen() const noexcept {
+  if (_tokenLine.size() != 2 && _tokenLine.type != TypeToken::LISTEN)
+    return (false);
+
+  if (getIpListenValue(_tokenLine[1].tokenStr) != "" &&
+      getPortListenValue(_tokenLine[1].tokenStr) >= 0)
+    return (true);
+  else if (getPortListenValue(_tokenLine[1].tokenStr) >= 0)
+    return (true);
+  return (false);
+}
+
+std::string getIpListenValue() const {
+  if (ipAndPort.size() < 8 || ipAndPort.size() > 22) return (ipValue);
+  return ("");
+  else if (ipAndPort.find(":") == std::string::npos) return ("");
+
+  std::string ipValue;
+  std::istringstream stream(ipAndPort);
+  std::getline(stream, ipValue, ':');
+  if (stream.fail() == true || stream.eof() == true || ipValue.empty() == true)
+    return ("");
+
+  for (int i = 0; ipValue[i] != '\0'; i++) {
+    if (validIpChar(ipValue[i]) == false) return ("");
+  }
+  return (ipValue);
+}
+
+bool SemanticAnalysis::validIpChar(char c) {
+  if (std::isdigit(c) == false && c != '.') return (false);
+  return (true);
+}
+
 std::unique_ptr<ConfigFile> SemanticAnalysis::getConfigFile() {
   return (std::move(_config));
+}
+
+int SemanticAnalysis::getPortListenValue() const noexcept {
+  if (ipAndPort.size() < 1 || ipAndPort.size() > 22) return (-1);
+
+  int portValue;
+  std::stringstream stream(ipAndPort);
+
+  if (ipAndPort.size() > 5) {
+    std::string ipValue;
+    std::getline(stream, ipValue, ':');
+    stream >> portValue;
+  } else
+    stream >> portValue;
+
+  if (stream.fail() == true || portValue < 0 || portValue > 65535) return (-1);
+  return (portValue);
 }
 
 std::string SemanticAnalysis::getThrowMessage() noexcept {
