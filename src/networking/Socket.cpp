@@ -29,19 +29,37 @@ void Socket::setSocketOption(int level, int optname, int optval) {
   }
 }
 
-void Socket::bindSocket(int port) {
-  // TODO::before binding the socket, find a way to check if it has
-  //  a speciffic adress assigend to that port
-  struct sockaddr_in address;
-  address.sin_family = AF_INET;
-  address.sin_addr.s_addr = INADDR_ANY;
-  address.sin_port = htons(port);
-
-  if (bind(_sockFd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-    Log::getInstance().error("Failed to bind socket");
+void Socket::bindSocket(int port, const std::string& address) {
+  struct sockaddr_in addr;
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(port);
+  if (address == "0.0.0.0") {
+    addr.sin_addr.s_addr = INADDR_ANY;
+  } else {
+    if (inet_pton(AF_INET, address.c_str(), &addr.sin_addr) <= 0) {
+        Log::getInstance().error("inet_pton failed: " + address);
+      throw bindFailed("Invalid address: " + address);
+    }
+  }
+  if (bind(_sockFd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+    Log::getInstance().error("Failed to bind socket to " + address +
+                             ":" + std::to_string(port));
     throw bindFailed(std::strerror(errno));
   }
+
+  //TODO: rm this, only for verification
+    struct sockaddr_in boundAddr;
+  socklen_t addrLen = sizeof(boundAddr);
+  if (getsockname(_sockFd, (struct sockaddr*)&boundAddr, &addrLen) == 0) {
+    char boundAddrStr[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &boundAddr.sin_addr, boundAddrStr, INET_ADDRSTRLEN);
+    int boundPort = ntohs(boundAddr.sin_port);
+    Log::getInstance().info("Socket successfully bound to " + std::string(boundAddrStr) + ":" + std::to_string(boundPort));
+  } else {
+    Log::getInstance().error("Failed to retrieve bound address: " + std::string(std::strerror(errno)));
+  }
 }
+
 
 void Socket::listenSocket(int backlog) {
   if (listen(_sockFd, backlog) < 0) {
