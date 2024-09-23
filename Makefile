@@ -1,6 +1,6 @@
 NAME			:=  webserv
 CC          	:=  c++
-CFLAGS      	:=  -std=c++17 -g -Wall -Wextra -Werror
+CFLAGS      	:=  -std=c++17 -g #-Wall -Wextra -Werror
 INCLUDE_DIRS	:=	-I./include -I./tester                                  		\
 					-I./include/parseConfigFile/semanticAnalysis               		\
 					-I./include/parseConfigFile/tokenizing							\
@@ -44,6 +44,11 @@ $(OBJ_DIR)/%.d: %.cpp
 	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) -M $< > $@
 
 -include $(DEP)
+
+CONTAINER_NAME := webserv
+IMAGE_NAME := webserv
+HOST_DIR = $(shell pwd)
+CONTAINER_DIR = /usr/src/app
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
