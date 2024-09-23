@@ -94,8 +94,16 @@ class SemanticAnalysis {
   void saveListenValue() const noexcept;
   void listenSetInServerCheck() const;
 
+  void setClientMaxBodySize();
+  size_t convertMaxBodySize(const std::string &value) const;
+  size_t getMaxBodySizeMultiplier(char c) const;
+  bool canClientMaxBodySetBeSet() const noexcept;
+  bool isClientMaxBodySizeSet() const noexcept;
+
   std::string getThrowMessage() noexcept;
+  std::string getThrowMessage() const noexcept;
   std::string currentLine() noexcept;
+  std::string currentLine() const noexcept;
 
   std::unique_ptr<ConfigFile> _config;
 

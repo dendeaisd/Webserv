@@ -6,7 +6,7 @@
 /*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 15:37:57 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 18:38:26 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <cctype>
 #include <cstring>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <stack>
@@ -348,9 +349,8 @@ void SemanticAnalysis::serverSaveDirective() {
     throw InvalidLocationDirective(getThrowMessage());
 
   std::string value = _tokenLine[1]->_tokenStr;
-  if (canDirectiveBeSaved(TypeToken::CLIENT_MAX_BODY_SIZE))
-    _config->_httpContext._serverContext.back()->_clientMaxBodySizeValue =
-        value;
+  if (canClientMaxBodySetBeSet() == true)
+    setClientMaxBodySize();
   else if (canDirectiveBeSaved(TypeToken::SSL_CERTIFICATE))
     _config->_httpContext._serverContext.back()->_sslCertificateValue = value;
   else if (canDirectiveBeSaved(TypeToken::SSL_CERTIFICATE_KEY))
@@ -569,14 +569,10 @@ bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
     case TypeToken::LISTEN:
       if (_config->_httpContext._serverContext.back()->_listenValue.empty() ==
           true)
-      case TypeToken::CLIENT_MAX_BODY_SIZE:
-        if (_config->_httpContext._serverContext.back()
-                ->_clientMaxBodySizeValue.empty() == true)
+      case TypeToken::INDEX:
+        if (_config->_httpContext._serverContext.back()->_indexValue.empty() ==
+            true)
           return (true);
-    case TypeToken::INDEX:
-      if (_config->_httpContext._serverContext.back()->_indexValue.empty() ==
-          true)
-        return (true);
     case TypeToken::ROOT:
       if (_config->_httpContext._serverContext.back()->_rootValue.empty() ==
           true)
@@ -715,6 +711,63 @@ void SemanticAnalysis::listenSetInServerCheck() const {
   }
 }
 
+void SemanticAnalysis::setClientMaxBodySize() {
+  _config->_httpContext._serverContext.back()->_clientMaxBodySizeValue =
+      convertMaxBodySize(_tokenLine[1]->_tokenStr);
+  _config->_httpContext._serverContext.back()->_isSetClientMaxBodySizeValue =
+      true;
+}
+
+size_t SemanticAnalysis::convertMaxBodySize(const std::string &value) const {
+  std::string tmpValue = value;
+  char c = tmpValue[tmpValue.size() - 1];
+  size_t multiplicator = getMaxBodySizeMultiplier(c);
+  tmpValue.erase((value.size() - 1), 1);
+
+  std::istringstream stream(value);
+  size_t maxBoySizeValue;
+
+  stream >> maxBoySizeValue;
+
+  if (stream.fail() == true)
+    throw MaxBodySizeInvalidSetting(getThrowMessage());
+  else if (maxBoySizeValue * multiplicator > std::numeric_limits<size_t>::max())
+    throw MaxBodySizeInvalidSetting(getThrowMessage());
+  return (maxBoySizeValue * multiplicator);
+}
+
+size_t SemanticAnalysis::getMaxBodySizeMultiplier(char c) const {
+  size_t multiplicator = 0;
+  switch (c) {
+    case 'k':
+      multiplicator = 1024;
+      break;
+    case 'M':
+      multiplicator = 1024 * 1024;
+      break;
+    case 'G':
+      multiplicator = 1024 * 1024 * 1024;
+      break;
+    dedefault:
+      throw MaxBodySizeInvalidSetting(getThrowMessage());
+  }
+  return (multiplicator);
+}
+bool SemanticAnalysis::canClientMaxBodySetBeSet() const noexcept {
+  if (isClientMaxBodySizeSet() == false &&
+      _tokenLine.front()->_type == TypeToken::CLIENT_MAX_BODY_SIZE &&
+      _tokenLine.size() == 2)
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::isClientMaxBodySizeSet() const noexcept {
+  if (_config->_httpContext._serverContext.back()
+          ->_isSetClientMaxBodySizeValue == true)
+    return (true);
+  return (false);
+}
+
 std::unique_ptr<ConfigFile> SemanticAnalysis::getConfigFile() {
   return (std::move(_config));
 }
@@ -723,7 +776,22 @@ std::string SemanticAnalysis::getThrowMessage() noexcept {
   return (_tokenLine.front()->_foundLine + ": " + currentLine());
 }
 
+std::string SemanticAnalysis::getThrowMessage() const noexcept {
+  return (_tokenLine.front()->_foundLine + ": " + currentLine());
+}
+
 std::string SemanticAnalysis::currentLine() noexcept {
+  std::string currentStr;
+  for (auto it = _tokenLine.begin(); it != _tokenLine.end(); it++) {
+    if (it != (_tokenLine.end() - 1))
+      currentStr += (*it)->_tokenStr + " ";
+    else
+      currentStr += (*it)->_tokenStr;
+  }
+  return (currentStr);
+}
+
+std::string SemanticAnalysis::currentLine() const noexcept {
   std::string currentStr;
   for (auto it = _tokenLine.begin(); it != _tokenLine.end(); it++) {
     if (it != (_tokenLine.end() - 1))

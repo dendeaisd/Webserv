@@ -12,9 +12,10 @@ class ServerContext {
   ServerContext();
 
   void printServerContent() const noexcept;
-  // void addListen(const std::string &value);
 
-  std::string _clientMaxBodySizeValue;
+  bool _isSetClientMaxBodySizeValue;
+  size_t _clientMaxBodySizeValue;
+
   std::string _sslCertificateValue;
   std::string _sslCertificateKeyValue;
   std::string _rootValue;
