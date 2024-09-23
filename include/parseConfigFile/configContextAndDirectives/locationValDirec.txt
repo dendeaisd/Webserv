@@ -7,3 +7,4 @@ access_log
 deny
 return
 autoindex
+allow_methods

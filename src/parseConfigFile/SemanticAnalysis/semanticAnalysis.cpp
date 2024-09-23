@@ -6,7 +6,7 @@
 /*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 20:51:03 by ramoussa         ###   ########.fr       */
+/*   Updated: 2024/09/23 21:29:31 by ramoussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ SemanticAnalysis::SemanticAnalysis(TokenStructure &token) {
     possibleCreationOfNewContext();
     saveDirectiveValue();
   }
-  //  _config->printConfigFile();
   listenSetInServerCheck();
 }
 
@@ -392,17 +391,6 @@ void SemanticAnalysis::locationSaveDirective() {
     _config->_httpContext._serverContext.back()
         ->_locationContext.back()
         ->_autoIndexValue = value;
-  /*
-  else if (canDirectiveBeSaved(TypeToken::ROOT))
-    _config->_httpContext._serverContext.back()
-        ->_locationContext.back()
-        ->_rootValue = value;
-  else if (_tokenLine.front()->_type == TypeToken::INDEX &&
-           _state == State::LOCATION_CONTEXT)
-    saveMultipleDirectiveValue(_config->_httpContext._serverContext.back()
-                                   ->_locationContext.back()
-                                   ->_indexValue);
-                                   */
   else if (_tokenLine.front()->_type == TypeToken::TRY_FILES &&
            _state == State::LOCATION_CONTEXT)
     saveMultipleDirectiveValue(_config->_httpContext._serverContext.back()
@@ -433,6 +421,10 @@ void SemanticAnalysis::locationSaveDirective() {
     saveMultipleDirectiveValue(_config->_httpContext._serverContext.back()
                                    ->_locationContext.back()
                                    ->_denyValue);
+  else if (canDirectiveBeSaved(TypeToken::ALLOW_METHODS))
+    saveMultipleDirectiveValue(_config->_httpContext._serverContext.back()
+                                   ->_locationContext.back()
+                                   ->_allowMethods);
   else
     throw InvalidLocationDirective(getThrowMessage());
   /*
@@ -621,6 +613,11 @@ bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_autoIndexValue.empty() == true)
+        return (true);
+    case TypeToken::ALLOW_METHODS:
+      if (_config->_httpContext._serverContext.back()
+              ->_locationContext.back()
+              ->_allowMethods.empty() == true)
         return (true);
       /*
     case TypeToken::RETURN:
