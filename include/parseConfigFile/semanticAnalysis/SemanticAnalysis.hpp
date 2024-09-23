@@ -92,6 +92,7 @@ class SemanticAnalysis {
   bool validIpChar(char c) const noexcept;
   int getPortListenValue(std::string &ipAndPort) const noexcept;
   void saveListenValue() const noexcept;
+  void listenSetInServerCheck() const;
 
   std::string getThrowMessage() noexcept;
   std::string currentLine() noexcept;

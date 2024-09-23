@@ -6,7 +6,7 @@
 /*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 11:04:23 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 15:36:28 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ SemanticAnalysis::SemanticAnalysis(TokenStructure &token) {
     saveDirectiveValue();
   }
   //  _config->printConfigFile();
+  listenSetInServerCheck();
 }
 
 void SemanticAnalysis::preSetup() {
@@ -705,6 +706,14 @@ void SemanticAnalysis::saveListenValue() const noexcept {
     _config->_httpContext._serverContext.back()
         ->_portWithAddressListenValue.push_back(std::make_pair(ip, port));
   _config->_httpContext._serverContext.back()->_listenValue.push_back(port);
+}
+
+void SemanticAnalysis::listenSetInServerCheck() const {
+  for (auto it = _config->_httpContext._serverContext.begin();
+       it != _config->_httpContext._serverContext.end(); it++) {
+    if ((*it)->_listenValue.size() == 0)
+      throw ListenNotSet();
+  }
 }
 
 std::unique_ptr<ConfigFile> SemanticAnalysis::getConfigFile() {
