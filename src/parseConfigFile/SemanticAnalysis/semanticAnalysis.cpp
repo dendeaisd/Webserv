@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   semanticAnalysis.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 21:29:31 by ramoussa         ###   ########.fr       */
+/*   Updated: 2024/09/23 22:43:27 by ramymoussa       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,7 +268,7 @@ void SemanticAnalysis::createServerContext() noexcept {
 
 void SemanticAnalysis::createLocationContext() noexcept {
   _config->_httpContext._serverContext.back()->_locationContext.push_back(
-      std::make_unique<Location>());
+      std::make_shared<Location>());
 
   _config->_httpContext._serverContext.back()
       ->_locationContext.back()

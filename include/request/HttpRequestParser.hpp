@@ -61,7 +61,7 @@ class HttpRequestParser {
   bool canHaveBody();
   bool isUploadAllowed();
   void injectUploadFormIfNeeded();
-  std::unique_ptr<Location> getMostRelevantLocation();
+  std::shared_ptr<Location> getMostRelevantLocation();
   bool parseBoundary();
   void setStatusCode(int code);
   void setLocation(std::string location);

@@ -48,18 +48,20 @@ HttpRequest HttpRequestParser::getHttpRequest() {
   }
 }
 
-std::unique_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
+std::shared_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
   for (auto &location : _serverContext->_locationContext) {
+    std::cout << "Location: " << location->_urlValue << std::endl;
+    location->printLocation();
     if (location->_urlValue == _request.getUri() ||
         location->_urlValue == _request.getUri() + "/") {
-      return std::forward<std::unique_ptr<Location>>(location);
+      return location;
     }
   }
   for (auto &location : _serverContext->_locationContext) {
     // check if _urlValue is contained inside _request.getUri() starting from
     // the beginning of the string
     if (_request.getUri().find(location->_urlValue) == 0) {
-      return std::forward<std::unique_ptr<Location>>(location);
+      return location;
     }
   }
   return nullptr;
@@ -154,6 +156,9 @@ bool HttpRequestParser::isAllowedMethod(const std::string &method,
 }
 
 bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
+  Log::getInstance().debug(
+      "Max content length: " +
+      std::to_string(_serverContext->_clientMaxBodySizeValue));
   return contentLength <= _serverContext->_clientMaxBodySizeValue;
 }
 
@@ -194,7 +199,7 @@ int HttpRequestParser::parse() {
   }
   size_t contentLength = _request.getContentLength();
   if (!isAllowedContentLength(contentLength)) {
-    Log::getInstance().error("Invalid content length " +
+    Log::getInstance().error("Invalid content length set by config: " +
                              std::to_string(contentLength));
     _request.setHandler(HttpRequestHandler::ERROR);
     setStatusCode(413);
@@ -303,11 +308,6 @@ bool HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
       break;
     }
   }
-  if (!isAllowedMethod(_request.getMethod(), _request.getUri())) {
-    Log::getInstance().error("Invalid method: " + _request.getMethod());
-    setStatusCode(405);
-    return false;
-  }
   size_t j = i + 1;
   for (i = j; i < len; i++) {
     if (requestLine[i] == ' ') {
@@ -326,6 +326,11 @@ bool HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
     Log::getInstance().error("Invalid HTTP version. expected HTTP/1.1 got " +
                              _request.getHttpVersion());
     setStatusCode(505);  // HTTP Version Not Supported
+    return false;
+  }
+  if (!isAllowedMethod(_request.getMethod(), _request.getUri())) {
+    Log::getInstance().error("Invalid method: " + _request.getMethod());
+    setStatusCode(405);
     return false;
   }
   return true;

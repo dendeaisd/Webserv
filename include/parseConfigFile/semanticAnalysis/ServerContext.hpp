@@ -27,7 +27,7 @@ class ServerContext {
   std::vector<int> _listenValue;
   std::vector<std::pair<std::string, int>> _portWithAddressListenValue;
 
-  std::vector<std::unique_ptr<Location>> _locationContext;
+  std::vector<std::shared_ptr<Location>> _locationContext;
 
  private:
   void printTypeFormat(const std::string &type,
