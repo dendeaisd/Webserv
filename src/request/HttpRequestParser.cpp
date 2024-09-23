@@ -153,21 +153,7 @@ bool HttpRequestParser::isAllowedMethod(const std::string &method,
 }
 
 bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
-  size_t maxBodySize = LONG_MAX;
-  std::string maxBodySizeConfig = _serverContext->_clientMaxBodySizeValue;
-  if (maxBodySizeConfig != "") {
-    // check if it has k or m at the end
-    if (maxBodySizeConfig.back() == 'k') {
-      maxBodySizeConfig.pop_back();
-      maxBodySize = std::stoul(maxBodySizeConfig) * 1024;
-    } else if (maxBodySizeConfig.back() == 'm') {
-      maxBodySizeConfig.pop_back();
-      maxBodySize = std::stoul(maxBodySizeConfig) * 1024 * 1024;
-    } else {
-      maxBodySize = std::stoul(maxBodySizeConfig);
-    }
-  }
-  return contentLength <= maxBodySize;
+  return contentLength <= _serverContext->_clientMaxBodySizeValue;
 }
 
 bool HttpRequestParser::isUploadAllowed() {
