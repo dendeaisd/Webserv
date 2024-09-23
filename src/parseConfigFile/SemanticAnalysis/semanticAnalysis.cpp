@@ -6,7 +6,7 @@
 /*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 15:36:28 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 15:37:57 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -711,8 +711,7 @@ void SemanticAnalysis::saveListenValue() const noexcept {
 void SemanticAnalysis::listenSetInServerCheck() const {
   for (auto it = _config->_httpContext._serverContext.begin();
        it != _config->_httpContext._serverContext.end(); it++) {
-    if ((*it)->_listenValue.size() == 0)
-      throw ListenNotSet();
+    if ((*it)->_listenValue.size() == 0) throw ListenNotSet();
   }
 }
 
