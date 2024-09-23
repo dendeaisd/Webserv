@@ -27,8 +27,8 @@ Location::Location() {
   _errorPageValue.clear();
   _accessLogValue.clear();
   _denyValue.clear();
-  _statusCodeAndUrlReturnValue.first = 0;
-  _statusCodeAndUrlReturnValue.second.clear();
+  // _statusCodeAndUrlReturnValue.first = 0;
+  // _statusCodeAndUrlReturnValue.second.clear();
 }
 
 void Location::printLocation() {

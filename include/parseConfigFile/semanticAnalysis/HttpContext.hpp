@@ -23,7 +23,7 @@ class HttpContext {
   std::vector<std::string> _gzipTypesValue;
   std::vector<std::string> _proxySetHeaderValue;
   std::vector<std::string> _proxyCacheValidValue;
-  std::vector<std::unique_ptr<ServerContext> > _serverContext;
+  std::vector<std::shared_ptr<ServerContext> > _serverContext;
 
  private:
   void typeFormatPrint(const std::string &type,

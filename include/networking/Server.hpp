@@ -2,14 +2,16 @@
 #define SERVER_H
 
 #include <unordered_map>
+#include <memory>
 
 #include "Client.hpp"
 #include "PollManager.hpp"
 #include "Socket.hpp"
+#include "ConfigFile.hpp"
 
 class Server {
  public:
-  Server(std::vector<int>& ports);
+  Server(std::vector<int>& ports, std::unique_ptr<ConfigFile>&& config);
   void run();
   ~Server();
 
@@ -18,6 +20,8 @@ class Server {
   PollManager _pollManager;
   std::vector<Client*> _clients;
   std::unordered_map<int, Client*> _fdToClientMap;
+  std::unordered_map<int, std::shared_ptr<ServerContext>> _portToServerContextMap;
+  std::unique_ptr<ConfigFile> _config;
 
   void handleEvents();
   void handlePollInEvent(int fd, short& events);
@@ -28,6 +32,7 @@ class Server {
   void handleClientRequest(int fd);
   void processClientRequest(std::vector<Client*>::iterator& it);
   void handleClientResponse(int fd);
+  void buildPortToServer();
   void cleanupClient(std::vector<Client*>::iterator& it);
   bool isServerSocket(int fd);
 };

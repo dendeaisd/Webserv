@@ -12,14 +12,17 @@
 #include "../../include/cgi/CGI.hpp"
 #include "../../include/cgi/CGIFileManager.hpp"
 #include "../../include/log/Log.hpp"
+#include "ServerContext.hpp"
 
 #define BUFFER_SIZE 4096
 
-Client::Client(int fd) : _fd(fd) {
+Client::Client(int fd, std::shared_ptr<ServerContext> context) : _fd(fd) {
+	_context = context;
   fcntl(fd, F_SETFL, O_NONBLOCK);
   _isReadyForResponse = false;
   _shouldSendContinue = false;
   _isReadyForRequest = true;
+  Log::getInstance().debug("Server context: " + _context->_serverNameValue.at(0));
 }
 
 Client::~Client() { close(_fd); }
@@ -33,13 +36,6 @@ void Client::reset() {
   _shouldSendContinue = false;
   _isReadyForRequest = true;
 }
-
-const char* HTTP_RESPONSE =
-    "HTTP/1.1 200 OK\r\n"
-    "Content-Type: text/html\r\n"
-    "Content-Length: 13\r\n"
-    "\r\n"
-    "Hello, World!";
 
 bool Client::sendDirectoryListings(const std::string& path) {
   auto req = _parser.getHttpRequest();
@@ -180,10 +176,9 @@ bool Client::execute() {
       send(_fd, responseString.c_str(), responseString.length(), 0);
       break;
     }
-    default: {
-      send(_fd, HTTP_RESPONSE, strlen(HTTP_RESPONSE), 0);
-      break;
-    }
+	default:
+	  Log::getInstance().error("Failed to handle request: " + request.getMethod() + " " + request.getHost() + request.getUri());
+	  break;
   }
   Log::getInstance().info(request.getMethod() + " " + request.getHost() +
                           request.getUri());

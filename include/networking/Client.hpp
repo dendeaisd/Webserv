@@ -11,10 +11,11 @@
 #include "../../include/request/HttpRequestParser.hpp"
 #include "../../include/response/HttpResponse.hpp"
 #include "SocketExceptions.hpp"
+#include "ServerContext.hpp"
 
 class Client {
  public:
-  Client(int fd);
+  Client(int fd, std::shared_ptr<ServerContext> context);
   ~Client();
 
   int getFd() const;
@@ -28,6 +29,7 @@ class Client {
 
  private:
   int _fd;
+  std::shared_ptr<ServerContext> _context;
   HttpRequestParser _parser;
   HttpResponse _response;
   std::unique_ptr<Event> _events;
