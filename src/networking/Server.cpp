@@ -23,16 +23,13 @@ Server::Server(std::unique_ptr<ConfigFile>&& config) {
   std::set<std::pair<std::string, int>> addressPortSet;
   std::set<int> portsWithAddress;
 
-
   for (const auto& serverContext : serverContexts) {
-	std::cout << "Server Contexts Size: " << serverContext->_listenValue.size() << std::endl;	
     for (int port : serverContext->_listenValue) {
       if (portsWithAddress.find(port) == portsWithAddress.end()) {
         addressPortSet.insert(std::make_pair("", port));
-		portsWithAddress.insert(port);
+        portsWithAddress.insert(port);
       }
     }
-	// std::cout << "Address Listen Size: " << serverContext->_portWithAddressListenValue.size() << std::endl;
     // for (const auto& addrPortPair :
     //      serverContext->_portWithAddressListenValue) {
 

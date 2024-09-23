@@ -236,7 +236,6 @@ bool Client::handleRequest() {
   char buffer[BUFFER_SIZE + 1];
 
   int bytes_read;
-  int status;
   _isReadyForRequest = false;
 
   // if (_parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
@@ -258,7 +257,7 @@ bool Client::handleRequest() {
       buffer[bytes_read] = '\0';
     }
     _parser = HttpRequestParser(raw, _fd, _context);
-    status = _parser.parse();
+    _parser.parse();
     Log::getInstance().debug("Parsed request: " + raw);
     if (_parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
       Log::getInstance().debug("Request is to be continued: " + raw);
