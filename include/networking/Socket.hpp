@@ -14,7 +14,7 @@ class Socket {
   Socket(int domain, int type, int protocol);
   ~Socket();
 
-  void bindSocket(int port, const std::string& address = "");
+  void bindSocket(int port, const std::string &address = "");
   void listenSocket(int backlog);
   int acceptConnection(struct sockaddr_in *address, socklen_t *addrlen);
   void setSocketOption(int level, int optname, int optval);

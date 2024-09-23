@@ -24,7 +24,8 @@ Server::Server(std::unique_ptr<ConfigFile>&& config) {
   std::set<int> portsWithAddress;
 
   for (const auto& serverContext : serverContexts) {
-    for (const auto& addrPortPair : serverContext->_portWithAddressListenValue) {
+    for (const auto& addrPortPair :
+         serverContext->_portWithAddressListenValue) {
       addressPortSet.insert(addrPortPair);
       portsWithAddress.insert(addrPortPair.second);
     }

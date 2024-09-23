@@ -1,6 +1,8 @@
 #include "../../include/request/HttpMaps.hpp"
-#include "../../include/log/Log.hpp"
+
 #include <fstream>
+
+#include "../../include/log/Log.hpp"
 
 HttpMaps::HttpMaps() {
   httpRequestMethodMap = initHttpRequestMethodMap();
@@ -112,38 +114,38 @@ bool HttpMaps::isHeaderRequired1_1(const std::string &header) {
 
 bool HttpMaps::errorHasDefaultPage(int statusCode) {
   switch (statusCode) {
-	case 401:
-	case 403:
-	case 404:
-	case 500:
-	case 504:
-	  return true;
-	default:
-	  return false;
+    case 401:
+    case 403:
+    case 404:
+    case 500:
+    case 504:
+      return true;
+    default:
+      return false;
   }
 }
 
 std::string HttpMaps::getErrorPage(int statusCode) {
   std::string path = "./default/error_pages/";
   switch (statusCode) {
-	case 401:
-	  path += "401/401.html";
-	  break;
-	case 403:
-	  path += "403/403.html";
-	  break;
-	case 404:
-	  path += "404/404.html";
-	  break;
-	case 500:
-	  path += "500/500.html";
-	  break;
-	case 504:
-	  path += "504/504.html";
-	  break;
-	default:
-	  path += "404/404.html";
-	  break;
+    case 401:
+      path += "401/401.html";
+      break;
+    case 403:
+      path += "403/403.html";
+      break;
+    case 404:
+      path += "404/404.html";
+      break;
+    case 500:
+      path += "500/500.html";
+      break;
+    case 504:
+      path += "504/504.html";
+      break;
+    default:
+      path += "404/404.html";
+      break;
   }
   std::string content;
   std::ifstream file(path, std::ios::binary);
@@ -152,5 +154,5 @@ std::string HttpMaps::getErrorPage(int statusCode) {
     return "";
   }
   return std::string((std::istreambuf_iterator<char>(file)),
-					 (std::istreambuf_iterator<char>()));
+                     (std::istreambuf_iterator<char>()));
 }
