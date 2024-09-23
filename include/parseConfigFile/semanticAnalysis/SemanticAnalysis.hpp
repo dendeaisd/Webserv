@@ -87,6 +87,13 @@ class SemanticAnalysis {
   bool locationValidDirective() const noexcept;
   bool isValueEmpty(TypeToken) const noexcept;
 
+  bool validListen() const noexcept;
+  std::string getIpListenValue(std::string &ipAndPort) const noexcept;
+  bool validIpChar(char c) const noexcept;
+  int getPortListenValue(std::string &ipAndPort) const noexcept;
+  void saveListenValue() const noexcept;
+  void listenSetInServerCheck() const;
+
   std::string getThrowMessage() noexcept;
   std::string currentLine() noexcept;
 

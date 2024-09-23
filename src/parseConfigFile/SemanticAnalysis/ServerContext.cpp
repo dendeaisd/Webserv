@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/22 17:06:40 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 14:44:37 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,7 @@ void ServerContext::printServerContent() const noexcept {
   printTypeFormat("root", _rootValue);
   vectorPrint(_indexValue, "index");
   vectorPrint(_serverNameValue, "server_name");
-  vectorPrint(_listenValue, "listen");
-  vectorPrint(_portWithAdressListenValue, "listen");
+  listenPrint();
 
   auto it_location = _locationContext.begin();
 
@@ -62,19 +61,16 @@ void ServerContext::vectorPrint(
   }
 };
 
-/*
-void ServerContext::addListen(const std::string &value) {
-  int port;
-  std::istringstream stream(value);
-
-  if (value.find(':') == std::string::npos) {
-    stream >> port;
-    _listenValue.push_back(port);
-  } else if (value.find(':') != std::string::npos) {
-    std::string adress;
-    std::getline(stream, adress, ':');
-    stream >> port;
-    _portWithAdressListenValue.push_back(std::make_pair(adress, port));
+void ServerContext::listenPrint() const noexcept {
+  int i = 0;
+  for (auto it = _listenValue.begin(); it != _listenValue.end(); it++) {
+    std::cout << "[" << i << "] Listen Value: [" << *it << "]\n";
+    i++;
+  }
+  i = 0;
+  for (auto it = _portWithAddressListenValue.begin();
+       it != _portWithAddressListenValue.end(); it++) {
+    std::cout << "[" << i << "] Listen IP and Port: [" << (*it).first
+              << "] [" << (*it).second << "]\n";
   }
 }
-*/

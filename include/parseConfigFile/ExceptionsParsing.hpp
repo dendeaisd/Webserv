@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/22 14:12:50 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 15:33:04 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,4 +130,17 @@ class InvalidLocationDirective : public ExceptionsParsing {
   InvalidLocationDirective(const std::string &message)
       : ExceptionsParsing("Invalid directive in location context. Line " +
                           message) {}
+};
+
+class InvalidServerDirective : public ExceptionsParsing {
+ public:
+  InvalidServerDirective(const std::string &message)
+      : ExceptionsParsing("Invalid directive in server context. Line " +
+                          message) {}
+};
+
+class ListenNotSet : public ExceptionsParsing {
+  public:
+    ListenNotSet()
+      : ExceptionsParsing("Listen is not set in server.") {}
 };
