@@ -169,7 +169,6 @@ void Server::buildPortToServer() {
       _portToServerContextMap[serverPort] = server;
     }
   }
-
   // print it please
   for (auto it = _portToServerContextMap.begin();
        it != _portToServerContextMap.end(); ++it) {

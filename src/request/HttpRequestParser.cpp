@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <utility>
 
 #include "../../include/log/Log.hpp"
@@ -21,7 +22,9 @@ using namespace std::filesystem;
 HttpRequestParser::HttpRequestParser()
     : status(HttpRequestParseStatus::NOT_PARSED) {}
 
-HttpRequestParser::HttpRequestParser(const std::string raw, int clientFd)
+HttpRequestParser::HttpRequestParser(
+    const std::string raw, int clientFd,
+    std::shared_ptr<ServerContext> serverContext)
     : status(HttpRequestParseStatus::NOT_PARSED),
       hasFile(false),
       _clientFd(clientFd),
@@ -31,6 +34,8 @@ HttpRequestParser::HttpRequestParser(const std::string raw, int clientFd)
   total_read = 0;
   currentFileUploadStatus = HttpFileUploadStatus::NOT_STARTED;
   currentFileUploadName = "";
+  _statusCode = 0;
+  _serverContext = serverContext;
 }
 
 HttpRequestParser::~HttpRequestParser() {}
@@ -43,7 +48,37 @@ HttpRequest HttpRequestParser::getHttpRequest() {
   }
 }
 
+std::unique_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
+  for (auto &location : _serverContext->_locationContext) {
+    if (location->_urlValue == _request.getUri() ||
+        location->_urlValue == _request.getUri() + "/") {
+      return std::forward<std::unique_ptr<Location>>(location);
+    }
+  }
+  return nullptr;
+}
+
+/**
+ * Determines the appropriate handler for the HTTP request.
+ *
+ * This function analyzes the request and sets the appropriate handler
+ * based on the request's URI and method. It checks for specific conditions
+ * and sets the handler accordingly. If a relevant location is found, it
+ * sets the handler to RETURN and returns false.
+ *
+ * @return true if the handler is of type that requires further processing,
+ * otherwise false
+ */
 bool HttpRequestParser::electHandler() {
+  auto location = getMostRelevantLocation();
+  if (location != nullptr) {
+    if (location->_returnSet) {
+      setStatusCode(location->_returnValues.first);
+      setLocation(location->_returnValues.second);
+      _request.setHandler(HttpRequestHandler::RETURN);
+      return false;  // return false to prevent further processing
+    }
+  }
   if (isCgiRequest()) {
     _request.setHandler(HttpRequestHandler::CGI);
   } else if (isFaviconRequest()) {
@@ -64,11 +99,11 @@ bool HttpRequestParser::electHandler() {
     _request.setHandler(HttpRequestHandler::FILE_UPLOAD);
   } else if (_request.getUri() == "/benchmark") {
     _request.setHandler(HttpRequestHandler::BENCHMARK);
-    return false;
+    return false;  // return false to prevent further processing
   } else {
     _request.setHandler(HttpRequestHandler::STATIC);
   }
-  return true;
+  return true;  // return true to continue processing
 }
 
 bool HttpRequestParser::isCgiRequest() {
@@ -92,15 +127,39 @@ std::string getLineSanitized(std::stringstream &ss) {
   return line;
 }
 
-bool HttpRequestParser::isAllowedMethod(const std::string &method) {
+bool HttpRequestParser::isAllowedMethod(const std::string &method,
+                                        const std::string &path) {
+  // TODO: support allow_methods in location context
+  // for (auto& location : _serverContext->_locationContext) {
+  // 	if (location->_urlValue == path) {
+  // 		for (auto& method : location->??) {
+  // 			if (method == method) {
+  // 				return true;
+  // 			}
+  // 		}
+  // 	}
+  // }
   // TODO: update this to use server configuration
   return method == "GET" || method == "POST" || method == "DELETE" ||
          method == "PUT" || method == "OPTIONS";
 }
 
 bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
-  // TODO: update this to use server configuration
-  return contentLength < 10000000000;
+  size_t maxBodySize = LONG_MAX;
+  std::string maxBodySizeConfig = _serverContext->_clientMaxBodySizeValue;
+  if (maxBodySizeConfig != "") {
+    // check if it has k or m at the end
+    if (maxBodySizeConfig.back() == 'k') {
+      maxBodySizeConfig.pop_back();
+      maxBodySize = std::stoul(maxBodySizeConfig) * 1024;
+    } else if (maxBodySizeConfig.back() == 'm') {
+      maxBodySizeConfig.pop_back();
+      maxBodySize = std::stoul(maxBodySizeConfig) * 1024 * 1024;
+    } else {
+      maxBodySize = std::stoul(maxBodySizeConfig);
+    }
+  }
+  return contentLength <= maxBodySize;
 }
 
 bool HttpRequestParser::isUploadAllowed() {
@@ -146,7 +205,6 @@ int HttpRequestParser::parse() {
   }
   Log::getInstance().debug("Content length validated");
   injectUploadFormIfNeeded();
-
   if (_request.getHandler() == HttpRequestHandler::SEND_UPLOADED_FILE) {
     // check if file exists
     std::string filename =
@@ -236,14 +294,12 @@ bool HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
       bool valid = _request.setMethod(std::string(requestLine, i));
       if (!valid) {
         setStatusCode(400);
-        Log::getInstance().error("Invalid request method " +
-                                 std::string(requestLine, i));
         return false;
       }
       break;
     }
   }
-  if (!isAllowedMethod(_request.getMethod())) {
+  if (!isAllowedMethod(_request.getMethod(), _request.getUri())) {
     Log::getInstance().error("Invalid method: " + _request.getMethod());
     setStatusCode(405);
     return false;
@@ -641,3 +697,7 @@ void HttpRequestParser::parseQueryParams(std::string query) {
 
 int HttpRequestParser::getStatusCode() { return _statusCode; }
 void HttpRequestParser::setStatusCode(int code) { _statusCode = code; }
+std::string HttpRequestParser::getLocation() { return _location; }
+void HttpRequestParser::setLocation(std::string location) {
+  _location = location;
+}
