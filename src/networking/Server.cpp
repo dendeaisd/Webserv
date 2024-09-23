@@ -14,11 +14,19 @@
 #include "ConfigFile.hpp"
 #include "ServerContext.hpp"
 
-Server::Server(std::vector<int>& ports, std::unique_ptr<ConfigFile>&& config) {
+Server::Server(std::unique_ptr<ConfigFile>&& config) {
   _config = std::move(config);
   buildPortToServer();
   _config->printConfigFile();
-  for (int port : ports) {
+  std::set<int> portsSet;
+  const auto& serverContexts = _config->_httpContext._serverContext;
+
+  for(const auto& serverContext : serverContexts) {
+    portsSet.insert(serverContext->_listenValue.begin(), 
+          serverContext->_listenValue.end());
+  }
+
+  for (int port : portsSet) {
     auto newSocket = std::make_shared<Socket>(AF_INET, SOCK_STREAM, 0);
     newSocket->setSocketOption(SOL_SOCKET, SO_REUSEADDR, 1);
     newSocket->bindSocket(port);

@@ -33,8 +33,7 @@ int main(int argc, char* argv[]) {
       return 1;
     }
     CGIFileManager::getInstance().configure(*parsed, "./cgi-bin");
-    std::vector<int> ports = {8080, 8081, 8082};
-    Server server(ports, std::move(parsed));
+    Server server(std::move(parsed));
     server.run();
   } catch (const socketException& e) {
     std::cerr << "Socket error: " << e.what() << std::endl;
