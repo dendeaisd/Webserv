@@ -14,6 +14,8 @@ class HttpMaps {
   HttpMaps(const HttpMaps &) = delete;
   HttpMaps &operator=(const HttpMaps &) = delete;
   std::string getMimeType(const std::string &uri);
+  bool errorHasDefaultPage(int statusCode);
+  std::string getErrorPage(int statusCode);
   HttpRequestMethod getMethodEnum(std::string method);
   HttpRequestVersion getVersionEnum(std::string version);
   bool isHeaderValid(const std::string &header);

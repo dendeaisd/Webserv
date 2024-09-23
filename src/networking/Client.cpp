@@ -15,6 +15,7 @@
 #include "ServerContext.hpp"
 
 #define BUFFER_SIZE 4096
+#define ERROR_PAGES "/default/error_pages/"
 
 Client::Client(int fd, std::shared_ptr<ServerContext> context) : _fd(fd) {
   _context = context;
@@ -61,8 +62,26 @@ bool Client::sendDefaultFavicon() {
   return true;
 }
 
-bool Client::sendDefaultPage() {
-  _response.setStatusCode(200);
+bool Client::sendWebDocument() {
+  _response.setStatusCode(_parser.getStatusCode());
+  std::string url = _parser.getHttpRequest().getUri();
+  url = "." + url;
+  // check if .url is a file
+  if (std::filesystem::is_regular_file(url)) {
+	std::string mimeType = HttpMaps::getInstance().getMimeType(url);
+	_response.setFile(url, mimeType, "inline");
+	if (url.find(ERROR_PAGES) != std::string::npos) {
+		// get file name
+		std::string fileName = url.substr(url.find_last_of("/") + 1);
+		// get file name without extension
+		std::string fileNameNoExt = fileName.substr(0, fileName.find_last_of("."));
+		_response.setStatusCode(std::stoi(fileNameNoExt));
+	}
+	std::string responseString = _response.getResponse();
+	std::cout << responseString << std::endl;
+	send(_fd, responseString.c_str(), responseString.length(), 0);
+	return true;
+  }
   _response.setFile("./default/index.html", "text/html", "inline");
   std::string responseString = _response.getResponse();
   send(_fd, responseString.c_str(), responseString.length(), 0);
@@ -123,31 +142,27 @@ bool Client::handleRedirect() {
   return true;
 }
 
+std::string getErrorPagePath(int status) {
+  return ERROR_PAGES + std::to_string(status) + "/" + std::to_string(status) +
+         ".html";
+}
+
 bool Client::execute() {
   Log::getInstance().debug("Server context: " +
                            _context->_serverNameValue.at(0));
   auto request = _parser.getHttpRequest();
   int status = _parser.getStatusCode();
-  if (status >= 300 && status < 400) {
-    handleRedirect();
-    reset();
-    return true;
-  }
-  if (status != 200 && status != 201) {
-    _response.setStatusCode(status);
-    std::string responseString = _response.getResponse();
-    send(_fd, responseString.c_str(), responseString.length(), 0);
-    Log::getInstance().warning(
-        request.getMethod() + " " + request.getHost() + request.getUri() +
-        " failed with status: " + std::to_string(status));
-    reset();
-    return false;
-  }
+  Log::getInstance().debug("Status code: " + std::to_string(status));
   switch (request.getHandler()) {
     case HttpRequestHandler::BENCHMARK: {
       _response.setStatusCode(200);
       std::string responseString = _response.getResponse();
       send(_fd, responseString.c_str(), responseString.length(), 0);
+      break;
+    }
+    case HttpRequestHandler::RETURN: {
+      Log::getInstance().debug("Successful request. Return");
+      handleRedirect();
       break;
     }
     case HttpRequestHandler::FAVICON: {
@@ -156,10 +171,12 @@ bool Client::execute() {
       break;
     }
     case HttpRequestHandler::STATIC: {
-      sendDefaultPage();
+      Log::getInstance().debug("Successful request. Static");
+      sendWebDocument();
       break;
     }
     case HttpRequestHandler::CGI: {
+      Log::getInstance().debug("Successful request. CGI");
       Event::getInstance().getEvent(_fd)->handleResponse();
       Event::getInstance().removeEvent(_fd);
       break;
@@ -193,9 +210,18 @@ bool Client::execute() {
       break;
     }
     default:
-      Log::getInstance().error(
-          "Failed to handle request: " + request.getMethod() + " " +
-          request.getHost() + request.getUri());
+      // This section will handle the case where handler is set to ERROR.
+      _response.setStatusCode(status);
+      if (HttpMaps::getInstance().errorHasDefaultPage(status)) {
+		// move to a redirect
+		_response.setStatusCode(301);
+		_response.setHeader("Location", getErrorPagePath(status));
+      }
+      std::string responseString = _response.getResponse();
+      send(_fd, responseString.c_str(), responseString.length(), 0);
+      Log::getInstance().warning(
+          request.getMethod() + " " + request.getHost() + request.getUri() +
+          " failed with status: " + std::to_string(status));
       break;
   }
   Log::getInstance().info(request.getMethod() + " " + request.getHost() +
@@ -233,8 +259,10 @@ bool Client::handleRequest() {
     _parser = HttpRequestParser(raw, _fd, _context);
     status = _parser.parse();
     Log::getInstance().debug("Parsed request: " + raw);
-    if ((status == 200 || status == 201) &&
-        _parser.status == HttpRequestParseStatus::PARSED) {
+    if (_parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+      Log::getInstance().debug("Request is to be continued: " + raw);
+      _shouldSendContinue = true;
+    } else {
       _isReadyForResponse = true;
       if (_parser.getHttpRequest().getHandler() == HttpRequestHandler::CGI) {
         auto request = _parser.getHttpRequest();
@@ -242,10 +270,6 @@ bool Client::handleRequest() {
         if (cgi->run()) Event::getInstance().addEvent(_fd, cgi);
         _isReadyForResponse = false;
       }
-    } else if ((status == 200 || status == 201) &&
-               _parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-      Log::getInstance().debug("Request is to be continued: " + raw);
-      _shouldSendContinue = true;
     }
     return true;
   } else {
