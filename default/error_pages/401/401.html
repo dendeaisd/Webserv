@@ -1,39 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>401 Unauthorized</title>
-    <link rel="stylesheet" href="assets/styles.css" />
-  </head>
-  <body>
-    <div class="container">
-      <div class="background">
-        <div class="loader loader1"></div>
-        <div class="loader loader2"></div>
-        <div class="loader loader3"></div>
-        <div class="loader loader4"></div>
-        <div class="loader loader5"></div>
-        <div class="loader loader6"></div>
-        <div class="loader loader7"></div>
-        <div class="loader loader8"></div>
-        <div class="loader loader9"></div>
-        <div class="loader loader10"></div>
-        <div class="loader1 loader11"></div>
-        <div class="loader1 loader12"></div>
-        <div class="loader1 loader13"></div>
-        <div class="loader1 loader14"></div>
-        <div class="loader1 loader15"></div>
-        <div class="loader1 loader16"></div>
-      </div>
-      <div class="text-content">
-        <h1>You're not supposed to be here</h1>
-        <p>You're not supposed to be here</p>
-        <p1>You're not supposed to be here</p1>
-        <p2> You're not supposed to be here</p2>
-        <p3> 401: Unauthorized</p3>
-      </div>
-    </div>
-    <script src="assets/script.js"></script>
-  </body>
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>401 Unauthorized</title>
+	<!-- <link rel="stylesheet" href="assets/styles.css" /> -->
+	<style>
+		:root {
+			--sclera-color: #eb2015;
+			--background-color: #000;
+			--pupil-color: #fff;
+			--loader-height: 50px;
+			--loader-aspect-ratio: 2;
+		}
+
+		body,
+		html {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+			display: flex;
+			align-items: center;
+			color: white;
+			background-color: var(--background-color);
+			overflow: hidden;
+		}
+
+		.container {
+			text-align: center;
+			position: relative;
+			width: 100%;
+			height: 100%;
+		}
+
+		.background {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			pointer-events: none;
+			z-index: 0;
+		}
+
+		.text-content {
+			position: relative;
+			z-index: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			height: 100%;
+		}
+
+		h1 {
+			font-size: 3.5em;
+			margin: 0;
+		}
+
+		p {
+			font-size: 2em;
+			margin: 10px 0;
+		}
+
+		p1,
+		p2,
+		p3 {
+			margin: 10px;
+		}
+
+		p1 {
+			font-size: 1.3em;
+		}
+
+		p2 {
+			font-size: 0.7em;
+		}
+
+		p3 {
+			font-size: 0.5em;
+		}
+
+		.loader,
+		.loader1 {
+			height: var(--loader-height);
+			aspect-ratio: var(--loader-aspect-ratio);
+			background: radial-gradient(farthest-side, var(--pupil-color) 15%, #0000 20%) 0 0 / 50% 100%,
+				radial-gradient(50% 100% at 50% 160%, var(--sclera-color) 95%, #0000) 0 0 / 50% 50%,
+				radial-gradient(50% 100% at 50% -60%, var(--sclera-color) 95%, #0000) 0 100% / 50% 50%;
+			background-repeat: repeat-x;
+		}
+
+		.loader {
+			position: absolute;
+			mask: radial-gradient(50% 100%, #000 95%, #0000) 0 100% / 50% 100% repeat-x;
+			animation: l1 1s infinite alternate ease-in;
+		}
+
+		.loader1 {
+			display: grid;
+			animation: l2 1.5s infinite linear;
+		}
+
+		.loader1::before {
+			content: "";
+			background: inherit;
+			opacity: 0.6;
+			animation: glow 1s infinite;
+		}
+
+		@keyframes l2 {
+
+			0%,
+			15%,
+			45%,
+			55%,
+			85%,
+			100% {
+				background-position: 0 0, 0 0, 0 100%;
+			}
+
+			20%,
+			40% {
+				background-position: 5px 0, 0 0, 0 100%;
+			}
+
+			60%,
+			80% {
+				background-position: -5px 0, 0 0, 0 100%;
+			}
+		}
+
+		@keyframes l1 {
+
+			0%,
+			70%,
+			100% {
+				mask-size: 50% 100%;
+			}
+
+			85% {
+				mask-size: 50% 0;
+			}
+		}
+
+		@keyframes glow {
+			to {
+				transform: scale(3);
+				opacity: 0;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="background">
+			<div class="loader loader1"></div>
+			<div class="loader loader2"></div>
+			<div class="loader loader3"></div>
+			<div class="loader loader4"></div>
+			<div class="loader loader5"></div>
+			<div class="loader loader6"></div>
+			<div class="loader loader7"></div>
+			<div class="loader loader8"></div>
+			<div class="loader loader9"></div>
+			<div class="loader loader10"></div>
+			<div class="loader1 loader11"></div>
+			<div class="loader1 loader12"></div>
+			<div class="loader1 loader13"></div>
+			<div class="loader1 loader14"></div>
+			<div class="loader1 loader15"></div>
+			<div class="loader1 loader16"></div>
+		</div>
+		<div class="text-content">
+			<h1>You're not supposed to be here</h1>
+			<p>You're not supposed to be here</p>
+			<p1>You're not supposed to be here</p1>
+			<p2> You're not supposed to be here</p2>
+			<p3> 401: Unauthorized</p3>
+		</div>
+	</div>
+	<!-- <script src="assets/script.js"></script> -->
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			const loaders = document.querySelectorAll(".loader, .loader1");
+			const safeZone = {
+				top: 30,
+				bottom: 70,
+				left: 20,
+				right: 80,
+			};
+
+			const eyeSize = 10;
+			const placedLoaders = [];
+
+			loaders.forEach((loader) => {
+				let randomX, randomY;
+				let overlap;
+
+				do {
+					overlap = false;
+					randomX = Math.random() * 100;
+					randomY = Math.random() * 100;
+
+					if (
+						randomX >= safeZone.left &&
+						randomX <= safeZone.right &&
+						randomY >= safeZone.top &&
+						randomY <= safeZone.bottom
+					) {
+						overlap = true;
+					}
+
+					placedLoaders.forEach((placed) => {
+						const dx = randomX - placed.x;
+						const dy = randomY - placed.y;
+
+						const distance = Math.sqrt(dx * dx + dy * dy);
+
+						if (distance < eyeSize) {
+							overlap = true;
+						}
+					});
+				} while (overlap);
+
+				loader.style.position = "absolute";
+				loader.style.top = `${randomY}%`;
+				loader.style.left = `${randomX}%`;
+				placedLoaders.push({ x: randomX, y: randomY });
+			});
+		});
+
+	</script>
+</body>
+
 </html>

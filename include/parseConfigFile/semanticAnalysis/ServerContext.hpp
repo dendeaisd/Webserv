@@ -45,4 +45,5 @@ class ServerContext {
                    const std::string &type) const noexcept;
   void listenPrint() const noexcept;
 };
+
 #endif

@@ -38,7 +38,7 @@ class Client {
   bool _isReadyForRequest;
 
   bool sendDefaultFavicon();
-  bool sendDefaultPage();
+  bool sendWebDocument();
   bool sendDirectoryListings(const std::string& path);
 
   std::string generateDirectoryListing(const std::string& path,

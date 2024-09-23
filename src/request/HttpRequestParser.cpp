@@ -55,6 +55,13 @@ std::unique_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
       return std::forward<std::unique_ptr<Location>>(location);
     }
   }
+  for (auto &location : _serverContext->_locationContext) {
+    // check if _urlValue is contained inside _request.getUri() starting from
+    // the beginning of the string
+    if (_request.getUri().find(location->_urlValue) == 0) {
+      return std::forward<std::unique_ptr<Location>>(location);
+    }
+  }
   return nullptr;
 }
 
@@ -99,6 +106,7 @@ bool HttpRequestParser::electHandler() {
     _request.setHandler(HttpRequestHandler::FILE_UPLOAD);
   } else if (_request.getUri() == "/benchmark") {
     _request.setHandler(HttpRequestHandler::BENCHMARK);
+    setStatusCode(200);
     return false;  // return false to prevent further processing
   } else {
     _request.setHandler(HttpRequestHandler::STATIC);
@@ -186,20 +194,22 @@ int HttpRequestParser::parse() {
   std::stringstream ss(_raw);
   std::string requestLine = getLineSanitized(ss);
   if (!parseRequestLine((char *)requestLine.c_str(), requestLine.length())) {
+    _request.setHandler(HttpRequestHandler::ERROR);
     return getStatusCode();
   }
 
   if (!electHandler()) {
-    setStatusCode(200);
-    return 200;
+    return getStatusCode();
   }
   if (!parseHeaders(ss)) {
+    _request.setHandler(HttpRequestHandler::ERROR);
     return getStatusCode();
   }
   size_t contentLength = _request.getContentLength();
   if (!isAllowedContentLength(contentLength)) {
     Log::getInstance().error("Invalid content length " +
                              std::to_string(contentLength));
+    _request.setHandler(HttpRequestHandler::ERROR);
     setStatusCode(413);
     return 413;  // Payload Too Large
   }
@@ -211,6 +221,7 @@ int HttpRequestParser::parse() {
         _request.getUri().substr(std::string(UPLOAD_DIR).length());
     if (!exists(UPLOAD_DIR + filename)) {
       Log::getInstance().error("File not found: " + filename);
+      _request.setHandler(HttpRequestHandler::ERROR);
       setStatusCode(404);
       return 404;  // Not Found
     }
@@ -225,6 +236,7 @@ int HttpRequestParser::parse() {
   if (!canHaveBody() && contentLength > 0) {
     Log::getInstance().error("Request method " + _request.getMethod() +
                              " cannot have a body");
+    _request.setHandler(HttpRequestHandler::ERROR);
     setStatusCode(405);
     return 400;
   }
@@ -236,6 +248,7 @@ int HttpRequestParser::parse() {
   if (contentType.find("application/json") != std::string::npos ||
       contentType.find("text/plain") != std::string::npos) {
     if (!parseBody(ss)) {
+      _request.setHandler(HttpRequestHandler::ERROR);
       return getStatusCode();
     }
   } else if (contentType.find("application/x-www-form-urlencoded") !=
@@ -246,6 +259,7 @@ int HttpRequestParser::parse() {
     if (!isUploadAllowed()) {
       Log::getInstance().error("File upload not allowed to endpoint " +
                                _request.getUri());
+      _request.setHandler(HttpRequestHandler::ERROR);
       setStatusCode(405);
       return 405;  // Method Not Allowed
     }
@@ -253,15 +267,18 @@ int HttpRequestParser::parse() {
   }
   if (contentType.find("multipart/form-data") != std::string::npos) {
     if (!parseBoundary()) {
+      _request.setHandler(HttpRequestHandler::ERROR);
       setStatusCode(400);
       return 400;
     }
     if (!handleFileUpload(ss)) {
+      _request.setHandler(HttpRequestHandler::ERROR);
       setStatusCode(400);
       return 400;
     }
     if (!askForContinue() &&
         status == HttpRequestParseStatus::EXPECT_CONTINUE) {
+      _request.setHandler(HttpRequestHandler::ERROR);
       setStatusCode(500);
       return 500;  // Internal Server Error
     }

@@ -14,20 +14,38 @@
 #include "ConfigFile.hpp"
 #include "ServerContext.hpp"
 
-Server::Server(std::vector<int>& ports, std::unique_ptr<ConfigFile>&& config) {
+Server::Server(std::unique_ptr<ConfigFile>&& config) {
   _config = std::move(config);
   buildPortToServer();
   _config->printConfigFile();
-  for (int port : ports) {
+
+  const auto& serverContexts = _config->_httpContext._serverContext;
+  std::set<std::pair<std::string, int>> addressPortSet;
+  std::set<int> portsWithAddress;
+
+  for (const auto& serverContext : serverContexts) {
+    for (const auto& addrPortPair : serverContext->_portWithAddressListenValue) {
+      addressPortSet.insert(addrPortPair);
+      portsWithAddress.insert(addrPortPair.second);
+    }
+    for (int port : serverContext->_listenValue) {
+      if (portsWithAddress.find(port) == portsWithAddress.end()) {
+        addressPortSet.insert(std::make_pair("0.0.0.0", port));
+      }
+    }
+  }
+
+  for (const auto& addrPortPair : addressPortSet) {
+    const std::string& address = addrPortPair.first;
+    int port = addrPortPair.second;
+
     auto newSocket = std::make_shared<Socket>(AF_INET, SOCK_STREAM, 0);
     newSocket->setSocketOption(SOL_SOCKET, SO_REUSEADDR, 1);
-    newSocket->bindSocket(port);
+    newSocket->bindSocket(port, address);
     newSocket->listenSocket(SOMAXCONN);
     newSocket->setNonBlocking();
     _pollManager.addSocket(newSocket->getSocketFd(), POLLIN, port);
     _serverSockets.push_back(newSocket);
-    Log::getInstance().debug("Server listening on port " +
-                             std::to_string(port));
   }
 }
 

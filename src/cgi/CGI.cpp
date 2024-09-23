@@ -218,7 +218,8 @@ void CGI::executeCGI() {
   exit(1);
 }
 
-bool CGI::handleResponse() {
+bool CGI::handleResponse()
+{
   if (_response.getStatusCode() == -1) return tunnelData();
   send(_fd, _response.getResponse().c_str(), _response.getResponse().length(),
        0);

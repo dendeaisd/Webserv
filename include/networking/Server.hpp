@@ -11,7 +11,7 @@
 
 class Server {
  public:
-  Server(std::vector<int>& ports, std::unique_ptr<ConfigFile>&& config);
+  Server(std::unique_ptr<ConfigFile>&& config);
   void run();
   ~Server();
 
