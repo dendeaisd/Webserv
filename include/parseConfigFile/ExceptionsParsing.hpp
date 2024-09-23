@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 17:49:32 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 18:58:21 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ class ListenNotSet : public ExceptionsParsing {
 };
 
 class MaxBodySizeInvalidSetting : public ExceptionsParsing {
-  public:
-    MaxBodySizeInvalidSetting(const std::string &message)
+ public:
+  MaxBodySizeInvalidSetting(const std::string &message)
       : ExceptionsParsing("Invalid client_max_body_size. Line " + message) {}
 };
