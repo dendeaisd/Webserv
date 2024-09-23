@@ -6,13 +6,14 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 14:44:37 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 18:57:35 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerContext.hpp"
 
 #include <cstring>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -24,11 +25,13 @@ ServerContext::ServerContext() {
   _sslCertificateKeyValue.clear();
   _indexValue.clear();
   _rootValue.clear();
+  _clientMaxBodySizeValue = SIZE_MAX;
+  _isSetClientMaxBodySizeValue = false;
 }
 
 void ServerContext::printServerContent() const noexcept {
   std::cout << "-Server-\n";
-  printTypeFormat("client_max_body_size", _clientMaxBodySizeValue);
+  std::cout << "client_max_body_size: [" << _clientMaxBodySizeValue << "]\n";
   printTypeFormat("ssl_certificate", _sslCertificateValue);
   printTypeFormat("ssl_certificate_key", _sslCertificateKeyValue);
   printTypeFormat("root", _rootValue);
@@ -70,7 +73,7 @@ void ServerContext::listenPrint() const noexcept {
   i = 0;
   for (auto it = _portWithAddressListenValue.begin();
        it != _portWithAddressListenValue.end(); it++) {
-    std::cout << "[" << i << "] Listen IP and Port: [" << (*it).first
-              << "] [" << (*it).second << "]\n";
+    std::cout << "[" << i << "] Listen IP and Port: [" << (*it).first << "] ["
+              << (*it).second << "]\n";
   }
 }

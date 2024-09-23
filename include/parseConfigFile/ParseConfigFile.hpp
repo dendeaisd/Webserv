@@ -10,7 +10,7 @@ class ParseConfigFile {
  public:
   ParseConfigFile(const std::string &filePath);
   std::unique_ptr<ConfigFile> getConfigFile();
-  ~ParseConfigFile() {};
+  ~ParseConfigFile(){};
 
  private:
   ParseConfigFile() = delete;

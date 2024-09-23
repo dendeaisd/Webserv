@@ -3,8 +3,8 @@
 
 #include <poll.h>
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "PollManagerExceptions.hpp"
 

@@ -1,13 +1,13 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
 
 #include "Client.hpp"
+#include "ConfigFile.hpp"
 #include "PollManager.hpp"
 #include "Socket.hpp"
-#include "ConfigFile.hpp"
 
 class Server {
  public:
@@ -20,7 +20,8 @@ class Server {
   PollManager _pollManager;
   std::vector<Client*> _clients;
   std::unordered_map<int, Client*> _fdToClientMap;
-  std::unordered_map<int, std::shared_ptr<ServerContext>> _portToServerContextMap;
+  std::unordered_map<int, std::shared_ptr<ServerContext>>
+      _portToServerContextMap;
   std::unique_ptr<ConfigFile> _config;
 
   void handleEvents();

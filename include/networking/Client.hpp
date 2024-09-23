@@ -10,8 +10,8 @@
 #include "../../include/Event.hpp"
 #include "../../include/request/HttpRequestParser.hpp"
 #include "../../include/response/HttpResponse.hpp"
-#include "SocketExceptions.hpp"
 #include "ServerContext.hpp"
+#include "SocketExceptions.hpp"
 
 class Client {
  public:

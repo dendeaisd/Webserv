@@ -19,7 +19,7 @@
 
 #define BUFFER_SIZE 4096
 
-CGI::CGI(int fd, HttpRequest& request)
+CGI::CGI(int fd, HttpRequest &request)
     : _fd(fd), _request(request), _unableToExecute(false) {
   std::string uri = request.getUri();
   size_t dotPos = uri.find(".");
@@ -218,8 +218,7 @@ void CGI::executeCGI() {
   exit(1);
 }
 
-bool CGI::handleResponse()
-{
+bool CGI::handleResponse() {
   if (_response.getStatusCode() == -1) return tunnelData();
   send(_fd, _response.getResponse().c_str(), _response.getResponse().length(),
        0);
