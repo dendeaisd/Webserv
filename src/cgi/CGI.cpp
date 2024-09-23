@@ -19,10 +19,8 @@
 
 #define BUFFER_SIZE 4096
 
-CGI::CGI(int fd, HttpRequest &request) {
-  _fd = fd;
-  _request = request;
-  _unableToExecute = false;
+CGI::CGI(int fd, HttpRequest& request)
+    : _fd(fd), _request(request), _unableToExecute(false) {
   std::string uri = request.getUri();
   size_t dotPos = uri.find(".");
   if (dotPos == std::string::npos) {

@@ -1,6 +1,6 @@
 NAME			:=  webserv
 CC          	:=  c++
-CFLAGS      	:=  -Wall -Wextra -Werror -std=c++17 -g
+CFLAGS      	:=  -std=c++17 -g ##-Wall -Wextra -Werror
 INCLUDE_DIRS	:=	-I./include -I./tester                                  		\
 					-I./include/parseConfigFile/semanticAnalysis               		\
 					-I./include/parseConfigFile/tokenizing							\

@@ -28,7 +28,11 @@ int main(int argc, char* argv[]) {
     auto config = std::make_shared<ParseConfigFile>(configFile);
     auto parsed = config->getConfigFile();
     Log::getInstance().configure("DEBUG");
-    CGIFileManager::getInstance().configure("./cgi-bin");
+    if (!parsed) {
+    std::cerr << "Parsed ConfigFile is null." << std::endl;
+    return 1;
+    }
+    CGIFileManager::getInstance().configure(*parsed, "./cgi-bin");
     std::vector<int> ports = {8080, 8081, 8082};
     Server server(ports, std::move(parsed));
     server.run();
