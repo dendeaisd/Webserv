@@ -23,21 +23,29 @@ Server::Server(std::unique_ptr<ConfigFile>&& config) {
   std::set<std::pair<std::string, int>> addressPortSet;
   std::set<int> portsWithAddress;
 
+
   for (const auto& serverContext : serverContexts) {
-    for (const auto& addrPortPair :
-         serverContext->_portWithAddressListenValue) {
-      addressPortSet.insert(addrPortPair);
-      portsWithAddress.insert(addrPortPair.second);
-    }
+	std::cout << "Server Contexts Size: " << serverContext->_listenValue.size() << std::endl;	
     for (int port : serverContext->_listenValue) {
       if (portsWithAddress.find(port) == portsWithAddress.end()) {
-        addressPortSet.insert(std::make_pair("0.0.0.0", port));
+        addressPortSet.insert(std::make_pair("", port));
+		portsWithAddress.insert(port);
       }
     }
+	// std::cout << "Address Listen Size: " << serverContext->_portWithAddressListenValue.size() << std::endl;
+    // for (const auto& addrPortPair :
+    //      serverContext->_portWithAddressListenValue) {
+
+    //   if (portsWithAddress.find(addrPortPair.second) !=
+    //       portsWithAddress.end()) {
+    //     addressPortSet.insert(addrPortPair);
+    //     portsWithAddress.insert(addrPortPair.second);
+    //   }
+    // }
   }
 
   for (const auto& addrPortPair : addressPortSet) {
-    const std::string& address = addrPortPair.first;
+    const std::string& address = "";
     int port = addrPortPair.second;
 
     auto newSocket = std::make_shared<Socket>(AF_INET, SOCK_STREAM, 0);
@@ -185,9 +193,10 @@ void Server::buildPortToServer() {
   auto servers = _config->_httpContext._serverContext;
   for (auto server : servers) {
     for (auto serverPort : server->_listenValue) {
-      if (_portToServerContextMap.find(serverPort) == _portToServerContextMap.end()) {
+      if (_portToServerContextMap.find(serverPort) ==
+          _portToServerContextMap.end()) {
         _portToServerContextMap[serverPort] = server;
-     }
+      }
     }
   }
   // print it please
@@ -218,7 +227,8 @@ void Server::handleNewConnection(int serverFd) {
     // server context that is stored in the _portToServerContextMap
     Log::getInstance().debug("New connection on port " +
                              std::to_string(serverPort));
-    std::shared_ptr<ServerContext> serverContext = _portToServerContextMap.find(serverPort)->second;
+    std::shared_ptr<ServerContext> serverContext =
+        _portToServerContextMap.find(serverPort)->second;
     // END OF TEMP SOLUTION
     Log::getInstance().debug("Server context: " +
                              serverContext->_serverNameValue.at(0));

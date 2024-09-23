@@ -6,7 +6,7 @@
 /*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 18:38:26 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/23 20:51:03 by ramoussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -748,7 +748,7 @@ size_t SemanticAnalysis::getMaxBodySizeMultiplier(char c) const {
     case 'G':
       multiplicator = 1024 * 1024 * 1024;
       break;
-    dedefault:
+    default:
       throw MaxBodySizeInvalidSetting(getThrowMessage());
   }
   return (multiplicator);
