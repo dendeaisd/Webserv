@@ -21,7 +21,7 @@ void CGIFileManager::configure(const ConfigFile& configFile,
   cgiExecutors_[".rb"] = "/usr/bin/ruby";
   cgiExecutors_[".sh"] = "/bin/bash";
 
-  size_t initialMappings = cgiExecutors_.size();
+  // size_t initialMappings = cgiExecutors_.size();
   size_t newMappings = collectExecutorMappings(configFile);
   collectExecutorMappings(configFile);
   cgiDir_ = cgiDir;

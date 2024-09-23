@@ -148,6 +148,7 @@ bool HttpRequestParser::isAllowedMethod(const std::string &method,
   // 	}
   // }
   // TODO: update this to use server configuration
+  (void)path;
   return method == "GET" || method == "POST" || method == "DELETE" ||
          method == "PUT" || method == "OPTIONS";
 }

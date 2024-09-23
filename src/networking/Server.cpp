@@ -185,7 +185,9 @@ void Server::buildPortToServer() {
   auto servers = _config->_httpContext._serverContext;
   for (auto server : servers) {
     for (auto serverPort : server->_listenValue) {
-      _portToServerContextMap[serverPort] = server;
+      if (_portToServerContextMap.find(serverPort) == _portToServerContextMap.end()) {
+        _portToServerContextMap[serverPort] = server;
+     }
     }
   }
   // print it please
@@ -216,15 +218,7 @@ void Server::handleNewConnection(int serverFd) {
     // server context that is stored in the _portToServerContextMap
     Log::getInstance().debug("New connection on port " +
                              std::to_string(serverPort));
-    std::shared_ptr<ServerContext> serverContext = nullptr;
-    auto ctx = _portToServerContextMap.find(serverPort);
-    if (ctx == _portToServerContextMap.end()) {
-      Log::getInstance().error("Server context not found for port " +
-                               std::to_string(serverPort));
-      serverContext = (*_config->_httpContext._serverContext.begin());
-    } else {
-      serverContext = ctx->second;
-    }
+    std::shared_ptr<ServerContext> serverContext = _portToServerContextMap.find(serverPort)->second;
     // END OF TEMP SOLUTION
     Log::getInstance().debug("Server context: " +
                              serverContext->_serverNameValue.at(0));
