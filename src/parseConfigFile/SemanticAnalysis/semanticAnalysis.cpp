@@ -14,6 +14,7 @@
 
 #include <string.h>
 
+#include <cctype>
 #include <cstring>
 #include <fstream>
 #include <memory>
@@ -35,7 +36,7 @@ SemanticAnalysis::SemanticAnalysis(TokenStructure &token) {
     possibleCreationOfNewContext();
     saveDirectiveValue();
   }
-  _config->printConfigFile();
+  //  _config->printConfigFile();
 }
 
 void SemanticAnalysis::preSetup() {
@@ -365,7 +366,10 @@ void SemanticAnalysis::serverSaveDirective() {
   else if (canDirectiveBeSaved(TypeToken::SERVER_NAME))
     saveMultipleDirectiveValue(
         _config->_httpContext._serverContext.back()->_serverNameValue);
-  // else if (_tokenLine.front()->_type == TypeToken::LISTEN)
+  else if (validListen() == true)
+    saveListenValue();
+  else
+    throw InvalidServerDirective(getThrowMessage());
 }
 
 void SemanticAnalysis::locationSaveDirective() {
@@ -428,6 +432,8 @@ void SemanticAnalysis::locationSaveDirective() {
     saveMultipleDirectiveValue(_config->_httpContext._serverContext.back()
                                    ->_locationContext.back()
                                    ->_denyValue);
+  else
+    throw InvalidLocationDirective(getThrowMessage());
   /*
    * return value implementation
    */
@@ -513,23 +519,6 @@ bool SemanticAnalysis::locationValidDirective() const noexcept {
            _state == State::LOCATION_CONTEXT)
     return (true);
   return (false);
-}
-
-bool SemanticAnalysis::validLocationValues() const noexcept {
-  if (_tokenLine.size() != 2) return (false);
-
-  unsigned int port;
-  std::string ipAddress;
-  std::istringstream stream(_tokenLine[1].tokenStr);
-
-  if (_tokenLine[1].find(':') == std::npos)
-    stream >> port;
-  else if (_tokenLine[1].find(':') != std::npos) {
-    std::getline(stream, ipAddress, ':');
-    std::getline(stream, port, ':');
-  }
-  if (port < 0 || port > 65535) return (false);
-  return (true);
 }
 
 bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
@@ -650,24 +639,31 @@ bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
 }
 
 bool SemanticAnalysis::validListen() const noexcept {
-  if (_tokenLine.size() != 2 && _tokenLine.type != TypeToken::LISTEN)
+  if (_tokenLine.size() != 2 && _tokenLine.front()->_type != TypeToken::LISTEN)
     return (false);
 
-  if (getIpListenValue(_tokenLine[1].tokenStr) != "" &&
-      getPortListenValue(_tokenLine[1].tokenStr) >= 0)
+  if (_tokenLine[1]->_tokenStr.find_first_not_of("0123456789") !=
+          std::string::npos &&
+      getIpListenValue(_tokenLine[1]->_tokenStr) == "")
+    return (false);
+
+  if (getIpListenValue(_tokenLine[1]->_tokenStr) != "" &&
+      getPortListenValue(_tokenLine[1]->_tokenStr) >= 0)
     return (true);
-  else if (getPortListenValue(_tokenLine[1].tokenStr) >= 0)
+  else if (getPortListenValue(_tokenLine[1]->_tokenStr) >= 0)
     return (true);
   return (false);
 }
 
-std::string getIpListenValue() const {
-  if (ipAndPort.size() < 8 || ipAndPort.size() > 22) return (ipValue);
-  return ("");
-  else if (ipAndPort.find(":") == std::string::npos) return ("");
+std::string SemanticAnalysis::getIpListenValue(
+    std::string &ipAndPort) const noexcept {
+  if (ipAndPort.size() < 8 || ipAndPort.size() > 22)
+    return ("");
+  else if (ipAndPort.find(":") == std::string::npos)
+    return ("");
 
   std::string ipValue;
-  std::istringstream stream(ipAndPort);
+  std::istringstream stream(_tokenLine[1]->_tokenStr);
   std::getline(stream, ipValue, ':');
   if (stream.fail() == true || stream.eof() == true || ipValue.empty() == true)
     return ("");
@@ -678,16 +674,13 @@ std::string getIpListenValue() const {
   return (ipValue);
 }
 
-bool SemanticAnalysis::validIpChar(char c) {
+bool SemanticAnalysis::validIpChar(char c) const noexcept {
   if (std::isdigit(c) == false && c != '.') return (false);
   return (true);
 }
 
-std::unique_ptr<ConfigFile> SemanticAnalysis::getConfigFile() {
-  return (std::move(_config));
-}
-
-int SemanticAnalysis::getPortListenValue() const noexcept {
+int SemanticAnalysis::getPortListenValue(
+    std::string &ipAndPort) const noexcept {
   if (ipAndPort.size() < 1 || ipAndPort.size() > 22) return (-1);
 
   int portValue;
@@ -702,6 +695,20 @@ int SemanticAnalysis::getPortListenValue() const noexcept {
 
   if (stream.fail() == true || portValue < 0 || portValue > 65535) return (-1);
   return (portValue);
+}
+
+void SemanticAnalysis::saveListenValue() const noexcept {
+  int port = getPortListenValue(_tokenLine[1]->_tokenStr);
+  std::string ip = getIpListenValue(_tokenLine[1]->_tokenStr);
+
+  if (ip.empty() == false)
+    _config->_httpContext._serverContext.back()
+        ->_portWithAddressListenValue.push_back(std::make_pair(ip, port));
+  _config->_httpContext._serverContext.back()->_listenValue.push_back(port);
+}
+
+std::unique_ptr<ConfigFile> SemanticAnalysis::getConfigFile() {
+  return (std::move(_config));
 }
 
 std::string SemanticAnalysis::getThrowMessage() noexcept {

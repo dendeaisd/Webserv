@@ -85,13 +85,13 @@ class SemanticAnalysis {
   bool canDirectiveBeSaved(TypeToken) const noexcept;
   bool serverValidDirective() const noexcept;
   bool locationValidDirective() const noexcept;
-  bool validLocationValues() const noexcept;
   bool isValueEmpty(TypeToken) const noexcept;
 
   bool validListen() const noexcept;
-  std::string getIpListenValue(std::string &ipAndPort) const;
+  std::string getIpListenValue(std::string &ipAndPort) const noexcept;
   bool validIpChar(char c) const noexcept;
-  int getPortListenValue() const noexcept;
+  int getPortListenValue(std::string &ipAndPort) const noexcept;
+  void saveListenValue() const noexcept;
 
   std::string getThrowMessage() noexcept;
   std::string currentLine() noexcept;

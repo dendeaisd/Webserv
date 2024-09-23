@@ -24,7 +24,7 @@ class ServerContext {
 
   /*_listenValue should store only a vector of ints that contains the ports*/
   std::vector<int> _listenValue;
-  std::vector<std::pair<std::string, int>> _portWithAdressListenValue;
+  std::vector<std::pair<std::string, int>> _portWithAddressListenValue;
 
   std::vector<std::unique_ptr<Location>> _locationContext;
 
@@ -42,5 +42,6 @@ class ServerContext {
   }
   void vectorPrint(const std::vector<std::pair<std::string, int>> &vec,
                    const std::string &type) const noexcept;
+ void listenPrint() const noexcept;
 };
 #endif
