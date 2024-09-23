@@ -23,7 +23,7 @@ class ServerContext {
   std::vector<std::string> _serverNameValue;
 
   /*_listenValue should store only a vector of ints that contains the ports*/
-  std::vector<int> _listenValue;
+  std::vector<int> _listenValue; // listen 80; listen 1.1.1.1:80;
   std::vector<std::pair<std::string, int>> _portWithAdressListenValue;
 
   std::vector<std::unique_ptr<Location>> _locationContext;

@@ -17,12 +17,13 @@
 #define BUFFER_SIZE 4096
 
 Client::Client(int fd, std::shared_ptr<ServerContext> context) : _fd(fd) {
-	_context = context;
+  _context = context;
   fcntl(fd, F_SETFL, O_NONBLOCK);
   _isReadyForResponse = false;
   _shouldSendContinue = false;
   _isReadyForRequest = true;
-  Log::getInstance().debug("Server context: " + _context->_serverNameValue.at(0));
+  Log::getInstance().debug("Server context: " +
+                           _context->_serverNameValue.at(0));
 }
 
 Client::~Client() { close(_fd); }
@@ -114,9 +115,24 @@ bool Client::handleContinue() {
   return true;
 }
 
+bool Client::handleRedirect() {
+  _response.setStatusCode(_parser.getStatusCode());
+  _response.setHeader("Location", _parser.getLocation());
+  std::string responseString = _response.getResponse();
+  send(_fd, responseString.c_str(), responseString.length(), 0);
+  return true;
+}
+
 bool Client::execute() {
+  Log::getInstance().debug("Server context: " +
+                           _context->_serverNameValue.at(0));
   auto request = _parser.getHttpRequest();
   int status = _parser.getStatusCode();
+  if (status >= 300 && status < 400) {
+    handleRedirect();
+    reset();
+    return true;
+  }
   if (status != 200 && status != 201) {
     _response.setStatusCode(status);
     std::string responseString = _response.getResponse();
@@ -176,9 +192,11 @@ bool Client::execute() {
       send(_fd, responseString.c_str(), responseString.length(), 0);
       break;
     }
-	default:
-	  Log::getInstance().error("Failed to handle request: " + request.getMethod() + " " + request.getHost() + request.getUri());
-	  break;
+    default:
+      Log::getInstance().error(
+          "Failed to handle request: " + request.getMethod() + " " +
+          request.getHost() + request.getUri());
+      break;
   }
   Log::getInstance().info(request.getMethod() + " " + request.getHost() +
                           request.getUri());
@@ -212,7 +230,7 @@ bool Client::handleRequest() {
       }
       buffer[bytes_read] = '\0';
     }
-    _parser = HttpRequestParser(raw, _fd);
+    _parser = HttpRequestParser(raw, _fd, _context);
     status = _parser.parse();
     Log::getInstance().debug("Parsed request: " + raw);
     if ((status == 200 || status == 201) &&
