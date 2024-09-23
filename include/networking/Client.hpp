@@ -45,6 +45,7 @@ class Client {
                                        const std::string& requestUri,
                                        const std::string& inject);
   bool handleContinue();
+  bool handleRedirect();
   void reset();
 };
 

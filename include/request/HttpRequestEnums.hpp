@@ -35,6 +35,7 @@ enum class HttpRequestHandler {
   SEND_UPLOADED_FILE,
   FILE_UPLOAD,
   BENCHMARK,
+  RETURN
 };
 
 enum class HttpFileUploadStatus {

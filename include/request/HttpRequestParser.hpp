@@ -7,31 +7,37 @@
 // you are not using the sstream header direcly anywhere here
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 #include "HttpMaps.hpp"
 #include "HttpRequest.hpp"
 #include "HttpRequestEnums.hpp"
+#include "ServerContext.hpp"
 
 class HttpRequestParser {
  public:
   HttpRequestParseStatus status;
   bool hasFile;
 
-  HttpRequestParser(std::string request, int clientFd);
+  HttpRequestParser(std::string request, int clientFd,
+                    std::shared_ptr<ServerContext> serverContext);
   HttpRequestParser();
   HttpRequest getHttpRequest();
   int parse();
   int handshake();
   int getStatusCode();
+  std::string getLocation();
   ~HttpRequestParser();
 
  private:
   int _clientFd;
+  std::shared_ptr<ServerContext> _serverContext;
   HttpRequest _request;
   std::string _raw;
   std::string _boundary;
   int _statusCode;
+  std::string _location;
   HttpFileUploadStatus currentFileUploadStatus;
   std::string currentFileUploadName;
   size_t total_read;
@@ -47,7 +53,7 @@ class HttpRequestParser {
   bool validateHttpVersion();
   bool askForContinue();
   bool checkForTerminator(std::string line);
-  bool isAllowedMethod(const std::string &method);
+  bool isAllowedMethod(const std::string &method, const std::string &path);
   bool isAllowedContentLength(size_t contentLength);
   bool isCgiRequest();
   bool isFaviconRequest();
@@ -55,7 +61,8 @@ class HttpRequestParser {
   bool canHaveBody();
   bool isUploadAllowed();
   void injectUploadFormIfNeeded();
-  bool writeToFile(std::string filename, std::stringstream &ss);
+  std::unique_ptr<Location> getMostRelevantLocation();
   bool parseBoundary();
   void setStatusCode(int code);
+  void setLocation(std::string location);
 };
