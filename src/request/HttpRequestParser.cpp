@@ -16,8 +16,6 @@
 #define UPLOAD_DIR "uploads/"
 #define MAX_HEADER_SIZE 4096
 
-#define DIR_LIST_ON 1
-
 using namespace std::filesystem;
 HttpRequestParser::HttpRequestParser()
     : status(HttpRequestParseStatus::NOT_PARSED) {}
@@ -65,6 +63,11 @@ std::shared_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
   return nullptr;
 }
 
+bool HttpRequestParser::isFileRequest() {
+  return (_request.getUri().substr(0, 9) == "/uploads/" &&
+          _request.getMethodEnum() == HttpRequestMethod::GET);
+}
+
 /**
  * Determines the appropriate handler for the HTTP request.
  *
@@ -77,11 +80,10 @@ std::shared_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
  * otherwise false
  */
 bool HttpRequestParser::electHandler() {
-  auto location = getMostRelevantLocation();
-  if (location != nullptr) {
-    if (location->_returnSet) {
-      setStatusCode(location->_returnValues.first);
-      setLocation(location->_returnValues.second);
+  if (_locationConfig != nullptr) {
+    if (_locationConfig->_returnSet) {
+      setStatusCode(_locationConfig->_returnValues.first);
+      setLocation(_locationConfig->_returnValues.second);
       _request.setHandler(HttpRequestHandler::RETURN);
       return false;  // return false to prevent further processing
     }
@@ -92,15 +94,19 @@ bool HttpRequestParser::electHandler() {
     _request.setHandler(HttpRequestHandler::FAVICON);
     Log::getInstance().debug("Favicon handler for request: " +
                              _request.getUri());
-  } else if (isDirectoryRequest("./default" + _request.getUri()) &&
-             DIR_LIST_ON) {
+  } else if (isDirectoryRequest()) {
     _request.setHandler(HttpRequestHandler::DIRECTORY_LISTING);
   } else if (_request.getUri() == "/uploads" &&
              _request.getMethodEnum() == HttpRequestMethod::GET) {
     _request.setHandler(HttpRequestHandler::LIST_UPLOADS);
-  } else if (_request.getUri().substr(0, 9) == "/uploads/" &&
-             _request.getMethodEnum() == HttpRequestMethod::GET) {
-    _request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
+  } else if (isFileRequest()) {
+    if (is_regular_file(_request.getUri().substr(1)))
+      _request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
+    else {
+      _request.setHandler(HttpRequestHandler::ERROR);
+      setStatusCode(404);
+      return false;
+    }
   } else if (_request.getUri() == "/uploads" &&
              _request.getMethodEnum() == HttpRequestMethod::POST) {
     _request.setHandler(HttpRequestHandler::FILE_UPLOAD);
@@ -122,8 +128,10 @@ bool HttpRequestParser::isFaviconRequest() {
   return _request.getUri().find("favicon.ico") != std::string::npos;
 }
 
-bool HttpRequestParser::isDirectoryRequest(const std::string &path) {
-  return is_directory(path);
+bool HttpRequestParser::isDirectoryRequest() {
+  bool dirListOn = _locationConfig->_autoIndexValue == "on" ? true : false;
+  std::string path = _request.getUri();
+  return is_directory(path) && dirListOn;
 }
 
 std::string getLineSanitized(std::stringstream &ss) {
@@ -184,7 +192,7 @@ int HttpRequestParser::parse() {
     _request.setHandler(HttpRequestHandler::ERROR);
     return getStatusCode();
   }
-
+  _locationConfig = getMostRelevantLocation();
   if (!electHandler()) {
     status = HttpRequestParseStatus::PARSED;
     return getStatusCode();
@@ -203,17 +211,17 @@ int HttpRequestParser::parse() {
   }
   Log::getInstance().debug("Content length validated");
   injectUploadFormIfNeeded();
-  if (_request.getHandler() == HttpRequestHandler::SEND_UPLOADED_FILE) {
-    // check if file exists
-    std::string filename =
-        _request.getUri().substr(std::string(UPLOAD_DIR).length());
-    if (!exists(UPLOAD_DIR + filename)) {
-      Log::getInstance().error("File not found: " + filename);
-      _request.setHandler(HttpRequestHandler::ERROR);
-      setStatusCode(404);
-      return 404;  // Not Found
-    }
-  }
+  //   if (_request.getHandler() == HttpRequestHandler::SEND_UPLOADED_FILE) {
+  //     // check if file exists
+  //     std::string filename =
+  //         _request.getUri().substr(std::string(UPLOAD_DIR).length());
+  //     if (!exists(UPLOAD_DIR + filename)) {
+  //       Log::getInstance().error("File not found: " + filename);
+  //       _request.setHandler(HttpRequestHandler::ERROR);
+  //       setStatusCode(404);
+  //       return 404;  // Not Found
+  //     }
+  //   }
   Log::getInstance().debug("Handler elected");
   size_t pos = _request.getUri().find("?");
   if (pos != std::string::npos) {

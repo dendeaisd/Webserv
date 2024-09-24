@@ -13,6 +13,7 @@
 #include "HttpMaps.hpp"
 #include "HttpRequest.hpp"
 #include "HttpRequestEnums.hpp"
+#include "Location.hpp"
 #include "ServerContext.hpp"
 
 class HttpRequestParser {
@@ -38,6 +39,7 @@ class HttpRequestParser {
   std::string _boundary;
   int _statusCode;
   std::string _location;
+  std::shared_ptr<Location> _locationConfig;
   HttpFileUploadStatus currentFileUploadStatus;
   std::string currentFileUploadName;
   size_t total_read;
@@ -57,7 +59,8 @@ class HttpRequestParser {
   bool isAllowedContentLength(size_t contentLength);
   bool isCgiRequest();
   bool isFaviconRequest();
-  bool isDirectoryRequest(const std::string &path);
+  bool isDirectoryRequest();
+  bool isFileRequest();
   bool canHaveBody();
   bool isUploadAllowed();
   void injectUploadFormIfNeeded();
