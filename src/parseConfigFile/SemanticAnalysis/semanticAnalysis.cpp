@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/24 17:19:59 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/24 19:48:10 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,6 +364,10 @@ void SemanticAnalysis::serverSaveDirective() {
   else if (canDirectiveBeSaved(TypeToken::SERVER_NAME))
     saveMultipleDirectiveValue(
         _config->_httpContext._serverContext.back()->_serverNameValue);
+  else if (canDirectiveBeSaved(TypeToken::UPLOAD_DIR))
+    _config->_httpContext._serverContext.back()->_uploadDirValue = value;
+  else if (canDirectiveBeSaved(TypeToken::REQUEST_TIMEOUT))
+    saveRequestTimeOut();
   else if (validListen() == true)
     saveListenValue();
   else
@@ -567,6 +571,14 @@ bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
     case TypeToken::ROOT:
       if (_config->_httpContext._serverContext.back()->_rootValue.empty() ==
           true)
+        return (true);
+    case TypeToken::UPLOAD_DIR:
+      if (_config->_httpContext._serverContext.back()
+              ->_uploadDirValue.empty() == true)
+        return (true);
+    case TypeToken::REQUEST_TIMEOUT:
+      if (_config->_httpContext._serverContext.back()->_requestTimeoutValue ==
+          60)
         return (true);
     case TypeToken::PROXY_PASS:
       if (_config->_httpContext._serverContext.back()
@@ -848,6 +860,33 @@ std::string SemanticAnalysis::getReturnMessage() const noexcept {
       returnMesse += (*it)->_tokenStr;
   }
   return (returnMesse);
+}
+
+void SemanticAnalysis::saveRequestTimeOut() {
+  if (_tokenLine.size() != 2 ||
+      _tokenLine.front()->_type != TypeToken::REQUEST_TIMEOUT ||
+      _state != State::SERVER_CONTEXT)
+    throw InvalidRequestTimeout(getThrowMessage());
+
+  size_t valueSize = _tokenLine.back()->_tokenStr.size() - 1;
+  if (_tokenLine.back()->_tokenStr[valueSize] != 's')
+    throw InvalidRequestTimeout(getThrowMessage());
+  _tokenLine.back()->_tokenStr.erase(valueSize, 1);
+
+  if (_tokenLine.back()->_tokenStr.find_first_not_of("0123456789") !=
+      std::string::npos)
+    throw InvalidRequestTimeout(getThrowMessage());
+
+
+      std::istringstream stream(_tokenLine.back()->_tokenStr);
+  int timeoutValue;
+
+  stream >> timeoutValue;
+
+  if (stream.fail() == true || timeoutValue < 1)
+    throw InvalidRequestTimeout(getThrowMessage());
+  _config->_httpContext._serverContext.back()->_requestTimeoutValue =
+      timeoutValue;
 }
 
 std::unique_ptr<ConfigFile> SemanticAnalysis::getConfigFile() {

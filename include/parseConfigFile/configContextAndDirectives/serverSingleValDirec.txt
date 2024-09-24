@@ -2,3 +2,5 @@ client_max_body_size
 ssl_certificate
 ssl_certificate_key
 root
+upload_dir
+request_timeout

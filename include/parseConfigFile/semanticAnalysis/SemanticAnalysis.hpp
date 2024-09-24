@@ -107,6 +107,8 @@ class SemanticAnalysis {
   bool isValidReturnURL() const noexcept;
   std::string getReturnMessage() const noexcept;
 
+  void saveRequestTimeOut();
+
   std::string getThrowMessage() noexcept;
   std::string getThrowMessage() const noexcept;
   std::string currentLine() noexcept;

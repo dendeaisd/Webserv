@@ -5,3 +5,5 @@ ssl_certificate_key
 index
 root
 listen
+upload_dir
+request_timeout
