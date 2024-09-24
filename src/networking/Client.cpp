@@ -71,7 +71,6 @@ bool Client::sendWebDocument() {
     std::string mimeType = HttpMaps::getInstance().getMimeType(url);
     _response.setFile(url, mimeType, "inline");
     std::string responseString = _response.getResponse();
-    std::cout << responseString << std::endl;
     send(_fd, responseString.c_str(), responseString.length(), 0);
     return true;
   }
