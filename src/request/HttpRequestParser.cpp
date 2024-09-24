@@ -13,10 +13,9 @@
 #include "../../include/request/HttpRequestEnums.hpp"
 #include "../../include/response/HttpResponse.hpp"
 #define MAX_BUFFER_SIZE 4096
-#define UPLOAD_DIR "uploads/"
 #define MAX_HEADER_SIZE 4096
 
-using namespace std::filesystem;
+namespace fs = std::filesystem;
 HttpRequestParser::HttpRequestParser()
     : status(HttpRequestParseStatus::NOT_PARSED) {}
 
@@ -27,13 +26,15 @@ HttpRequestParser::HttpRequestParser(
       hasFile(false),
       _clientFd(clientFd),
       _raw(raw) {
+  _serverContext = serverContext;
   _request = HttpRequest();
+  _request.setTimeoutSeconds(serverContext->_requestTimeoutValue);
   _boundary = "";
   total_read = 0;
   currentFileUploadStatus = HttpFileUploadStatus::NOT_STARTED;
   currentFileUploadName = "";
   _statusCode = 0;
-  _serverContext = serverContext;
+  setupUploadDir();
 }
 
 HttpRequestParser::~HttpRequestParser() {}
@@ -61,6 +62,25 @@ std::shared_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
     }
   }
   return nullptr;
+}
+
+void HttpRequestParser::setupUploadDir() {
+  if (_serverContext->_uploadDirValue.empty())
+    _uploadDir = "uploads/";
+  else
+    _uploadDir = "." + _serverContext->_uploadDirValue;
+  if (_uploadDir.back() != '/') {
+	_uploadDir += "/";
+  }
+  if (!fs::exists(_uploadDir)) {
+    fs::create_directories(_uploadDir);
+  }
+//   if (fs::exists(".gitignore"))
+//   {
+// 	// append the upload directory to the gitignore file
+// 	std::ofstream gitignore(".gitignore", std::ios::app);
+// 	gitignore << _uploadDir << std::endl;
+//   }
 }
 
 bool HttpRequestParser::isFileRequest() {
@@ -100,7 +120,7 @@ bool HttpRequestParser::electHandler() {
              _request.getMethodEnum() == HttpRequestMethod::GET) {
     _request.setHandler(HttpRequestHandler::LIST_UPLOADS);
   } else if (isFileRequest()) {
-    if (is_regular_file(_request.getUri().substr(1)))
+    if (fs::is_regular_file(_request.getUri().substr(1)))
       _request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
     else {
       _request.setHandler(HttpRequestHandler::ERROR);
@@ -130,8 +150,8 @@ bool HttpRequestParser::isFaviconRequest() {
 
 bool HttpRequestParser::isDirectoryRequest() {
   bool dirListOn = _locationConfig->_autoIndexValue == "on" ? true : false;
-  std::string path = _request.getUri();
-  return is_directory(path) && dirListOn;
+  std::string path = "." + _request.getUri();
+  return fs::is_directory(path) && dirListOn;
 }
 
 std::string getLineSanitized(std::stringstream &ss) {
@@ -159,9 +179,6 @@ bool HttpRequestParser::isAllowedMethod(const std::string &method) {
 }
 
 bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
-  Log::getInstance().debug(
-      "Max content length: " +
-      std::to_string(_serverContext->_clientMaxBodySizeValue));
   return contentLength <= _serverContext->_clientMaxBodySizeValue;
 }
 
@@ -172,7 +189,11 @@ bool HttpRequestParser::isUploadAllowed() {
 }
 
 void HttpRequestParser::injectUploadFormIfNeeded() {
-  if (_request.getUri() == "/uploads" &&
+  std::string path = _request.getUri();
+  if (path.back() == '/') {
+    path.pop_back();
+  }
+  if (path == "/uploads" &&
       _request.getMethodEnum() == HttpRequestMethod::GET) {
     _request.addInjection("./default/upload/index.html");
   }
@@ -479,7 +500,7 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
   int contentLength = _request.getContentLength();
   int bytesWritten = 0;
   std::string filename = _request.getHeader("filename");
-  std::ofstream file(UPLOAD_DIR + filename, std::ios::binary);
+  std::ofstream file(_uploadDir + filename, std::ios::binary);
   if (!file.is_open()) {
     Log::getInstance().error("Failed to open file for writing");
     return false;
@@ -609,7 +630,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
             "key");
         return false;
       }
-      std::ofstream file(UPLOAD_DIR + filename, std::ios::binary);
+      std::ofstream file(_uploadDir + filename, std::ios::binary);
       if (!file.is_open()) {
         Log::getInstance().error("Failed to open file for writing");
         return false;

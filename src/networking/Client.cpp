@@ -176,7 +176,7 @@ bool Client::execute() {
     }
     case HttpRequestHandler::DIRECTORY_LISTING: {
       Log::getInstance().debug("Successful request. Directory Listing");
-      sendDirectoryListings("./default" + request.getUri());
+      sendDirectoryListings("." + request.getUri());
       break;
     }
     case HttpRequestHandler::LIST_UPLOADS: {
@@ -189,7 +189,7 @@ bool Client::execute() {
       _response.setStatusCode(200);
       std::string mimeType =
           HttpMaps::getInstance().getMimeType(request.getUri());
-      _response.setFile("." + request.getUri(), mimeType, "inline");
+      _response.setFile("." + request.getUri(), mimeType);
       _response.sendResponse(_fd);
       break;
     }
