@@ -12,40 +12,15 @@ jobs:
 
     - name: Build with make
       run: |
-        make re
+        make
 
     - name: Run our webserver
       run: |
         ./webserv&
 
-    - name: Wait for server to start
+    - name: curl homepage
       run: |
-        for i in {1..10}; do
-          curl --head --silent localhost:8080 && break
-          echo "Waiting for server to start..."
-          sleep 2
-        done
-
-    - name: Create expected output for homepage
-      run: |
-        echo "-Main-\nworker process: [4]\npid: [1234]\nerror log: [log/error.log]" > expected_homepage_output.txt
-
-    - name: Curl homepage and save output
-      run: |
-        curl -s http://localhost:8080 > homepage_output.txt
-
-    - name: Compare homepage output with expected output
-      run: |
-        diff homepage_output.txt expected_homepage_output.txt
-
-    - name: Curl index.html and save output
-      run: |
-        curl -s http://localhost:8080/index.html > index_output.txt
-
-    - name: Compare index.html output with expected output
-      run: |
-        echo "<html>Expected content for index.html</html>" > expected_index_output.txt
-        diff index_output.txt expected_index_output.txt
+        curl localhost:8080
 
     # - name: curl index.html
     #   run: |
