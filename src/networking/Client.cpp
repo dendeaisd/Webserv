@@ -16,7 +16,7 @@
 
 #define BUFFER_SIZE 4096
 #define ERROR_PAGES "/default/error_pages/"
-#define CONNECTION_TIMEOUT 5 // seconds before non-active connection is closed
+#define CONNECTION_TIMEOUT 5  // seconds before non-active connection is closed
 
 Client::Client(int fd, std::shared_ptr<ServerContext> context) : _fd(fd) {
   _context = context;
@@ -35,7 +35,7 @@ void Client::reset() {
   std::string connection = _parser.getHttpRequest().getHeader("Connection");
   _shouldCloseConnection = false;
   if (connection == "close") {
-	_shouldCloseConnection = true;
+    _shouldCloseConnection = true;
   }
   _parser = HttpRequestParser();
   _response = HttpResponse();
@@ -147,13 +147,14 @@ std::string getErrorPagePath(int status) {
 
 bool Client::shouldCloseConnection(bool force) {
   auto now = std::chrono::system_clock::now();
-  auto diff = std::chrono::duration_cast<std::chrono::seconds>(now - _lastRequestTime);
+  auto diff =
+      std::chrono::duration_cast<std::chrono::seconds>(now - _lastRequestTime);
   if (diff.count() >= 5 && _isReadyForRequest) {
-	Log::getInstance().debug("Closing connection due to inactivity");
-	return true;
+    Log::getInstance().debug("Closing connection due to inactivity");
+    return true;
   }
   if (force && diff.count() >= 10) {
-	return true;
+    return true;
   }
   return _shouldCloseConnection;
 }

@@ -56,14 +56,16 @@ Server::~Server() {
 
 void Server::run() {
   while (true) {
-	if (std::chrono::system_clock::now() - _lastCleanup >
-		std::chrono::seconds(5)) {
-	  std::cout << "Count of connections: " << _fdToClientMap.size() << std::endl;
-	  std::cout << "Count of clients: " << _clients.size() << std::endl;
-	  int count = cleanupStaleClients();
-	  std::cout << "Cleaned up " << std::to_string(count) << " stale clients" << std::endl;
-	  _lastCleanup = std::chrono::system_clock::now();
-	}
+    if (std::chrono::system_clock::now() - _lastCleanup >
+        std::chrono::seconds(5)) {
+      std::cout << "Count of connections: " << _fdToClientMap.size()
+                << std::endl;
+      std::cout << "Count of clients: " << _clients.size() << std::endl;
+      int count = cleanupStaleClients();
+      std::cout << "Cleaned up " << std::to_string(count) << " stale clients"
+                << std::endl;
+      _lastCleanup = std::chrono::system_clock::now();
+    }
     _pollManager.pollSockets();
     handleEvents();
   }
@@ -99,16 +101,16 @@ void Server::handleEvents() {
 int Server::cleanupStaleClients() {
   int count = 0;
   bool force = false;
-  if (_fdToClientMap.size() > RLIMIT_NOFILE / 2)
-	force = true;
+  if (_fdToClientMap.size() > RLIMIT_NOFILE / 2) force = true;
   std::vector<struct pollfd>& fds = _pollManager.getFds();
   for (size_t i = 0; i < fds.size(); ++i) {
-	int fd = fds[i].fd;
-	auto client = _fdToClientMap.find(fd);
-	if (client != _fdToClientMap.end() && client->second->shouldCloseConnection(force)) {
-	  cleanupClient(client->second);
-	  count++;
-	}
+    int fd = fds[i].fd;
+    auto client = _fdToClientMap.find(fd);
+    if (client != _fdToClientMap.end() &&
+        client->second->shouldCloseConnection(force)) {
+      cleanupClient(client->second);
+      count++;
+    }
   }
   return count;
 }
