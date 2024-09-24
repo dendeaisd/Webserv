@@ -130,7 +130,7 @@ bool HttpRequestParser::isFaviconRequest() {
 
 bool HttpRequestParser::isDirectoryRequest() {
   bool dirListOn = _locationConfig->_autoIndexValue == "on" ? true : false;
-  std::string path = _request.getUri();
+  std::string path = "." + _request.getUri();
   return is_directory(path) && dirListOn;
 }
 
@@ -159,9 +159,6 @@ bool HttpRequestParser::isAllowedMethod(const std::string &method) {
 }
 
 bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
-  Log::getInstance().debug(
-      "Max content length: " +
-      std::to_string(_serverContext->_clientMaxBodySizeValue));
   return contentLength <= _serverContext->_clientMaxBodySizeValue;
 }
 
@@ -172,7 +169,11 @@ bool HttpRequestParser::isUploadAllowed() {
 }
 
 void HttpRequestParser::injectUploadFormIfNeeded() {
-  if (_request.getUri() == "/uploads" &&
+  std::string path = _request.getUri();
+  if (path.back() == '/') {
+	path.pop_back();
+  }
+  if (path == "/uploads" &&
       _request.getMethodEnum() == HttpRequestMethod::GET) {
     _request.addInjection("./default/upload/index.html");
   }

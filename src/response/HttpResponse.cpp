@@ -99,8 +99,11 @@ void HttpResponse::sendHeaders(int fd) {
   file.seekg(0, std::ios::beg);
 
   _headers["Content-Length"] = std::to_string(fileSize);
-  _headers["Content-Disposition"] =
-      "attachment; filename=" + Helpers::getFilenameFromPath(_file);
+  if (_contentType.find("octet-stream") != std::string::npos)
+    _headers["Content-Disposition"] =
+        "attachment; filename=" + Helpers::getFilenameFromPath(_file);
+  else
+    _headers["Content-Disposition"] = "inline";
   _headers["Connection"] = "keep-alive";
   for (auto const &header : _headers) {
     response += header.first + ": " + header.second + "\r\n";
@@ -127,11 +130,11 @@ bool HttpResponse::sendResponse(int fd) {
       ssize_t bytesSent =
           send(fd, buffer + totalSent, bytesToSend - totalSent, 0);
       if (bytesSent < 0) {
-        // if (errno == EWOULDBLOCK || errno == EAGAIN) {
-        //   // sleep a bit
-        //   std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        //   continue;
-        // }
+        if (errno == EWOULDBLOCK || errno == EAGAIN) {
+          // sleep a bit
+          std::this_thread::sleep_for(std::chrono::milliseconds(100));
+          continue;
+        }
         return false;
       }
       totalSent += bytesSent;
