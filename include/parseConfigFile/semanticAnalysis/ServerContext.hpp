@@ -16,9 +16,12 @@ class ServerContext {
   bool _isSetClientMaxBodySizeValue;
   size_t _clientMaxBodySizeValue;
 
+  int _requestTimeoutValue;
+
   std::string _sslCertificateValue;
   std::string _sslCertificateKeyValue;
   std::string _rootValue;
+  std::string _uploadDirValue;
 
   std::vector<std::string> _indexValue;
   std::vector<std::string> _serverNameValue;

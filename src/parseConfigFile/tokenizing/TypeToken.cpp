@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 14:29:53 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/10 09:27:38 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/24 18:57:41 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,5 +93,9 @@ std::ostream &operator<<(std::ostream &outStream, const TypeToken &type) {
     outStream << "RETURN";
   else if (type == TypeToken::VALUE)
     outStream << "VALUE";
+  else if (type == TypeToken::REQUEST_TIMEOUT)
+    outStream << "REQUEST_TIMEOUT";
+  else if (type == TypeToken::UPLOAD_DIR)
+    outStream << "UPLOAD_DIR";
   return (outStream);
 }

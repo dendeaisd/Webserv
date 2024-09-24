@@ -32,3 +32,5 @@ return
 autoindex
 error_log
 proxy_pass
+upload_dir
+request_timeout

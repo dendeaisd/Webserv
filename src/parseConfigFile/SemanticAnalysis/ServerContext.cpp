@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 20:30:29 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/24 19:29:45 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ ServerContext::ServerContext() {
   _indexValue.clear();
   _rootValue.clear();
   _clientMaxBodySizeValue = SIZE_MAX;
+  _requestTimeoutValue = 60;
   _isSetClientMaxBodySizeValue = false;
 }
 
@@ -35,6 +36,8 @@ void ServerContext::printServerContent() const noexcept {
   printTypeFormat("ssl_certificate", _sslCertificateValue);
   printTypeFormat("ssl_certificate_key", _sslCertificateKeyValue);
   printTypeFormat("root", _rootValue);
+  std::cout << "request_timeout [" << _requestTimeoutValue << "]\n";
+  printTypeFormat("upload_dir", _uploadDirValue);
   vectorPrint(_indexValue, "index");
   vectorPrint(_serverNameValue, "server_name");
   listenPrint();
