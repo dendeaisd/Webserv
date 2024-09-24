@@ -56,8 +56,8 @@
         right: 0;
         color: #fff;
         text-align: center;
-        font-weight: 300;
-        font-size: 50px;
+        font-weight: 380;
+        font-size: 70px;
         letter-spacing: 10px;
         transform: translateY(-50%);
         z-index: 1;
@@ -65,8 +65,58 @@
 
       #title span {
         background: -webkit-linear-gradient(white, #38495a);
+        background: -linear-gradient(white, #38495a);
         -webkit-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent;
+        -webkit-text-fill-color: transparent;
+      }
+
+      #button-container {
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        gap: 100px;
+        z-index: 2;
+      }
+
+      .button {
+        font-size: 22px;
+        font-weight: 200;
+        letter-spacing: 1px;
+        padding: 20px 30px;
+        outline: 0;
+        border: 1px solid rgb(228, 228, 228);
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 0);
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        position: relative;
+        color: rgb(228, 228, 228);
+        margin-top: 15px;
+      }
+
+      .button:after {
+        content: "";
+        background-color: #fb89c2;
+        width: 100%;
+        z-index: -1;
+        position: absolute;
+        height: 100%;
+        top: 7px;
+        left: 7px;
+        transition: 0.2s;
+      }
+      .button:nth-of-type(2):after {
+        top: -7px;
+        left: 7px;
+      }
+      .button:hover:after {
+        top: 0px;
+        left: 0px;
       }
     </style>
   </head>
@@ -78,7 +128,23 @@
       <span>a webserver btw</span>
     </div>
 
+    <div id="button-container">
+      <button class="button" id="uploads-button">Uploads</button>
+      <button class="button" id="todo-app-button">ToDo App</button>
+    </div>
+
     <script>
+      document
+        .getElementById("uploads-button")
+        .addEventListener("click", function () {
+          window.location.href = "/uploads";
+        });
+      document
+        .getElementById("todo-app-button")
+        .addEventListener("click", function () {
+          window.location.href = "/cgi-bin/todo/app.py";
+        });
+
       function createStars(numStars) {
         const starsContainer = document.getElementById("stars");
 
