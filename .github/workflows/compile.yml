@@ -9,12 +9,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-  
-    - name: Set up dependencies (optional)
-    run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential
 
     - name: Build with make
       run: |
-        make
+        make all
