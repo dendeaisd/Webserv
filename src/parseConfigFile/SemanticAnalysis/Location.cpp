@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 15:39:42 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 20:30:45 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/24 16:46:25 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ void Location::printLocation() {
   printVecOfStrings(_errorPageValue, "error_page");
   printVecOfStrings(_accessLogValue, "access_log");
   printVecOfStrings(_allowMethods, "allow_methods");
+  std::cout << "return [" << _returnValues.first << "] ["
+            << _returnValues.second << "]\n";
 
   std::cout << std::endl;
 }

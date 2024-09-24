@@ -6,7 +6,7 @@
 /*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 20:45:49 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/24 16:58:16 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -263,7 +263,6 @@ void SemanticAnalysis::possibleCreationOfNewContext() noexcept {
 void SemanticAnalysis::createServerContext() noexcept {
   _config->_httpContext._serverContext.push_back(
       std::make_shared<ServerContext>());
-  // std::cout << "NEW SERVER\n";
 }
 
 void SemanticAnalysis::createLocationContext() noexcept {
@@ -273,7 +272,6 @@ void SemanticAnalysis::createLocationContext() noexcept {
   _config->_httpContext._serverContext.back()
       ->_locationContext.back()
       ->_urlValue = _tokenLine[1]->_tokenStr;
-  // std::cout << "NEW LOCATION\n";
 }
 
 bool SemanticAnalysis::validServerLine() noexcept {
@@ -377,6 +375,8 @@ void SemanticAnalysis::locationSaveDirective() {
 
   if (locationValidDirective() == false)
     throw InvalidHttpDirective(getThrowMessage());
+  else if (locationReturned() == true)
+    DirectiveSetAfterReturnInLocation(getThrowMessage());
 
   std::string value = _tokenLine[1]->_tokenStr;
   if (canDirectiveBeSaved(TypeToken::PROXY_PASS))
@@ -425,16 +425,10 @@ void SemanticAnalysis::locationSaveDirective() {
     saveMultipleDirectiveValue(_config->_httpContext._serverContext.back()
                                    ->_locationContext.back()
                                    ->_allowMethods);
+  else if (canDirectiveBeSaved(TypeToken::RETURN))
+    saveReturnValue();
   else
     throw InvalidLocationDirective(getThrowMessage());
-  /*
-   * return value implementation
-   */
-}
-
-void SemanticAnalysis::listenSave() {
-  if (_state != State::SERVER_CONTEXT)
-    throw DirectiveSetAtWrongPosition(getThrowMessage());
 }
 
 bool SemanticAnalysis::isDirectiveInLine(
@@ -619,13 +613,11 @@ bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
               ->_locationContext.back()
               ->_allowMethods.empty() == true)
         return (true);
-      /*
     case TypeToken::RETURN:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
-              ->_returnValue.empty() == true)
+              ->_returnSet == false)
         return (true);
-        */
     default:
       break;
   }
@@ -745,7 +737,7 @@ size_t SemanticAnalysis::getMaxBodySizeMultiplier(char c) const {
     case 'G':
       multiplicator = 1024 * 1024 * 1024;
       break;
-    dedefault:
+    default:
       throw MaxBodySizeInvalidSetting(getThrowMessage());
   }
   return (multiplicator);
@@ -763,6 +755,90 @@ bool SemanticAnalysis::isClientMaxBodySizeSet() const noexcept {
           ->_isSetClientMaxBodySizeValue == true)
     return (true);
   return (false);
+}
+
+bool SemanticAnalysis::locationReturned() const noexcept {
+  if (_config->_httpContext._serverContext.back()
+          ->_locationContext.back()
+          ->_returnSet == true)
+    return (true);
+  return (false);
+}
+
+void SemanticAnalysis::saveReturnValue() {
+  int statusCode = convertStatusCode(_tokenLine[1]->_tokenStr);
+
+  if (_tokenLine.size() == 2 &&
+      isValidThreeHundredStatusRange(statusCode) == false)
+    _config->_httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_returnValues = std::make_pair(statusCode, "");
+  else if (_tokenLine.size() == 3 &&
+           isValidThreeHundredStatusRange(statusCode) == true &&
+           isValidReturnURL() == true)
+    _config->_httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_returnValues = std::make_pair(statusCode, _tokenLine[2]->_tokenStr);
+  else if (_tokenLine.size() > 3 && isValidReturnURL() == false) {
+    std::string returnMessage = getReturnMessage();
+    _config->_httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_returnValues = std::make_pair(statusCode, returnMessage);
+  } else
+    throw InvalidLocationDirective(getThrowMessage());
+}
+
+int SemanticAnalysis::convertStatusCode(std::string &statusCodeStr) const {
+  if (statusCodeStr.find_first_not_of("0123456789") != std::string::npos)
+    throw InvalidStatusCode(getThrowMessage());
+
+  int statusCode;
+  std::stringstream stream(statusCodeStr);
+
+  stream >> statusCode;
+
+  if (stream.fail() == true || isWithInStatusCodeRange(statusCode) == false)
+    throw InvalidStatusCode(getThrowMessage());
+  return (statusCode);
+}
+
+bool SemanticAnalysis::isWithInStatusCodeRange(int statusCode) const noexcept {
+  if ((statusCode >= 100 && statusCode <= 103) ||
+      (statusCode >= 200 && statusCode <= 208) || statusCode == 226 ||
+      (statusCode >= 300 && statusCode <= 308) ||
+      (statusCode >= 400 && statusCode <= 418) ||
+      (statusCode >= 421 && statusCode <= 429) || statusCode == 431 ||
+      statusCode == 451 || (statusCode >= 500 && statusCode <= 511))
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::isValidThreeHundredStatusRange(
+    int statusCode) const noexcept {
+  if (statusCode >= 300 && statusCode <= 308) return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::isValidReturnURL() const noexcept {
+  if (_tokenLine.size() == 3 &&
+      (_tokenLine[2]->_tokenStr.compare(0, 7, "http://") == 0 ||
+       _tokenLine[2]->_tokenStr.compare(0, 8, "https://") == 0))
+    return (true);
+  return (false);
+}
+
+std::string SemanticAnalysis::getReturnMessage() const noexcept {
+  if (_tokenLine.size() < 3 && _tokenLine.front()->_type != TypeToken::RETURN)
+    return ("");
+
+  std::string returnMesse;
+  for (auto it = _tokenLine.begin() + 2; it != _tokenLine.end(); it++) {
+    if (it != _tokenLine.end() - 1)
+      returnMesse += (*it)->_tokenStr + " ";
+    else
+      returnMesse += (*it)->_tokenStr;
+  }
+  return (returnMesse);
 }
 
 std::unique_ptr<ConfigFile> SemanticAnalysis::getConfigFile() {

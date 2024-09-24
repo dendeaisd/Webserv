@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 18:58:21 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/24 14:46:50 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,4 +148,17 @@ class MaxBodySizeInvalidSetting : public ExceptionsParsing {
  public:
   MaxBodySizeInvalidSetting(const std::string &message)
       : ExceptionsParsing("Invalid client_max_body_size. Line " + message) {}
+};
+
+class DirectiveSetAfterReturnInLocation : public ExceptionsParsing {
+ public:
+  DirectiveSetAfterReturnInLocation(const std::string &message)
+      : ExceptionsParsing("Directive after return in location context. Line " +
+                          message) {}
+};
+
+class InvalidStatusCode : public ExceptionsParsing {
+  public:
+    InvalidStatusCode(const std::string &message)
+      : ExceptionsParsing("Invalid status code. Line " + message) {}
 };
