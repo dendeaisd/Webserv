@@ -33,7 +33,7 @@ void Socket::bindSocket(int port, const std::string &address) {
   struct sockaddr_in addr;
   addr.sin_family = AF_INET;
   addr.sin_port = htons(port);
-  if (address == "0.0.0.0") {
+  if (address.empty()) {
     addr.sin_addr.s_addr = INADDR_ANY;
   } else {
     if (inet_pton(AF_INET, address.c_str(), &addr.sin_addr) <= 0) {

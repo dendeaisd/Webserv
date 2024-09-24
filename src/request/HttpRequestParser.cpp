@@ -48,18 +48,18 @@ HttpRequest HttpRequestParser::getHttpRequest() {
   }
 }
 
-std::unique_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
+std::shared_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
   for (auto &location : _serverContext->_locationContext) {
     if (location->_urlValue == _request.getUri() ||
         location->_urlValue == _request.getUri() + "/") {
-      return std::forward<std::unique_ptr<Location>>(location);
+      return location;
     }
   }
   for (auto &location : _serverContext->_locationContext) {
     // check if _urlValue is contained inside _request.getUri() starting from
     // the beginning of the string
     if (_request.getUri().find(location->_urlValue) == 0) {
-      return std::forward<std::unique_ptr<Location>>(location);
+      return location;
     }
   }
   return nullptr;
@@ -135,25 +135,26 @@ std::string getLineSanitized(std::stringstream &ss) {
   return line;
 }
 
-bool HttpRequestParser::isAllowedMethod(const std::string &method,
-                                        const std::string &path) {
-  // TODO: support allow_methods in location context
-  // for (auto& location : _serverContext->_locationContext) {
-  // 	if (location->_urlValue == path) {
-  // 		for (auto& method : location->??) {
-  // 			if (method == method) {
-  // 				return true;
-  // 			}
-  // 		}
-  // 	}
-  // }
-  // TODO: update this to use server configuration
-  (void)path;
+bool HttpRequestParser::isAllowedMethod(const std::string &method) {
+  auto location = getMostRelevantLocation();
+  std::cout << "Most relevant location: " << location->_urlValue << std::endl;
+  if (location != nullptr && location->_allowMethods.size() > 0) {
+    for (auto &method : location->_allowMethods) {
+      if (method == _request.getMethod()) {
+        return true;
+      }
+    }
+    return false;
+  }
+  // default allowed methods
   return method == "GET" || method == "POST" || method == "DELETE" ||
          method == "PUT" || method == "OPTIONS";
 }
 
 bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
+  Log::getInstance().debug(
+      "Max content length: " +
+      std::to_string(_serverContext->_clientMaxBodySizeValue));
   return contentLength <= _serverContext->_clientMaxBodySizeValue;
 }
 
@@ -186,6 +187,7 @@ int HttpRequestParser::parse() {
   }
 
   if (!electHandler()) {
+    status = HttpRequestParseStatus::PARSED;
     return getStatusCode();
   }
   if (!parseHeaders(ss)) {
@@ -194,7 +196,7 @@ int HttpRequestParser::parse() {
   }
   size_t contentLength = _request.getContentLength();
   if (!isAllowedContentLength(contentLength)) {
-    Log::getInstance().error("Invalid content length " +
+    Log::getInstance().error("Invalid content length set by config: " +
                              std::to_string(contentLength));
     _request.setHandler(HttpRequestHandler::ERROR);
     setStatusCode(413);
@@ -303,11 +305,6 @@ bool HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
       break;
     }
   }
-  if (!isAllowedMethod(_request.getMethod(), _request.getUri())) {
-    Log::getInstance().error("Invalid method: " + _request.getMethod());
-    setStatusCode(405);
-    return false;
-  }
   size_t j = i + 1;
   for (i = j; i < len; i++) {
     if (requestLine[i] == ' ') {
@@ -326,6 +323,11 @@ bool HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
     Log::getInstance().error("Invalid HTTP version. expected HTTP/1.1 got " +
                              _request.getHttpVersion());
     setStatusCode(505);  // HTTP Version Not Supported
+    return false;
+  }
+  if (!isAllowedMethod(_request.getMethod())) {
+    Log::getInstance().error("Invalid method: " + _request.getMethod());
+    setStatusCode(405);
     return false;
   }
   return true;

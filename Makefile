@@ -45,6 +45,11 @@ $(OBJ_DIR)/%.d: %.cpp
 
 -include $(DEP)
 
+CONTAINER_NAME := webserv
+IMAGE_NAME := webserv
+HOST_DIR = $(shell pwd)
+CONTAINER_DIR = /usr/src/app
+
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 

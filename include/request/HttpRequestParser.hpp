@@ -53,7 +53,7 @@ class HttpRequestParser {
   bool validateHttpVersion();
   bool askForContinue();
   bool checkForTerminator(std::string line);
-  bool isAllowedMethod(const std::string &method, const std::string &path);
+  bool isAllowedMethod(const std::string &method);
   bool isAllowedContentLength(size_t contentLength);
   bool isCgiRequest();
   bool isFaviconRequest();
@@ -61,7 +61,7 @@ class HttpRequestParser {
   bool canHaveBody();
   bool isUploadAllowed();
   void injectUploadFormIfNeeded();
-  std::unique_ptr<Location> getMostRelevantLocation();
+  std::shared_ptr<Location> getMostRelevantLocation();
   bool parseBoundary();
   void setStatusCode(int code);
   void setLocation(std::string location);
