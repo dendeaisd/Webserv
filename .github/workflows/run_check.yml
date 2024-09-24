@@ -12,7 +12,7 @@ jobs:
 
     - name: Build with make
       run: |
-        make
+        make VERBOSE=1
 
     - name: Run our webserver
       run: |
