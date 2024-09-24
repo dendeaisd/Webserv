@@ -137,7 +137,6 @@ std::string getLineSanitized(std::stringstream &ss) {
 
 bool HttpRequestParser::isAllowedMethod(const std::string &method) {
   auto location = getMostRelevantLocation();
-  std::cout << "Most relevant location: " << location->_urlValue << std::endl;
   if (location != nullptr && location->_allowMethods.size() > 0) {
     for (auto &method : location->_allowMethods) {
       if (method == _request.getMethod()) {
