@@ -189,7 +189,7 @@ bool Client::execute() {
       _response.setStatusCode(200);
       std::string mimeType =
           HttpMaps::getInstance().getMimeType(request.getUri());
-      _response.setFile("." + request.getUri(), mimeType);
+      _response.setFile("." + request.getUri(), mimeType, "inline");
       _response.sendResponse(_fd);
       break;
     }
