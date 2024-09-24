@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/24 16:58:16 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/24 17:08:16 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -376,7 +376,7 @@ void SemanticAnalysis::locationSaveDirective() {
   if (locationValidDirective() == false)
     throw InvalidHttpDirective(getThrowMessage());
   else if (locationReturned() == true)
-    DirectiveSetAfterReturnInLocation(getThrowMessage());
+    throw DirectiveSetAfterReturnInLocation(getThrowMessage());
 
   std::string value = _tokenLine[1]->_tokenStr;
   if (canDirectiveBeSaved(TypeToken::PROXY_PASS))
@@ -786,6 +786,10 @@ void SemanticAnalysis::saveReturnValue() {
         ->_returnValues = std::make_pair(statusCode, returnMessage);
   } else
     throw InvalidLocationDirective(getThrowMessage());
+
+  _config->_httpContext._serverContext.back()
+      ->_locationContext.back()
+      ->_returnSet = true;
 }
 
 int SemanticAnalysis::convertStatusCode(std::string &statusCodeStr) const {
