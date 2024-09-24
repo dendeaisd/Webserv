@@ -1,30 +1,27 @@
-# name: Run curl check
+name: Run curl check
 
-# on:
-#   pull_request:
-#     branches:
-#       - main
+on: [pull_request]
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v2
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-#     - name: Build with make
-#       run: |
-#         make
+    - name: Build with make
+      run: |
+        make
 
-#     - name: Run our webserver
-#       run: |
-#         ./webserv&
+    - name: Run our webserver
+      run: |
+        ./webserv&
 
-#     - name: curl homepage
-#       run: |
-#         curl localhost:8080
+    - name: curl homepage
+      run: |
+        curl localhost:8080
 
-#     - name: curl index.html
-#       run: |
-#         curl localhost:8080/index.html
+    # - name: curl index.html
+    #   run: |
+    #     curl localhost:8080/index.html
