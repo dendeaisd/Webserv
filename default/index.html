@@ -69,7 +69,6 @@
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
-        -webkit-text-fill-color: transparent;
       }
 
       #button-container {
@@ -101,7 +100,7 @@
 
       .button:after {
         content: "";
-        background-color: #fb89c2;
+        background-color: rgba(251, 137, 194, 0.8);
         width: 100%;
         z-index: -1;
         position: absolute;
@@ -110,16 +109,136 @@
         left: 7px;
         transition: 0.2s;
       }
+
       .button:nth-of-type(2):after {
         top: -7px;
         left: 7px;
       }
+
       .button:hover:after {
         top: 0px;
         left: 0px;
       }
+
+      .open {
+        position: fixed;
+        top: 40px;
+        right: 40px;
+        width: 50px;
+        height: 50px;
+        display: block;
+        cursor: pointer;
+        transition: opacity 0.2s linear;
+      }
+
+      .open span {
+        display: block;
+        float: left;
+        clear: both;
+        height: 4px;
+        width: 40px;
+        border-radius: 40px;
+        background-color: #fff;
+        position: absolute;
+        right: 3px;
+        top: 3px;
+        overflow: hidden;
+        transition: all 0.4s ease;
+      }
+
+      .open span:nth-child(1) {
+        margin-top: 10px;
+        z-index: 9;
+      }
+
+      .open span:nth-child(2) {
+        margin-top: 25px;
+      }
+
+      .open span:nth-child(3) {
+        margin-top: 40px;
+      }
+
+      .sub-menu {
+        transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        height: 0;
+        width: 0;
+        right: 0;
+        top: 0;
+        position: absolute;
+        background-color: rgba(255, 153, 207, 0.54);
+        border-radius: 50%;
+        z-index: 18;
+        overflow: hidden;
+      }
+
+      .sub-menu li {
+        display: block;
+        float: right;
+        clear: both;
+        height: auto;
+        margin-right: -160px;
+        transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      }
+
+      .sub-menu li:first-child {
+        margin-top: 175px;
+      }
+
+      .sub-menu li a {
+        color: #fff;
+        font-family: "Lato", sans-serif;
+        font-size: 30px;
+        width: 100%;
+        display: block;
+        float: right;
+        line-height: 40px;
+        text-decoration: none;
+      }
+
+      .sub-menu li a:hover,
+      .sub-menu li a:focus {
+        text-decoration: underline;
+      }
+      .opened .sub-menu {
+        opacity: 1;
+        height: 500px;
+        width: 500px;
+      }
+
+      .opened span:nth-child(2) {
+        overflow: visible;
+      }
+
+      .opened span:nth-child(1),
+      .opened span:nth-child(3) {
+        z-index: 100;
+        transform: rotate(45deg);
+      }
+
+      .opened span:nth-child(1) {
+        transform: rotate(45deg) translateY(12px) translateX(12px);
+      }
+
+      .opened span:nth-child(2) {
+        height: 480px;
+        width: 480px;
+        right: -160px;
+        top: -160px;
+        border-radius: 50%;
+        background-color: rgba(82, 20, 61, 0.54);
+      }
+
+      .opened span:nth-child(3) {
+        transform: rotate(-45deg) translateY(-10px) translateX(10px);
+      }
+
+      .opened li {
+        margin-right: 180px;
+      }
     </style>
   </head>
+
   <body>
     <div id="stars"></div>
     <div id="title">
@@ -128,12 +247,51 @@
       <span>a webserver btw</span>
     </div>
 
+    <!-- Menu Integration -->
+    <div class="open">
+      <span class="cls"></span>
+      <span>
+        <ul class="sub-menu">
+          <li><a id="bad.py-item">bad.py</a></li>
+          <li><a id="blocking.py-item">blocking.py</a></li>
+          <li><a id="hello.pl-item">hello.pl</a></li>
+          <li><a id="hello.py-item">hello.py</a></li>
+          <li><a id="hello.rb-item">hello.rb</a></li>
+          <li><a id="hello.sh-item">hello.sh</a></li>
+          <li><a id="info.py-item">info.py</a></li>
+        </ul>
+      </span>
+      <span class="cls"></span>
+    </div>
+
     <div id="button-container">
       <button class="button" id="uploads-button">Uploads</button>
       <button class="button" id="todo-app-button">ToDo App</button>
     </div>
 
     <script>
+      /* Menu Integration Logic */
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .querySelector(".open")
+          .addEventListener("click", function (event) {
+            this.classList.toggle("opened");
+            event.stopPropagation();
+          });
+
+        document.body.addEventListener("click", function () {
+          document.querySelector(".open").classList.remove("opened");
+        });
+
+        document.querySelectorAll(".cls").forEach(function (cls) {
+          cls.addEventListener("click", function (event) {
+            document.querySelector(".open").classList.remove("opened");
+            event.stopPropagation();
+          });
+        });
+      });
+
+      /* Redirect button actions */
       document
         .getElementById("uploads-button")
         .addEventListener("click", function () {
@@ -144,10 +302,45 @@
         .addEventListener("click", function () {
           window.location.href = "/cgi-bin/todo/app.py";
         });
+      document
+        .getElementById("bad.py-item")
+        .addEventListener("click", function () {
+          window.location.href = "/cgi-bin/bad.py";
+        });
+      document
+        .getElementById("blocking.py-item")
+        .addEventListener("click", function () {
+          window.location.href = "/cgi-bin/blocking.py";
+        });
+      document
+        .getElementById("hello.pl-item")
+        .addEventListener("click", function () {
+          window.location.href = "/cgi-bin/hello.pl";
+        });
+      document
+        .getElementById("hello.py-item")
+        .addEventListener("click", function () {
+          window.location.href = "/cgi-bin/hello.py";
+        });
+      document
+        .getElementById("hello.rb-item")
+        .addEventListener("click", function () {
+          window.location.href = "/cgi-bin/hello.rb";
+        });
+      document
+        .getElementById("hello.sh-item")
+        .addEventListener("click", function () {
+          window.location.href = "/cgi-bin/hello.sh";
+        });
+      document
+        .getElementById("info.py-item")
+        .addEventListener("click", function () {
+          window.location.href = "/cgi-bin/info.py";
+        });
 
+      /* Star background effect */
       function createStars(numStars) {
         const starsContainer = document.getElementById("stars");
-
         for (let i = 0; i < numStars; i++) {
           const star = document.createElement("div");
           star.classList.add("star");
@@ -156,7 +349,6 @@
           star.style.top = `${Math.random() * window.innerHeight}px`;
           star.style.left = `${Math.random() * window.innerWidth}px`;
           star.style.animationDuration = `${Math.random() * 50 + 50}s`;
-
           starsContainer.appendChild(star);
         }
       }
