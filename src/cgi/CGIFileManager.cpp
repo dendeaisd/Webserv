@@ -9,38 +9,19 @@ namespace fs = std::filesystem;
 
 void CGIFileManager::configure(const ConfigFile& configFile,
                                std::string cgiDir) {
-  // TEMP map for cgi executors
   if (_configured) {
     Log::getInstance().warning("CGIFileManager already configured");
     return;
   }
-
-  cgiExecutors_[".php"] = "/usr/bin/php";
-  cgiExecutors_[".py"] = "/usr/bin/python3";
-  cgiExecutors_[".pl"] = "/usr/bin/perl";
-  cgiExecutors_[".rb"] = "/usr/bin/ruby";
-  cgiExecutors_[".sh"] = "/bin/bash";
-
-  // size_t initialMappings = cgiExecutors_.size();
-  size_t newMappings = collectExecutorMappings(configFile);
   collectExecutorMappings(configFile);
   cgiDir_ = cgiDir;
-  if (newMappings == 0) {
-    std::cout << "No executor mappings found in the configuration file."
-              << std::endl;
-  } else {
-    std::cout << newMappings
-              << " executor mappings found in the configuration file."
-              << std::endl;
-  }
   mapCGIDir(cgiDir_);
   for (auto& file : cgiFiles_) {
     std::cout << file.path << " " << file.executor << std::endl;
   }
 }
 
-size_t CGIFileManager::collectExecutorMappings(const ConfigFile& configFile) {
-  size_t initialSize = cgiExecutors_.size();
+void CGIFileManager::collectExecutorMappings(const ConfigFile& configFile) {
   const HttpContext& httpContext = configFile._httpContext;
 
   for (const auto& serverContextPtr : httpContext._serverContext) {
@@ -54,10 +35,6 @@ size_t CGIFileManager::collectExecutorMappings(const ConfigFile& configFile) {
       }
     }
   }
-  // TODO: convert this to a void func and remove the return
-  //   statement once the _cgi is populated
-  size_t newMappings = cgiExecutors_.size() - initialSize;
-  return newMappings;
 }
 
 std::string CGIFileManager::getExecutor(std::string scriptPath) {

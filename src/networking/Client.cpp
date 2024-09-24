@@ -70,16 +70,7 @@ bool Client::sendWebDocument() {
   if (std::filesystem::is_regular_file(url)) {
     std::string mimeType = HttpMaps::getInstance().getMimeType(url);
     _response.setFile(url, mimeType, "inline");
-    if (url.find(ERROR_PAGES) != std::string::npos) {
-      // get file name
-      std::string fileName = url.substr(url.find_last_of("/") + 1);
-      // get file name without extension
-      std::string fileNameNoExt =
-          fileName.substr(0, fileName.find_last_of("."));
-      _response.setStatusCode(std::stoi(fileNameNoExt));
-    }
     std::string responseString = _response.getResponse();
-    std::cout << responseString << std::endl;
     send(_fd, responseString.c_str(), responseString.length(), 0);
     return true;
   }
@@ -198,7 +189,7 @@ bool Client::execute() {
       _response.setStatusCode(200);
       std::string mimeType =
           HttpMaps::getInstance().getMimeType(request.getUri());
-      _response.setFile("." + request.getUri(), mimeType);
+      _response.setFile("." + request.getUri(), mimeType, "inline");
       _response.sendResponse(_fd);
       break;
     }
@@ -259,9 +250,10 @@ bool Client::handleRequest() {
     }
     _parser = HttpRequestParser(raw, _fd, _context);
     _parser.parse();
-    Log::getInstance().debug("Parsed request: " + raw);
+    Log::getInstance().debug("Parsed request: " + raw.substr(0, 100));
     if (_parser.status == HttpRequestParseStatus::EXPECT_CONTINUE) {
-      Log::getInstance().debug("Request is to be continued: " + raw);
+      Log::getInstance().debug("Request is to be continued: " +
+                               raw.substr(0, 100));
       _shouldSendContinue = true;
     } else {
       _isReadyForResponse = true;

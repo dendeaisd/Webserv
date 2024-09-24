@@ -76,7 +76,6 @@ void Server::handleEvents() {
       }
     }
     if (revents & POLLIN) {
-      Log::getInstance().debug("POLLIN event on fd " + std::to_string(fd));
       handlePollInEvent(fd, fds[i].events);
     } else if (revents & POLLOUT) {
       handlePollOutEvent(fd, fds[i].events);
