@@ -38,6 +38,7 @@ class Location {
                        const std::string &value) const noexcept;
   void printVecOfStrings(const std::vector<std::string> &vec,
                          const std::string &type) const noexcept;
+  void cgiPrint() const noexcept;
 };
 
 #endif  // LOCATION_HPP

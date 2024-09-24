@@ -8,3 +8,4 @@ deny
 return
 autoindex
 allow_methods
+cgi

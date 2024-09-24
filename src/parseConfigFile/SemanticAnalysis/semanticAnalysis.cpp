@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/24 17:08:16 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/24 17:19:59 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -427,6 +427,11 @@ void SemanticAnalysis::locationSaveDirective() {
                                    ->_allowMethods);
   else if (canDirectiveBeSaved(TypeToken::RETURN))
     saveReturnValue();
+  else if (_tokenLine.front()->_type == TypeToken::CGI &&
+           _tokenLine.size() == 3)
+    _config->_httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_cgi.insert({_tokenLine[1]->_tokenStr, _tokenLine[2]->_tokenStr});
   else
     throw InvalidLocationDirective(getThrowMessage());
 }
