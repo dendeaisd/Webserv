@@ -16,6 +16,7 @@
 
 #define BUFFER_SIZE 4096
 #define ERROR_PAGES "/default/error_pages/"
+#define CONNECTION_TIMEOUT 5 // seconds before non-active connection is closed
 
 Client::Client(int fd, std::shared_ptr<ServerContext> context) : _fd(fd) {
   _context = context;
@@ -23,8 +24,7 @@ Client::Client(int fd, std::shared_ptr<ServerContext> context) : _fd(fd) {
   _isReadyForResponse = false;
   _shouldSendContinue = false;
   _isReadyForRequest = true;
-  Log::getInstance().debug("Server context: " +
-                           _context->_serverNameValue.at(0));
+  _lastRequestTime = std::chrono::system_clock::now();
 }
 
 Client::~Client() { close(_fd); }
@@ -32,11 +32,17 @@ Client::~Client() { close(_fd); }
 int Client::getFd() const { return _fd; }
 
 void Client::reset() {
+  std::string connection = _parser.getHttpRequest().getHeader("Connection");
+  _shouldCloseConnection = false;
+  if (connection == "close") {
+	_shouldCloseConnection = true;
+  }
   _parser = HttpRequestParser();
   _response = HttpResponse();
   _isReadyForResponse = false;
   _shouldSendContinue = false;
   _isReadyForRequest = true;
+  _lastRequestTime = std::chrono::system_clock::now();
 }
 
 bool Client::sendDirectoryListings(const std::string& path) {
@@ -139,16 +145,26 @@ std::string getErrorPagePath(int status) {
          ".html";
 }
 
+bool Client::shouldCloseConnection(bool force) {
+  auto now = std::chrono::system_clock::now();
+  auto diff = std::chrono::duration_cast<std::chrono::seconds>(now - _lastRequestTime);
+  if (diff.count() >= 5 && _isReadyForRequest) {
+	Log::getInstance().debug("Closing connection due to inactivity");
+	return true;
+  }
+  if (force && diff.count() >= 10) {
+	return true;
+  }
+  return _shouldCloseConnection;
+}
+
 bool Client::execute() {
-  Log::getInstance().debug("Server context: " +
-                           _context->_serverNameValue.at(0));
   auto request = _parser.getHttpRequest();
   int status = _parser.getStatusCode();
   Log::getInstance().debug("Status code: " + std::to_string(status));
   switch (request.getHandler()) {
     case HttpRequestHandler::BENCHMARK: {
       _response.setStatusCode(200);
-      Log::getInstance().error("SOMETHING!");
       std::string responseString = _response.getResponse();
       send(_fd, responseString.c_str(), responseString.length(), 0);
       break;
