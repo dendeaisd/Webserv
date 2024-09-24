@@ -1,12 +1,104 @@
 <!DOCTYPE html>
-<html>
-<head>
-	<title>Iridescent WebServ</title>
-</head>
-<body>
-	<h1>Iridescent WebServ Home Page</h1>
-	<p>Welcome to the home page.</p>
-	<marquee><h2>Thalia is procrastinating...</h2></marquee>
-	<button onclick="javascript:alert('HEY THALIA!! QUIT IT!!')">CLICK ME!!</button>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iridescent</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Lato:300,400,700"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: "Lato", sans-serif;
+        background: radial-gradient(
+          ellipse at bottom,
+          #1b2735 0%,
+          #090a0f 100%
+        );
+        overflow: hidden;
+      }
+
+      #stars {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        z-index: 0;
+      }
+
+      .star {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        animation: animStar linear infinite;
+      }
+
+      @keyframes animStar {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(-2000px);
+        }
+      }
+
+      #title {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        color: #fff;
+        text-align: center;
+        font-weight: 300;
+        font-size: 50px;
+        letter-spacing: 10px;
+        transform: translateY(-50%);
+        z-index: 1;
+      }
+
+      #title span {
+        background: -webkit-linear-gradient(white, #38495a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stars"></div>
+    <div id="title">
+      <span>IRIDESCENT</span>
+      <br />
+      <span>a webserver btw</span>
+    </div>
+
+    <script>
+      function createStars(numStars) {
+        const starsContainer = document.getElementById("stars");
+
+        for (let i = 0; i < numStars; i++) {
+          const star = document.createElement("div");
+          star.classList.add("star");
+          star.style.width = `${Math.random() * 3 + 1}px`;
+          star.style.height = star.style.width;
+          star.style.top = `${Math.random() * window.innerHeight}px`;
+          star.style.left = `${Math.random() * window.innerWidth}px`;
+          star.style.animationDuration = `${Math.random() * 50 + 50}s`;
+
+          starsContainer.appendChild(star);
+        }
+      }
+
+      createStars(100);
+      setInterval(() => {
+        createStars(50);
+      }, 10000);
+    </script>
+  </body>
 </html>

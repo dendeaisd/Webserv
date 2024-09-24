@@ -30,15 +30,6 @@ Server::Server(std::unique_ptr<ConfigFile>&& config) {
         portsWithAddress.insert(port);
       }
     }
-    // for (const auto& addrPortPair :
-    //      serverContext->_portWithAddressListenValue) {
-
-    //   if (portsWithAddress.find(addrPortPair.second) !=
-    //       portsWithAddress.end()) {
-    //     addressPortSet.insert(addrPortPair);
-    //     portsWithAddress.insert(addrPortPair.second);
-    //   }
-    // }
   }
 
   for (const auto& addrPortPair : addressPortSet) {
@@ -212,7 +203,6 @@ void Server::handleNewConnection(int serverFd) {
                          [serverFd](std::shared_ptr<Socket> socket) {
                            return socket->getSocketFd() == serverFd;
                          });
-
   if (it == _serverSockets.end()) {
     std::cerr << "Error: Server socket not found for fd " << serverFd
               << std::endl;
@@ -220,13 +210,10 @@ void Server::handleNewConnection(int serverFd) {
   }
   int new_socket = (*it)->acceptConnection(&address, &addrlen);
   if (new_socket >= 0) {
-    // TODO: update this TEMP solution with a proper
-    // server context that is stored in the _portToServerContextMap
     Log::getInstance().debug("New connection on port " +
                              std::to_string(serverPort));
     std::shared_ptr<ServerContext> serverContext =
         _portToServerContextMap.find(serverPort)->second;
-    // END OF TEMP SOLUTION
     Log::getInstance().debug("Server context: " +
                              serverContext->_serverNameValue.at(0));
     Client* new_client = new Client(new_socket, serverContext);

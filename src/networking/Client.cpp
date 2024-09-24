@@ -157,6 +157,7 @@ bool Client::execute() {
   switch (request.getHandler()) {
     case HttpRequestHandler::BENCHMARK: {
       _response.setStatusCode(200);
+      Log::getInstance().error("SOMETHING!");
       std::string responseString = _response.getResponse();
       send(_fd, responseString.c_str(), responseString.length(), 0);
       break;
