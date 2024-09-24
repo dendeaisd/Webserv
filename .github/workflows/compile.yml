@@ -10,13 +10,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Run build inside Docker container
-      uses: docker://gcc:latest
-      with:
-        entrypoint: "/bin/bash"
-      run: |
-        apt-get update && apt-get install -y make
+    - name: Install dependencies
+      run: sudo apt-get install -y gcc g++ make
 
     - name: Build with make
       run: |
-        make build
+        make re
