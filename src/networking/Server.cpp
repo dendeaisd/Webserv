@@ -11,8 +11,8 @@
 
 #include "../../include/Event.hpp"
 #include "../../include/log/Log.hpp"
-#include "ConfigFile.hpp"
-#include "ServerContext.hpp"
+#include "../../include/parseConfigFile/semanticAnalysis/ConfigFile.hpp"
+#include "../../include/parseConfigFile/semanticAnalysis/ServerContext.hpp"
 
 Server::Server(std::unique_ptr<ConfigFile>&& config) {
   _config = std::move(config);
