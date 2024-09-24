@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/24 19:48:10 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/24 21:23:57 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -519,122 +519,155 @@ bool SemanticAnalysis::locationValidDirective() const noexcept {
 
 bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
   switch (token) {
+    break;
     case TypeToken::WORKER_PROCESS:
       if (_config->_workerProcessesValue.empty() == true) return (true);
+      break;
     case TypeToken::PID:
       if (_config->_pidValue.empty() == true) return (true);
+      break;
     case TypeToken::ERROR_LOG:
       if (_config->_errorLogValue.empty() == true) return (true);
+      break;
     case TypeToken::GEO_IP_COUNTRY:
       if (_config->_httpContext._geoipCountryValue.empty() == true)
         return (true);
+      break;
     case TypeToken::PROXY_CACHE:
       if (_config->_httpContext._proxyCacheValue.empty() == true) return (true);
+      break;
     case TypeToken::PROXY_CACHE_USE_STALE:
       if (_config->_httpContext._proxyCacheUseStaleValue.empty() == true)
         return (true);
+      break;
     case TypeToken::GZIP:
       if (_config->_httpContext._gzipValue.empty() == true) return (true);
+      break;
     case TypeToken::GZIP_TYPES:
       if (_config->_httpContext._gzipTypesValue.empty() == true) return (true);
+      break;
     case TypeToken::LIMIT_RED_ZONE:
       if (_config->_httpContext._limitReqZoneValue.empty() == true)
         return (true);
+      break;
     case TypeToken::PROXY_SET_HEADER:
       if (_config->_httpContext._proxySetHeaderValue.empty() == true)
         return (true);
+      break;
     case TypeToken::PROXY_CACHE_VALID:
       if (_config->_httpContext._proxyCacheValidValue.empty() == true)
         return (true);
+      break;
     case TypeToken::PROXY_CACHE_PATH:
       if (_config->_httpContext._proxyCachePathValue.empty() == true)
         return (true);
+      break;
     case TypeToken::SERVER_NAME:
       if (_config->_httpContext._serverContext.back()
               ->_serverNameValue.empty() == true)
         return (true);
+      break;
     case TypeToken::SSL_CERTIFICATE:
       if (_config->_httpContext._serverContext.back()
               ->_sslCertificateValue.empty() == true)
         return (true);
+      break;
     case TypeToken::SSL_CERTIFICATE_KEY:
       if (_config->_httpContext._serverContext.back()
               ->_sslCertificateKeyValue.empty() == true)
         return (true);
+      break;
     case TypeToken::LISTEN:
       if (_config->_httpContext._serverContext.back()->_listenValue.empty() ==
           true)
-      case TypeToken::INDEX:
-        if (_config->_httpContext._serverContext.back()->_indexValue.empty() ==
-            true)
-          return (true);
+        return (true);
+      break;
+    case TypeToken::INDEX:
+      if (_config->_httpContext._serverContext.back()->_indexValue.empty() ==
+          true)
+        return (true);
+      break;
     case TypeToken::ROOT:
       if (_config->_httpContext._serverContext.back()->_rootValue.empty() ==
           true)
         return (true);
+      break;
     case TypeToken::UPLOAD_DIR:
       if (_config->_httpContext._serverContext.back()
               ->_uploadDirValue.empty() == true)
         return (true);
+      break;
     case TypeToken::REQUEST_TIMEOUT:
       if (_config->_httpContext._serverContext.back()->_requestTimeoutValue ==
           60)
         return (true);
+      break;
     case TypeToken::PROXY_PASS:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_proxyPassValue.empty() == true)
         return (true);
+      break;
     case TypeToken::ALIAS:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_aliasValue.empty() == true)
         return (true);
+      break;
     case TypeToken::TRY_FILES:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_tryFilesValue.empty() == true)
         return (true);
+      break;
     case TypeToken::ERROR_PAGE:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_errorPageValue.empty() == true)
         return (true);
+      break;
     case TypeToken::ACCESS_LOG:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_accessLogValue.empty() == true)
         return (true);
+      break;
     case TypeToken::DENY:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_denyValue.empty() == true)
         return (true);
+      break;
     case TypeToken::CGI:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_cgi.empty() == true)
         return (true);
+      break;
     case TypeToken::REWRITE:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_rewriteValue.empty() == true)
         return (true);
+      break;
     case TypeToken::AUTO_INDEX:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_autoIndexValue.empty() == true)
         return (true);
+      break;
     case TypeToken::ALLOW_METHODS:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_allowMethods.empty() == true)
         return (true);
+      break;
     case TypeToken::RETURN:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_returnSet == false)
         return (true);
+      break;
     default:
       break;
   }
@@ -745,6 +778,7 @@ size_t SemanticAnalysis::convertMaxBodySize(const std::string &value) const {
 size_t SemanticAnalysis::getMaxBodySizeMultiplier(char c) const {
   size_t multiplicator = 0;
   switch (c) {
+    break;
     case 'k':
       multiplicator = 1024;
       break;
@@ -877,8 +911,7 @@ void SemanticAnalysis::saveRequestTimeOut() {
       std::string::npos)
     throw InvalidRequestTimeout(getThrowMessage());
 
-
-      std::istringstream stream(_tokenLine.back()->_tokenStr);
+  std::istringstream stream(_tokenLine.back()->_tokenStr);
   int timeoutValue;
 
   stream >> timeoutValue;
