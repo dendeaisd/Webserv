@@ -36,6 +36,7 @@ class HttpRequest {
   std::string getRequestTime();
   size_t getContentLength();
   bool checkTimeout();
+  void setTimeoutSeconds(size_t seconds);
   void setHandler(HttpRequestHandler handler);
   bool setMethod(std::string method);
   void setMethod(HttpRequestMethod httpRequestMethod);
@@ -73,6 +74,7 @@ class HttpRequest {
   std::string _domain;
   HttpRequestHandler _handler;
   std::chrono::system_clock::time_point _requestTime;
+  size_t _timeoutSeconds;
   std::map<std::string, std::string> _headers;
   std::map<std::string, std::string> _queryParams;
   std::map<std::string, std::string> _formData;

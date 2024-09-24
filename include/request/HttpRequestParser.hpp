@@ -40,6 +40,7 @@ class HttpRequestParser {
   int _statusCode;
   std::string _location;
   std::shared_ptr<Location> _locationConfig;
+  std::string _uploadDir;
   HttpFileUploadStatus currentFileUploadStatus;
   std::string currentFileUploadName;
   size_t total_read;
@@ -68,4 +69,5 @@ class HttpRequestParser {
   bool parseBoundary();
   void setStatusCode(int code);
   void setLocation(std::string location);
+  void setupUploadDir();
 };

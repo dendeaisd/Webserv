@@ -22,6 +22,7 @@ HttpRequest::HttpRequest()
   _body = "";
   _subDomain = "";
   _domain = "";
+  _timeoutSeconds = 60;
 }
 
 HttpRequest::~HttpRequest() {
@@ -30,6 +31,10 @@ HttpRequest::~HttpRequest() {
   _formData.clear();
   _attachments.clear();
   _injections.clear();
+}
+
+void HttpRequest::setTimeoutSeconds(size_t seconds) {
+  _timeoutSeconds = seconds;
 }
 
 std::string HttpRequest::getMethod() { return _method; }
@@ -260,7 +265,7 @@ bool HttpRequest::checkTimeout() {
   std::chrono::system_clock::time_point currentTime =
       std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = currentTime - _requestTime;
-  if (elapsed_seconds.count() > TIMEOUT) {
+  if (elapsed_seconds.count() > _timeoutSeconds) {
     return true;
   }
   return false;
