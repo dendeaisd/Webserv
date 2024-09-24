@@ -33,7 +33,7 @@ class CGIFileManager {
   std::map<std::string, std::string> cgiExecutors_;
   std::string cgiDir_;
   void mapCGIDir(std::string cgiDir);
-  size_t collectExecutorMappings(const ConfigFile &configFile);
+  void collectExecutorMappings(const ConfigFile &configFile);
 };
 
 #endif
