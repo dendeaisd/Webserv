@@ -50,8 +50,6 @@ HttpRequest HttpRequestParser::getHttpRequest() {
 
 std::shared_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
   for (auto &location : _serverContext->_locationContext) {
-    std::cout << "Location: " << location->_urlValue << std::endl;
-    location->printLocation();
     if (location->_urlValue == _request.getUri() ||
         location->_urlValue == _request.getUri() + "/") {
       return location;
@@ -137,20 +135,18 @@ std::string getLineSanitized(std::stringstream &ss) {
   return line;
 }
 
-bool HttpRequestParser::isAllowedMethod(const std::string &method,
-                                        const std::string &path) {
-  // TODO: support allow_methods in location context
-  // for (auto& location : _serverContext->_locationContext) {
-  // 	if (location->_urlValue == path) {
-  // 		for (auto& method : location->??) {
-  // 			if (method == method) {
-  // 				return true;
-  // 			}
-  // 		}
-  // 	}
-  // }
-  // TODO: update this to use server configuration
-  (void)path;
+bool HttpRequestParser::isAllowedMethod(const std::string &method) {
+  auto location = getMostRelevantLocation();
+  std::cout << "Most relevant location: " << location->_urlValue << std::endl;
+  if (location != nullptr && location->_allowMethods.size() > 0) {
+    for (auto &method : location->_allowMethods) {
+      if (method == _request.getMethod()) {
+        return true;
+      }
+    }
+    return false;
+  }
+  // default allowed methods
   return method == "GET" || method == "POST" || method == "DELETE" ||
          method == "PUT" || method == "OPTIONS";
 }
@@ -328,7 +324,7 @@ bool HttpRequestParser::parseRequestLine(char *requestLine, size_t len) {
     setStatusCode(505);  // HTTP Version Not Supported
     return false;
   }
-  if (!isAllowedMethod(_request.getMethod(), _request.getUri())) {
+  if (!isAllowedMethod(_request.getMethod())) {
     Log::getInstance().error("Invalid method: " + _request.getMethod());
     setStatusCode(405);
     return false;

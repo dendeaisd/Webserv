@@ -53,7 +53,7 @@ class HttpRequestParser {
   bool validateHttpVersion();
   bool askForContinue();
   bool checkForTerminator(std::string line);
-  bool isAllowedMethod(const std::string &method, const std::string &path);
+  bool isAllowedMethod(const std::string &method);
   bool isAllowedContentLength(size_t contentLength);
   bool isCgiRequest();
   bool isFaviconRequest();
