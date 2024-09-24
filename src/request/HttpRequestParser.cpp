@@ -186,6 +186,7 @@ int HttpRequestParser::parse() {
   }
 
   if (!electHandler()) {
+    status = HttpRequestParseStatus::PARSED;
     return getStatusCode();
   }
   if (!parseHeaders(ss)) {
