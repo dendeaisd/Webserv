@@ -63,7 +63,10 @@ class MissingSymbol : public ExceptionsParsing {
 
 class EmptyVectorOfTokens : public ExceptionsParsing {
  public:
-  EmptyVectorOfTokens() : ExceptionsParsing("Can't get empty tokens") {}
+  EmptyVectorOfTokens()
+      : ExceptionsParsing(
+            "No token found. Can't call the get function on an empty token "
+            "structure.") {}
 };
 
 class DirectiveValueNotTerminatedWithSemicolon : public ExceptionsParsing {
