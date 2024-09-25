@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/25 12:03:17 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/26 00:45:01 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ void SemanticAnalysis::preSetup() {
   _config = std::make_unique<ConfigFile>();
   loadDirectives();
 }
-
 
 void SemanticAnalysis::loadDirectives() {
   std::string path = "include/parseConfigFile/configContextAndDirectives/";
@@ -365,6 +364,9 @@ void SemanticAnalysis::serverSaveDirective() {
         _config->_httpContext._serverContext.back()->_serverNameValue);
   else if (canDirectiveBeSaved(TypeToken::UPLOAD_DIR))
     _config->_httpContext._serverContext.back()->_uploadDirValue = value;
+  else if (_tokenLine.front()->_type == TypeToken::ERROR_PAGE &&
+           _tokenLine.size() == 3)
+    errorPageSave();
   else if (canDirectiveBeSaved(TypeToken::REQUEST_TIMEOUT))
     saveRequestTimeOut();
   else if (validListen() == true)
@@ -377,7 +379,7 @@ void SemanticAnalysis::locationSaveDirective() {
   if (isDirectiveInLine(_locationValidDirective) == false) return;
 
   if (locationValidDirective() == false)
-    throw InvalidHttpDirective(getThrowMessage());
+    throw InvalidLocationDirective(getThrowMessage());
   else if (locationReturned() == true)
     throw DirectiveSetAfterReturnInLocation(getThrowMessage());
 
@@ -922,6 +924,19 @@ void SemanticAnalysis::saveRequestTimeOut() {
     throw InvalidRequestTimeout(getThrowMessage());
   _config->_httpContext._serverContext.back()->_requestTimeoutValue =
       timeoutValue;
+}
+
+void SemanticAnalysis::errorPageSave() {
+  if (_tokenLine.size() != 3 ||
+      _tokenLine.front()->_type != TypeToken::ERROR_PAGE ||
+      _state != State::SERVER_CONTEXT)
+    throw InvalidErrorPage(getThrowMessage());
+
+  int statusCode = convertStatusCode(_tokenLine[1]->_tokenStr);
+  std::string file = _tokenLine.back()->_tokenStr;
+
+  _config->_httpContext._serverContext.back()->_errorPageValue.insert(
+      {statusCode, file});
 }
 
 std::unique_ptr<ConfigFile> SemanticAnalysis::getConfigFile() {

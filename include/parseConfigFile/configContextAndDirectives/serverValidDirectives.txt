@@ -7,3 +7,4 @@ root
 listen
 upload_dir
 request_timeout
+error_page

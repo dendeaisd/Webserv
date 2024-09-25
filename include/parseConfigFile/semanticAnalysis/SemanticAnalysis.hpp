@@ -109,6 +109,8 @@ class SemanticAnalysis {
 
   void saveRequestTimeOut();
 
+  void errorPageSave();
+
   std::string getThrowMessage() noexcept;
   std::string getThrowMessage() const noexcept;
   std::string currentLine() noexcept;

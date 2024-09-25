@@ -15,7 +15,6 @@ proxy_cache_valid
 server_name
 ssl_certificate
 ssl_certificate_key
-include
 pid
 prox_pass
 worker_processes
