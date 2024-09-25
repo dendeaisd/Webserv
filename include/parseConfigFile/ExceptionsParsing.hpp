@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/24 19:46:24 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/25 12:16:41 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,13 +158,13 @@ class DirectiveSetAfterReturnInLocation : public ExceptionsParsing {
 };
 
 class InvalidStatusCode : public ExceptionsParsing {
-  public:
-    InvalidStatusCode(const std::string &message)
+ public:
+  InvalidStatusCode(const std::string &message)
       : ExceptionsParsing("Invalid status code. Line " + message) {}
 };
 
 class InvalidRequestTimeout : public ExceptionsParsing {
-  public:
-    InvalidRequestTimeout(const std::string &message)
+ public:
+  InvalidRequestTimeout(const std::string &message)
       : ExceptionsParsing("Invalid request timeout. Line " + message) {}
 };
