@@ -109,6 +109,12 @@ bool HttpRequestParser::electHandler() {
     }
   }
   if (isCgiRequest()) {
+	if (!fs::exists(_request.getUri().substr(1)))
+	{
+	  _request.setHandler(HttpRequestHandler::ERROR);
+	  setStatusCode(404);
+	  return false;
+	}
     _request.setHandler(HttpRequestHandler::CGI);
   } else if (isFaviconRequest()) {
     _request.setHandler(HttpRequestHandler::FAVICON);
