@@ -75,21 +75,62 @@ bool Client::sendDefaultFavicon() {
   return sendToClient(_fd, responseString);
 }
 
-std::string getErrorPagePath(int status) {
+std::string Client::getErrorPagePath(int status) {
+  auto configErrorPage = _context->_errorPageValue.find(status);
+  if (configErrorPage != _context->_errorPageValue.end()) {
+    std::string path = configErrorPage->second;
+    if (path.front() != '/') {
+      path = "/" + path;
+    }
+    return path;
+  }
   return ERROR_PAGES + std::to_string(status) + "/" + std::to_string(status) +
          ".html";
+}
+
+int Client::getStatusCodeForErrorPage(const std::string& path) {
+  // Iterate through the map to find a matching path
+  for (const auto& entry : _context->_errorPageValue) {
+    std::string formattedPath = entry.second;
+    if (formattedPath.front() != '/') {
+      formattedPath = "/" + formattedPath;
+    }
+    if (formattedPath == path) {
+      return entry.first;  // Return the status code if a match is found
+    }
+  }
+
+  // If no match is found in the map, try to extract the status code from the
+  // path Assuming the path follows the format: ERROR_PAGES + status_code + "/"
+  // + status_code + ".html"
+  size_t startPos = path.find_last_of('/');
+  if (startPos != std::string::npos) {
+    size_t endPos = path.find('.', startPos);
+    if (endPos != std::string::npos) {
+      std::string statusCodeStr =
+          path.substr(startPos + 1, endPos - startPos - 1);
+      try {
+        int statusCode = std::stoi(statusCodeStr);
+        return statusCode;  // Return the extracted status code
+      } catch (const std::invalid_argument& e) {
+        // Handle error if conversion fails
+      } catch (const std::out_of_range& e) {
+        // Handle error if conversion fails
+      }
+    }
+  }
+
+  return -1;  // Return an invalid status code if no match is found
 }
 
 bool Client::sendErrorPage(int status) {
   // This section will handle the case where handler is set to ERROR.
   _response.setStatusCode(status);
-  if (HttpMaps::getInstance().errorHasDefaultPage(status)) {
-    std::string path = getErrorPagePath(status);
-    if (std::filesystem::is_regular_file("." + _context->_rootValue + path)) {
-      // move to a redirect
-      _response.setStatusCode(302);
-      _response.setHeader("Location", path);
-    }
+  std::string path = getErrorPagePath(status);
+  if (std::filesystem::is_regular_file("." + _context->_rootValue + path)) {
+    // move to a redirect
+    _response.setStatusCode(302);
+    _response.setHeader("Location", path);
   }
   std::string responseString = _response.getResponse();
   return sendToClient(_fd, responseString);
@@ -111,6 +152,10 @@ bool Client::sendWebDocument() {
   std::string root = _context->_rootValue;
   if (root.back() == '/') root.pop_back();
   url = "." + root + url;
+  int suggestedStatus = getStatusCodeForErrorPage(url);
+  if (suggestedStatus != -1) {
+    _response.setStatusCode(suggestedStatus);
+  }
   // check if .url is a file
   if (std::filesystem::is_regular_file(url)) {
     std::string mimeType = HttpMaps::getInstance().getMimeType(url);
@@ -183,8 +228,12 @@ std::string Client::generateDirectoryListing(const std::string& path,
 // }
 
 bool Client::handleRedirect() {
-  _response.setStatusCode(_parser.getStatusCode());
-  _response.setHeader("Location", _parser.getLocation());
+  int status = _parser.getStatusCode();
+  _response.setStatusCode(status);
+  if (status >= 300 && status < 400)
+    _response.setHeader("Location", _parser.getLocation());
+  else
+    _response.setBody(_parser.getLocation());
   std::string responseString = _response.getResponse();
   return sendToClient(_fd, responseString);
 }
@@ -238,7 +287,8 @@ bool Client::execute() {
     }
     case HttpRequestHandler::DIRECTORY_LISTING: {
       Log::getInstance().debug("Successful request. Directory Listing");
-      couldSendToClient = sendDirectoryListings("." + _context->_rootValue + request.getUri());
+      couldSendToClient =
+          sendDirectoryListings("." + _context->_rootValue + request.getUri());
       break;
     }
     case HttpRequestHandler::LIST_UPLOADS: {
@@ -299,10 +349,10 @@ bool Client::handleRequest() {
                                  std::string(std::strerror(errno)));
         return false;
       }
-	  if (bytes_read == 0) {
-	    Log::getInstance().debug("Read 0 bytes");
-		break;
-	  }
+      if (bytes_read == 0) {
+        Log::getInstance().debug("Read 0 bytes");
+        break;
+      }
       buffer[bytes_read] = '\0';
     }
     _parser = HttpRequestParser(raw, _fd, _context);
@@ -326,10 +376,9 @@ bool Client::handleRequest() {
     if (bytes_read == -1) {
       Log::getInstance().error("Failed to read from socket with error: " +
                                std::string(std::strerror(errno)));
-		return false;
+      return false;
     }
-	if (bytes_read == 0)
-	  Log::getInstance().debug("Read 0 bytes");
+    if (bytes_read == 0) Log::getInstance().debug("Read 0 bytes");
   }
   return true;
 }
