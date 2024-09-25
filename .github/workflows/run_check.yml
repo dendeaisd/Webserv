@@ -13,7 +13,7 @@ jobs:
     - name: Install Siege
       run: |
         sudo apt-get update
-        sudo apt-get install -y procps net-tools siege ulimit
+        sudo apt-get install -y procps net-tools siege
 
     - name: Build with make
       run: |
