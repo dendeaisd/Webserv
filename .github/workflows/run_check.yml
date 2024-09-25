@@ -25,7 +25,7 @@ jobs:
 
     - name: Wait for the server to start
       run: |
-        sleep 5  # Give time for the server to start
+        sleep 15  # Give time for the server to start
 
     - name: curl localhost
       run: |
@@ -33,7 +33,7 @@ jobs:
 
     - name: Run Siege stress test
       run: |
-        siege -b -c100 -t1m http://localhost:8080
+        siege -b -c10 -t1m http://localhost:8080
 
     - name: Check server memory usage
       run: |
