@@ -15,7 +15,7 @@
 #include "ServerContext.hpp"
 
 #define BUFFER_SIZE 4096
-#define ERROR_PAGES "/default/error_pages/"
+#define ERROR_PAGES "/error_pages/"
 #define CONNECTION_TIMEOUT 5  // seconds before non-active connection is closed
 
 Client::Client(int fd, std::shared_ptr<ServerContext> context) : _fd(fd) {
@@ -45,6 +45,15 @@ void Client::reset() {
   _lastRequestTime = std::chrono::system_clock::now();
 }
 
+bool sendToClient(int fd, std::string response) {
+  int result = send(fd, response.c_str(), response.length(), 0);
+  if (result == -1) {
+    Log::getInstance().error("Failed to send directory listing");
+    return false;
+  }
+  if (result == 0) return true;
+  return true;
+}
 bool Client::sendDirectoryListings(const std::string& path) {
   auto req = _parser.getHttpRequest();
   std::string requestUri = req.getUri();
@@ -56,16 +65,14 @@ bool Client::sendDirectoryListings(const std::string& path) {
   _response.setContentType("text/html");
 
   std::string responseString = _response.getResponse();
-  send(_fd, responseString.c_str(), responseString.length(), 0);
-  return true;
+  return sendToClient(_fd, responseString);
 }
 
 bool Client::sendDefaultFavicon() {
   _response.setStatusCode(200);
   _response.setFile("./default/favicon-dt.png", "image/x-icon");
   std::string responseString = _response.getResponse();
-  send(_fd, responseString.c_str(), responseString.length(), 0);
-  return true;
+  return sendToClient(_fd, responseString);
 }
 
 std::string getErrorPagePath(int status) {
@@ -73,22 +80,26 @@ std::string getErrorPagePath(int status) {
          ".html";
 }
 
-void Client::sendErrorPage(int status) {
+bool Client::sendErrorPage(int status) {
   // This section will handle the case where handler is set to ERROR.
   _response.setStatusCode(status);
   if (HttpMaps::getInstance().errorHasDefaultPage(status)) {
-    // move to a redirect
-    _response.setStatusCode(302);
-    _response.setHeader("Location", getErrorPagePath(status));
+    std::string path = getErrorPagePath(status);
+    if (std::filesystem::is_regular_file("." + _context->_rootValue + path)) {
+      // move to a redirect
+      _response.setStatusCode(302);
+      _response.setHeader("Location", path);
+    }
   }
   std::string responseString = _response.getResponse();
-  send(_fd, responseString.c_str(), responseString.length(), 0);
+  return sendToClient(_fd, responseString);
 }
 
-std::string getFirstValidIndexPage(std::vector<std::string> indexPages) {
+std::string getFirstValidIndexPage(std::string root,
+                                   std::vector<std::string> indexPages) {
   for (auto page : indexPages) {
-    if (std::filesystem::exists("." + page)) {
-      return "." + page;
+    if (std::filesystem::exists("." + root + page)) {
+      return "." + root + page;
     }
   }
   return "";
@@ -97,33 +108,32 @@ std::string getFirstValidIndexPage(std::vector<std::string> indexPages) {
 bool Client::sendWebDocument() {
   _response.setStatusCode(_parser.getStatusCode());
   std::string url = _parser.getHttpRequest().getUri();
-  url = "." + url;
+  std::string root = _context->_rootValue;
+  if (root.back() == '/') root.pop_back();
+  url = "." + root + url;
   // check if .url is a file
   if (std::filesystem::is_regular_file(url)) {
     std::string mimeType = HttpMaps::getInstance().getMimeType(url);
     _response.setFile(url, mimeType, "inline");
     std::string responseString = _response.getResponse();
-    send(_fd, responseString.c_str(), responseString.length(), 0);
-    return true;
+    return sendToClient(_fd, responseString);
   }
   std::cout << "URL: " << url << std::endl;
-  if (url == "./" || url == "./index.html") {
-    url = getFirstValidIndexPage(_context->_indexValue);
+  if (url == "." + root + "/" || url == "./index.html") {
+    url = getFirstValidIndexPage(root, _context->_indexValue);
     std::cout << "Index page: " << url << std::endl;
     if (url == "") {
       if (_context->_indexValue.size() == 0)
         url = "./default/index.html";
       else
-        sendErrorPage(403);
+        return sendErrorPage(404);
     }
     _response.setFile(url, "text/html", "inline");
     std::string responseString = _response.getResponse();
-    send(_fd, responseString.c_str(), responseString.length(), 0);
-    return true;
+    return sendToClient(_fd, responseString);
   }
-  if (url.back() == '/') sendErrorPage(403);
-  sendErrorPage(404);
-  return true;
+  if (url.back() == '/') return sendErrorPage(403);
+  return sendErrorPage(404);
 }
 
 std::string Client::generateDirectoryListing(const std::string& path,
@@ -150,41 +160,40 @@ std::string Client::generateDirectoryListing(const std::string& path,
   return ss.str();
 }
 
-bool Client::handleContinue() {
-  int status = _parser.handshake();
-  if (status != 200 && status != 201) {
-    Log::getInstance().error("Failed to complete handshake");
-    _response.setStatusCode(status);
-    std::string responseString = _response.getResponse();
-    send(_fd, responseString.c_str(), responseString.length(), 0);
-    close(_fd);
-    return false;
-  }
-  if (_parser.status == HttpRequestParseStatus::PARSED) {
-    auto request = _parser.getHttpRequest();
-    _response.setStatusCode(status);
-    std::string responseString = _response.getResponse();
-    send(_fd, responseString.c_str(), responseString.length(), 0);
-    close(_fd);
-    Log::getInstance().debug(
-        "Successful multipart/octet-stream request with handshake");
-  }
-  return true;
-}
+// bool Client::handleContinue() {
+//   int status = _parser.handshake();
+//   if (status != 200 && status != 201) {
+//     Log::getInstance().error("Failed to complete handshake");
+//     _response.setStatusCode(status);
+//     std::string responseString = _response.getResponse();
+//     send(_fd, responseString.c_str(), responseString.length(), 0);
+//     close(_fd);
+//     return false;
+//   }
+//   if (_parser.status == HttpRequestParseStatus::PARSED) {
+//     auto request = _parser.getHttpRequest();
+//     _response.setStatusCode(status);
+//     std::string responseString = _response.getResponse();
+//     send(_fd, responseString.c_str(), responseString.length(), 0);
+//     close(_fd);
+//     Log::getInstance().debug(
+//         "Successful multipart/octet-stream request with handshake");
+//   }
+//   return true;
+// }
 
 bool Client::handleRedirect() {
   _response.setStatusCode(_parser.getStatusCode());
   _response.setHeader("Location", _parser.getLocation());
   std::string responseString = _response.getResponse();
-  send(_fd, responseString.c_str(), responseString.length(), 0);
-  return true;
+  return sendToClient(_fd, responseString);
 }
 
 bool Client::shouldCloseConnection(bool force) {
   auto now = std::chrono::system_clock::now();
   auto diff =
       std::chrono::duration_cast<std::chrono::seconds>(now - _lastRequestTime);
-  if (diff.count() >= 5 && _isReadyForRequest) {
+  if (diff.count() >= 20 && _isReadyForRequest) {
     Log::getInstance().debug("Closing connection due to inactivity");
     return true;
   }
@@ -197,43 +206,44 @@ bool Client::shouldCloseConnection(bool force) {
 bool Client::execute() {
   auto request = _parser.getHttpRequest();
   int status = _parser.getStatusCode();
+  bool couldSendToClient = true;
   Log::getInstance().debug("Status code: " + std::to_string(status));
   switch (request.getHandler()) {
     case HttpRequestHandler::BENCHMARK: {
       _response.setStatusCode(200);
       std::string responseString = _response.getResponse();
-      send(_fd, responseString.c_str(), responseString.length(), 0);
+      couldSendToClient = sendToClient(_fd, responseString);
       break;
     }
     case HttpRequestHandler::RETURN: {
       Log::getInstance().debug("Successful request. Return");
-      handleRedirect();
+      couldSendToClient = handleRedirect();
       break;
     }
     case HttpRequestHandler::FAVICON: {
       Log::getInstance().debug("Successful request. Favicon");
-      sendDefaultFavicon();
+      couldSendToClient = sendDefaultFavicon();
       break;
     }
     case HttpRequestHandler::STATIC: {
       Log::getInstance().debug("Successful request. Static");
-      sendWebDocument();
+      couldSendToClient = sendWebDocument();
       break;
     }
     case HttpRequestHandler::CGI: {
       Log::getInstance().debug("Successful request. CGI");
-      Event::getInstance().getEvent(_fd)->handleResponse();
+      couldSendToClient = Event::getInstance().getEvent(_fd)->handleResponse();
       Event::getInstance().removeEvent(_fd);
       break;
     }
     case HttpRequestHandler::DIRECTORY_LISTING: {
       Log::getInstance().debug("Successful request. Directory Listing");
-      sendDirectoryListings("." + request.getUri());
+      couldSendToClient = sendDirectoryListings("." + _context->_rootValue + request.getUri());
       break;
     }
     case HttpRequestHandler::LIST_UPLOADS: {
       Log::getInstance().debug("Successful request. List Uploads");
-      sendDirectoryListings("./uploads");
+      couldSendToClient = sendDirectoryListings("./uploads");
       break;
     }
     case HttpRequestHandler::SEND_UPLOADED_FILE: {
@@ -242,7 +252,7 @@ bool Client::execute() {
       std::string mimeType =
           HttpMaps::getInstance().getMimeType(request.getUri());
       _response.setFile("." + request.getUri(), mimeType);
-      _response.sendResponse(_fd);
+      couldSendToClient = _response.sendResponse(_fd);
       break;
     }
     case HttpRequestHandler::FILE_UPLOAD: {
@@ -250,11 +260,11 @@ bool Client::execute() {
       _response.setHeader("Location", "/uploads");
       std::string responseString = _response.getResponse();
       Log::getInstance().debug(responseString);
-      send(_fd, responseString.c_str(), responseString.length(), 0);
+      couldSendToClient = sendToClient(_fd, responseString);
       break;
     }
     default:
-      sendErrorPage(status);
+      couldSendToClient = sendErrorPage(status);
       Log::getInstance().warning(
           request.getMethod() + " " + request.getHost() + request.getUri() +
           " failed with status: " + std::to_string(status));
@@ -264,7 +274,7 @@ bool Client::execute() {
                           request.getUri());
   // clean up request/response objects
   reset();
-  return true;
+  return couldSendToClient;
 }
 
 bool Client::handleRequest() {
@@ -284,11 +294,15 @@ bool Client::handleRequest() {
     while (bytes_read == BUFFER_SIZE) {
       raw.append(buffer, bytes_read);
       bytes_read = read(_fd, buffer, BUFFER_SIZE);
-      if (bytes_read < 0) {
+      if (bytes_read == -1) {
         Log::getInstance().error("Failed to read from socket with error: " +
                                  std::string(std::strerror(errno)));
-        break;
+        return false;
       }
+	  if (bytes_read == 0) {
+	    Log::getInstance().debug("Read 0 bytes");
+		break;
+	  }
       buffer[bytes_read] = '\0';
     }
     _parser = HttpRequestParser(raw, _fd, _context);
@@ -309,10 +323,13 @@ bool Client::handleRequest() {
     }
     return true;
   } else {
-    if (bytes_read < 0) {
+    if (bytes_read == -1) {
       Log::getInstance().error("Failed to read from socket with error: " +
                                std::string(std::strerror(errno)));
+		return false;
     }
+	if (bytes_read == 0)
+	  Log::getInstance().debug("Read 0 bytes");
   }
   return true;
 }

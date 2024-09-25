@@ -109,12 +109,24 @@ bool HttpRequestParser::electHandler() {
     }
   }
   if (isCgiRequest()) {
-	if (!fs::exists(_request.getUri().substr(1)))
-	{
-	  _request.setHandler(HttpRequestHandler::ERROR);
-	  setStatusCode(404);
-	  return false;
-	}
+    bool valid = true;
+    std::string script = "";
+    std::string uri = _request.getUri();
+    size_t dotPos = uri.find(".");
+    if (dotPos == std::string::npos) {
+      valid = false;
+    }
+    size_t slashPos = uri.find("/", dotPos);
+    if (slashPos != std::string::npos) {
+      script = "." + uri.substr(0, slashPos);
+    } else {
+      script = "." + uri;
+    }
+    if (!valid || !fs::exists(script)) {
+      _request.setHandler(HttpRequestHandler::ERROR);
+      setStatusCode(404);
+      return false;
+    }
     _request.setHandler(HttpRequestHandler::CGI);
   } else if (isFaviconRequest()) {
     _request.setHandler(HttpRequestHandler::FAVICON);
@@ -156,7 +168,11 @@ bool HttpRequestParser::isFaviconRequest() {
 
 bool HttpRequestParser::isDirectoryRequest() {
   bool dirListOn = _locationConfig->_autoIndexValue == "on" ? true : false;
-  std::string path = "." + _request.getUri();
+  std::string root = _serverContext->_rootValue;
+  if (root.back() == '/') {
+	root.pop_back();
+  }
+  std::string path = "." + _serverContext->_rootValue + _request.getUri();
   return fs::is_directory(path) && dirListOn;
 }
 
@@ -535,6 +551,11 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
       break;
     }
     bytes_read = read(_clientFd, buffer, MAX_BUFFER_SIZE);
+    if (bytes_read == -1) {
+      Log::getInstance().error("Failed to read from client with error: " +
+                               std::string(std::strerror(errno)));
+    }
+    if (bytes_read == 0) Log::getInstance().debug("Read 0 bytes");
   }
   file.close();
   status = HttpRequestParseStatus::PARSED;
@@ -553,11 +574,13 @@ bool HttpRequestParser::askForContinue() {
     response.setHeader("Connection", "keep-alive");
     std::string responseString = response.getResponse();
     status = HttpRequestParseStatus::EXPECT_CONTINUE;
-    if (send(_clientFd, responseString.c_str(), responseString.length(), 0) <
-        0) {
+    int sent =
+        send(_clientFd, responseString.c_str(), responseString.length(), 0);
+    if (sent == -1) {
       Log::getInstance().error("Failed to send 100 Continue response");
       return false;
     }
+    if (sent == 0) Log::getInstance().debug("Sent 0 bytes");
     return true;
   }
   status = HttpRequestParseStatus::PARSED;
@@ -572,9 +595,12 @@ int readMore(std::stringstream &ss, int _clientFd) {
     buffer[bytes_read] = '\0';
     ss << buffer;
   } else {
-    if (bytes_read < 0) {
+    if (bytes_read == -1) {
       Log::getInstance().error("Readmore failed with error: " +
                                std::string(std::strerror(errno)));
+    }
+    if (bytes_read == 0) {
+      Log::getInstance().debug("Read 0 bytes");
     }
   }
   return bytes_read;

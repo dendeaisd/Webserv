@@ -18,8 +18,8 @@ class Server {
  private:
   std::vector<std::shared_ptr<Socket>> _serverSockets;
   PollManager _pollManager;
-  std::vector<Client*> _clients;
-  std::unordered_map<int, Client*> _fdToClientMap;
+  std::vector<std::shared_ptr<Client>> _clients;
+  std::unordered_map<int, std::shared_ptr<Client>> _fdToClientMap;
   std::unordered_map<int, std::shared_ptr<ServerContext>>
       _portToServerContextMap;
   std::unique_ptr<ConfigFile> _config;
@@ -34,9 +34,9 @@ class Server {
   void handlePollErrEvent(int fd);
   void handleNewConnection(int serverFd);
   void handleClientRequest(int fd);
-  void processClientRequest(Client* client);
+  void processClientRequest(std::shared_ptr<Client> client);
   void buildPortToServer();
-  void cleanupClient(Client* client);
+  void cleanupClient(std::shared_ptr<Client> client);
   bool isServerSocket(int fd);
   int cleanupStaleClients();
   void shutdown();
