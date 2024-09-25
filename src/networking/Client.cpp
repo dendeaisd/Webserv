@@ -68,6 +68,23 @@ bool Client::sendDefaultFavicon() {
   return true;
 }
 
+std::string getErrorPagePath(int status) {
+  return ERROR_PAGES + std::to_string(status) + "/" + std::to_string(status) +
+         ".html";
+}
+
+void Client::sendErrorPage(int status) {
+  // This section will handle the case where handler is set to ERROR.
+  _response.setStatusCode(status);
+  if (HttpMaps::getInstance().errorHasDefaultPage(status)) {
+    // move to a redirect
+    _response.setStatusCode(301);
+    _response.setHeader("Location", getErrorPagePath(status));
+  }
+  std::string responseString = _response.getResponse();
+  send(_fd, responseString.c_str(), responseString.length(), 0);
+}
+
 bool Client::sendWebDocument() {
   _response.setStatusCode(_parser.getStatusCode());
   std::string url = _parser.getHttpRequest().getUri();
@@ -80,9 +97,15 @@ bool Client::sendWebDocument() {
     send(_fd, responseString.c_str(), responseString.length(), 0);
     return true;
   }
-  _response.setFile("./default/index.html", "text/html", "inline");
-  std::string responseString = _response.getResponse();
-  send(_fd, responseString.c_str(), responseString.length(), 0);
+  if (url == "./" || url == "./index.html") {
+    url = "./default/index.html";
+    _response.setFile(url, "text/html", "inline");
+    std::string responseString = _response.getResponse();
+    send(_fd, responseString.c_str(), responseString.length(), 0);
+    return true;
+  }
+  if (url.back() == '/') sendErrorPage(403);
+  sendErrorPage(404);
   return true;
 }
 
@@ -138,11 +161,6 @@ bool Client::handleRedirect() {
   std::string responseString = _response.getResponse();
   send(_fd, responseString.c_str(), responseString.length(), 0);
   return true;
-}
-
-std::string getErrorPagePath(int status) {
-  return ERROR_PAGES + std::to_string(status) + "/" + std::to_string(status) +
-         ".html";
 }
 
 bool Client::shouldCloseConnection(bool force) {
@@ -219,15 +237,7 @@ bool Client::execute() {
       break;
     }
     default:
-      // This section will handle the case where handler is set to ERROR.
-      _response.setStatusCode(status);
-      if (HttpMaps::getInstance().errorHasDefaultPage(status)) {
-        // move to a redirect
-        _response.setStatusCode(301);
-        _response.setHeader("Location", getErrorPagePath(status));
-      }
-      std::string responseString = _response.getResponse();
-      send(_fd, responseString.c_str(), responseString.length(), 0);
+      sendErrorPage(status);
       Log::getInstance().warning(
           request.getMethod() + " " + request.getHost() + request.getUri() +
           " failed with status: " + std::to_string(status));

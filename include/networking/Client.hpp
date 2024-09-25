@@ -43,6 +43,7 @@ class Client {
   bool sendDefaultFavicon();
   bool sendWebDocument();
   bool sendDirectoryListings(const std::string& path);
+  void sendErrorPage(int status);
 
   std::string generateDirectoryListing(const std::string& path,
                                        const std::string& requestUri,

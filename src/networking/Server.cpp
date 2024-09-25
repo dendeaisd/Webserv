@@ -124,6 +124,7 @@ void Server::handleEvents() {
 int Server::cleanupStaleClients() {
   int count = 0;
   bool force = false;
+  if (_fdToClientMap.size() == 0) return 0;
   if (_fdToClientMap.size() > RLIMIT_NOFILE / 2) force = true;
   std::vector<struct pollfd>& fds = _pollManager.getFds();
   for (size_t i = 0; i < fds.size(); ++i) {
