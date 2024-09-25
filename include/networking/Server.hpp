@@ -1,9 +1,9 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <csignal>
 #include <memory>
 #include <unordered_map>
-#include <csignal>
 
 #include "Client.hpp"
 #include "PollManager.hpp"
@@ -24,6 +24,8 @@ class Server {
       _portToServerContextMap;
   std::unique_ptr<ConfigFile> _config;
   std::chrono::system_clock::time_point _lastCleanup;
+  size_t _processedRequests;
+  size_t _requestCount;
 
   void handleEvents();
   void handlePollInEvent(int fd, short& events);

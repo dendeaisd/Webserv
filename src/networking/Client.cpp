@@ -213,7 +213,6 @@ bool Client::execute() {
     case HttpRequestHandler::FILE_UPLOAD: {
       _response.setStatusCode(302);
       _response.setHeader("Location", "/uploads");
-      _response.setContentType("text/html");
       std::string responseString = _response.getResponse();
       Log::getInstance().debug(responseString);
       send(_fd, responseString.c_str(), responseString.length(), 0);

@@ -2,14 +2,13 @@
 #include "../../include/networking/Server.hpp"
 
 #include <fcntl.h>
+#include <sys/resource.h>
 #include <unistd.h>
 
 #include <algorithm>
 #include <cstring>
 #include <iostream>
-#include <sys/resource.h>
 #include <memory>
-
 
 #include "../../include/Event.hpp"
 #include "../../include/log/Log.hpp"
@@ -18,8 +17,7 @@
 
 static volatile bool running = true;
 
-void handleSignal(int signal)
-{
+void handleSignal(int signal) {
   if (signal == SIGINT) {
     running = false;
     Log::getInstance().warning("SIGINT caught. Shutting down the server...");
@@ -57,6 +55,8 @@ Server::Server(std::unique_ptr<ConfigFile>&& config) {
     _serverSockets.push_back(newSocket);
   }
   _lastCleanup = std::chrono::system_clock::now();
+  _processedRequests = 0;
+  _requestCount = 0;
 }
 
 Server::~Server() {
@@ -66,22 +66,23 @@ Server::~Server() {
   }
 }
 
-
 void Server::run() {
   std::signal(SIGINT, handleSignal);
 
   while (true) {
     if (std::chrono::system_clock::now() - _lastCleanup >
         std::chrono::seconds(5)) {
-      std::cout << "Count of connections: " << _fdToClientMap.size()
+      std::cout << "Concurrent clients count: " << _fdToClientMap.size()
                 << std::endl;
-      std::cout << "Count of clients: " << _clients.size() << std::endl;
+      std::cout << "Total requests processed: " << _processedRequests
+                << std::endl;
+      std::cout << "Total requests received: " << _requestCount << std::endl;
       int count = cleanupStaleClients();
       std::cout << "Cleaned up " << std::to_string(count) << " stale clients"
                 << std::endl;
       _lastCleanup = std::chrono::system_clock::now();
-    }  
-    
+    }
+
     if (!running) {
       break;
     }
@@ -175,6 +176,7 @@ void Server::handlePollInEvent(int fd, short& events) {
     // If client is ready for response, set events to POLLOUT
     if (client != _fdToClientMap.end() &&
         client->second->isReadyForResponse()) {
+      _requestCount++;
       events = POLLOUT;
     }
   }
@@ -191,6 +193,7 @@ void Server::handlePollOutEvent(int fd, short& events) {
       events = POLLHUP;
       return;
     }
+    _processedRequests++;
     events = POLLIN;
   }
 }

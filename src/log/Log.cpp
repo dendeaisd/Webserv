@@ -45,7 +45,9 @@ void Log::configure(const std::string& logLevel) {
   } else if (logLevel == "DEBUG") {
     logLevel_ = LogLevel::DEBUG;
   } else {
-    std::cerr << "Invalid log level: " << logLevel << std::endl;
+    std::cerr << "Invalid log level: " << logLevel << ". defaulting to NOLOG."
+              << std::endl;
+    logLevel_ = LogLevel::NOLOG;
   }
 }
 

@@ -1,28 +1,28 @@
 <style>
-  .spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    border-left-color: #000;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: none;
-    /* Initially hidden */
-  }
+	.spinner {
+		border: 4px solid rgba(0, 0, 0, 0.1);
+		border-left-color: #000;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		animation: spin 1s linear infinite;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		display: none;
+		/* Initially hidden */
+	}
 
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
 
-    100% {
-      transform: rotate(360deg);
-    }
-  }
+		100% {
+			transform: rotate(360deg);
+		}
+	}
 </style>
 <div class="spinner" id="spinner"></div>
 <h1>Upload a file</h1>
@@ -30,116 +30,65 @@
 <input type="file" name="file" />
 <button type="submit">Upload</button>
 
-<div id="file-list">
-  <h2>Uploaded Files:</h2>
-  <ul id="uploaded-files"></ul>
-</div>
 
 <script>
-  function showSpinner() {
-    document.getElementById("spinner").style.display = "block";
-  }
-  function hideSpinner() {
-    document.getElementById("spinner").style.display = "none";
-  }
+	function showSpinner() {
+		document.getElementById("spinner").style.display = "block";
+	}
+	function hideSpinner() {
+		document.getElementById("spinner").style.display = "none";
+	}
 
-  function displayUploadedFilesFromHTML(html) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-    const fileLinks = doc.querySelectorAll("ul li a");
-    const fileList = document.getElementById("uploaded-files");
-    fileList.innerHTML = "";
-    fileLinks.forEach(function (fileLink) {
-      const listItem = document.createElement("li");
-      const newLink = document.createElement("a");
-      newLink.href = fileLink.href;
-      newLink.textContent = fileLink.textContent;
-      listItem.appendChild(newLink);
-      fileList.appendChild(listItem);
-    });
-  }
-
-  function handleFileStream(file) {
-    const filename = file.name;
-    var reader = new FileReader();
-    reader.onload = function (event) {
-      var arrayBuffer = event.target.result;
-      var blob = new Blob([arrayBuffer], { type: "application/octet-stream" });
-      fetch("/uploads", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/octet-stream",
-          "Content-Disposition": 'attachment; filename="' + filename + '"',
-        },
-        body: file.stream(),
-        duplex: "half",
-      })
-        .then(function (response) {
-          if (response.redirected) {
-            window.location.href = "/uploads";
-          } else {
-            return response.text().then(function (html) {
-              hideSpinner();
-              displayUploadedFilesFromHTML(html);
-            });
-          }
-        })
-        .catch(function (error) {
-          hideSpinner();
-          console.error("Upload failed:", error);
-        });
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  document.querySelector("button").addEventListener("click", function (event) {
-    showSpinner();
-    var file = document.querySelector("input[type=file]").files[0];
-    if (!file) {
-      console.error("No file selected");
-      hideSpinner();
-      return;
-    }
-    const size = file.size;
-    const maxSize = 1024 * 1024 * 1024; // 1GB
-    if (size > maxSize) {
-      console.error("File too large (max 1GB)");
-      hideSpinner();
-      console.log("Switching to file.stream() mode");
-      handleFileStream(file);
-      showSpinner();
-      return;
-    }
-    console.log(file);
-    var reader = new FileReader();
-    reader.onload = function (event) {
-      var arrayBuffer = event.target.result;
-      var blob = new Blob([arrayBuffer], { type: "application/octet-stream" });
-      const filename = file.name;
-      fetch("/uploads", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/octet-stream",
-          "Content-Disposition": 'attachment; filename="' + filename + '"',
-        },
-        body: blob,
-      })
-        .then(function (response) {
-          if (response.redirected) {
-            window.location.href = response.url;
-          } else {
-            return response.text().then(function (html) {
-              hideSpinner();
-              console.log("File uploaded successfully");
-              displayUploadedFilesFromHTML(html);
-            });
-          }
-        })
-        .catch(function (error) {
-          hideSpinner();
-          console.error("Upload failed:", error);
-        });
-    };
-    reader.readAsArrayBuffer(file);
-  });
+	document.querySelector("button").addEventListener("click", function (event) {
+		showSpinner();
+		var file = document.querySelector("input[type=file]").files[0];
+		if (!file) {
+			console.error("No file selected");
+			hideSpinner();
+			return;
+		}
+		const size = file.size;
+		const maxSize = 1024 * 1024 * 1024; // 1GB
+		if (size > maxSize) {
+			console.error("File too large (max 1GB)");
+			hideSpinner();
+			console.log("Switching to file.stream() mode");
+			showSpinner();
+			return;
+		}
+		console.log(file);
+		var reader = new FileReader();
+		reader.onload = function (event) {
+			var arrayBuffer = event.target.result;
+			var blob = new Blob([arrayBuffer], { type: "application/octet-stream" });
+			const filename = file.name;
+			fetch("/uploads", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/octet-stream",
+					"Content-Disposition": 'attachment; filename="' + filename + '"',
+				},
+				body: blob,
+			})
+				.then(function (response) {
+					if (response.redirected) {
+						console.log("Redirecting to", response.url);
+						window.location.href = response.url;
+					} else {
+						// return response.text().then(function (html) {
+						// 	hideSpinner();
+						// 	console.log("File uploaded successfully");
+						// 	// displayUploadedFilesFromHTML(html);
+						// });
+						hideSpinner();
+						console.log(response);
+					}
+				})
+				.catch(function (error) {
+					hideSpinner();
+					console.error("Upload failed:", error);
+				});
+		};
+		reader.readAsArrayBuffer(file);
+	});
 </script>
