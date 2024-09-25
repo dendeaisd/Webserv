@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/24 21:23:57 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/25 12:03:17 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -763,7 +763,10 @@ size_t SemanticAnalysis::convertMaxBodySize(const std::string &value) const {
   size_t multiplicator = getMaxBodySizeMultiplier(c);
   tmpValue.erase((value.size() - 1), 1);
 
-  std::istringstream stream(value);
+  if (tmpValue.find_first_not_of("0123456789") != std::string::npos)
+    throw MaxBodySizeInvalidSetting(getThrowMessage());
+
+  std::istringstream stream(tmpValue);
   size_t maxBoySizeValue;
 
   stream >> maxBoySizeValue;
