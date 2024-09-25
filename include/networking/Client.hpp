@@ -24,6 +24,7 @@ class Client {
   bool isReadyForResponse();
   bool isReadyForRequest();
   bool shouldSendContinue();
+  bool shouldCloseConnection(bool force);
   void setReadyForResponse(bool ready);
   bool execute();
 
@@ -36,6 +37,8 @@ class Client {
   bool _shouldSendContinue;
   bool _isReadyForResponse;
   bool _isReadyForRequest;
+  bool _shouldCloseConnection;
+  std::chrono::system_clock::time_point _lastRequestTime;
 
   bool sendDefaultFavicon();
   bool sendWebDocument();

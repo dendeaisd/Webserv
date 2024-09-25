@@ -13,6 +13,7 @@
 
 PollManager::PollManager() {}
 
+bool PollManager::canAccept() { return _fds.size() < RLIMIT_NOFILE; }
 void PollManager::addSocket(int fd, int events, int port) {
   struct pollfd pfd;
   pfd.fd = fd;

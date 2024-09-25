@@ -14,6 +14,7 @@ class PollManager {
   void addSocket(int fd, int events = POLLIN, int port = -1);
   void removeSocket(int fd);
   void pollSockets();
+  bool canAccept();
   std::vector<struct pollfd>& getFds();
   std::unordered_map<int, int> _fdToPortMap;
 

@@ -30,7 +30,7 @@ class Log {
   std::mutex mutex_;
   std::string logFile_ = "logs/server.log";
   std::string errorFile_ = "logs/error.log";
-  LogLevel logLevel_ = LogLevel::DEBUG;
+  LogLevel logLevel_ = LogLevel::NOLOG;
 };
 
 #endif

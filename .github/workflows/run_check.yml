@@ -1,0 +1,27 @@
+name: Run curl check
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Build with make
+      run: |
+        make
+
+    - name: Run our webserver
+      run: |
+        ./webserv&
+
+    - name: curl homepage
+      run: |
+        curl localhost:8080
+
+    # - name: curl index.html
+    #   run: |
+    #     curl localhost:8080/index.html

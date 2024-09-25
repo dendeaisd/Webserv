@@ -70,17 +70,17 @@ void HttpRequestParser::setupUploadDir() {
   else
     _uploadDir = "." + _serverContext->_uploadDirValue;
   if (_uploadDir.back() != '/') {
-	_uploadDir += "/";
+    _uploadDir += "/";
   }
   if (!fs::exists(_uploadDir)) {
     fs::create_directories(_uploadDir);
   }
-//   if (fs::exists(".gitignore"))
-//   {
-// 	// append the upload directory to the gitignore file
-// 	std::ofstream gitignore(".gitignore", std::ios::app);
-// 	gitignore << _uploadDir << std::endl;
-//   }
+  //   if (fs::exists(".gitignore"))
+  //   {
+  // 	// append the upload directory to the gitignore file
+  // 	std::ofstream gitignore(".gitignore", std::ios::app);
+  // 	gitignore << _uploadDir << std::endl;
+  //   }
 }
 
 bool HttpRequestParser::isFileRequest() {

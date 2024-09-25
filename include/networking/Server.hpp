@@ -5,7 +5,6 @@
 #include <unordered_map>
 
 #include "Client.hpp"
-#include "ConfigFile.hpp"
 #include "PollManager.hpp"
 #include "Socket.hpp"
 
@@ -23,6 +22,7 @@ class Server {
   std::unordered_map<int, std::shared_ptr<ServerContext>>
       _portToServerContextMap;
   std::unique_ptr<ConfigFile> _config;
+  std::chrono::system_clock::time_point _lastCleanup;
 
   void handleEvents();
   void handlePollInEvent(int fd, short& events);
@@ -31,11 +31,11 @@ class Server {
   void handlePollErrEvent(int fd);
   void handleNewConnection(int serverFd);
   void handleClientRequest(int fd);
-  void processClientRequest(std::vector<Client*>::iterator& it);
-  void handleClientResponse(int fd);
+  void processClientRequest(Client* client);
   void buildPortToServer();
-  void cleanupClient(std::vector<Client*>::iterator& it);
+  void cleanupClient(Client* client);
   bool isServerSocket(int fd);
+  int cleanupStaleClients();
 };
 
 #endif
