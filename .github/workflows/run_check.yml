@@ -1,4 +1,4 @@
-name: Run curl check
+name: Run checks
 
 on: [pull_request]
 
@@ -13,7 +13,7 @@ jobs:
     - name: Install Siege
       run: |
         sudo apt-get update
-        sudo apt-get install -y siege
+        sudo apt-get install -y procps net-tools siege
 
     - name: Build with make
       run: |
@@ -23,7 +23,11 @@ jobs:
       run: |
         ./webserv&
 
-    - name: curl homepage
+    - name: Wait for the server to start
+      run: |
+        sleep 5  # Give time for the server to start
+
+    - name: curl localhost
       run: |
         curl localhost:8080
 
