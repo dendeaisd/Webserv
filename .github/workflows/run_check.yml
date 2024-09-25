@@ -1,4 +1,4 @@
-name: Run curl check
+name: Run checks
 
 on: [pull_request]
 
@@ -10,18 +10,46 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Install Siege
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y procps net-tools siege
+
     - name: Build with make
       run: |
-        make
+        make re
+
+    - name: Increase file descriptor limit
+      run: |
+        ulimit -n 65536
 
     - name: Run our webserver
       run: |
         ./webserv&
 
-    - name: curl homepage
+    - name: Wait until server is ready
+      run: |
+        for i in {1..10}; do
+          curl -s localhost:8080 && break
+          sleep 2
+        done
+
+    - name: curl localhost
       run: |
         curl localhost:8080
 
-    # - name: curl index.html
-    #   run: |
-    #     curl localhost:8080/index.html
+    - name: Run Siege stress test
+      run: |
+        siege -b -c10 -t1m http://localhost:8080
+
+    - name: Check server memory usage
+      run: |
+        ps aux | grep webserv
+
+    - name: Monitor memory for leaks
+      run: |
+        pmap $(pgrep webserv) | tail -n 1
+
+    - name: Check hanging connections
+      run: |
+        netstat -an | grep :8080
