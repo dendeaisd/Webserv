@@ -108,14 +108,14 @@ bool Client::sendWebDocument() {
   }
   std::cout << "URL: " << url << std::endl;
   if (url == "./" || url == "./index.html") {
-	url = getFirstValidIndexPage(_context->_indexValue);
-	std::cout << "Index page: " << url << std::endl;
-	if (url == "") {
-		if (_context->_indexValue.size() == 0)
-    		url = "./default/index.html";
-		else
-			sendErrorPage(403);
-	}
+    url = getFirstValidIndexPage(_context->_indexValue);
+    std::cout << "Index page: " << url << std::endl;
+    if (url == "") {
+      if (_context->_indexValue.size() == 0)
+        url = "./default/index.html";
+      else
+        sendErrorPage(403);
+    }
     _response.setFile(url, "text/html", "inline");
     std::string responseString = _response.getResponse();
     send(_fd, responseString.c_str(), responseString.length(), 0);

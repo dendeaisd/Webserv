@@ -223,8 +223,7 @@ void Server::cleanupClient(Client* client) {
     close(client->getFd());
     _clients.erase(std::remove(_clients.begin(), _clients.end(), client),
                    _clients.end());
-	if (client)
-    	delete client;
+    if (client) delete client;
   } catch (const std::exception& e) {
     Log::getInstance().error("Exception caught while cleaning up client: " +
                              std::string(e.what()));
