@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstring>
 #include <vector>
+#include <resource.h>
 
 PollManager::PollManager() {}
 
