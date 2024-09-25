@@ -48,7 +48,6 @@ void SemanticAnalysis::preSetup() {
   loadDirectives();
 }
 
-SemanticAnalysis::~SemanticAnalysis() {}
 
 void SemanticAnalysis::loadDirectives() {
   std::string path = "include/parseConfigFile/configContextAndDirectives/";

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cstring>
 #include <iostream>
+#include <sys/resource.h>
 #include <memory>
 
 #include "../../include/Event.hpp"
