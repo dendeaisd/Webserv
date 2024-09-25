@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   SemanticAnalysis.cpp                               :+:      :+:    :+:   */
+/*   semanticAnalysis.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/26 00:06:33 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/26 00:45:01 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -379,7 +379,7 @@ void SemanticAnalysis::locationSaveDirective() {
   if (isDirectiveInLine(_locationValidDirective) == false) return;
 
   if (locationValidDirective() == false)
-    throw InvalidHttpDirective(getThrowMessage());
+    throw InvalidLocationDirective(getThrowMessage());
   else if (locationReturned() == true)
     throw DirectiveSetAfterReturnInLocation(getThrowMessage());
 

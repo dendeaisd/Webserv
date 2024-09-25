@@ -1,6 +1,5 @@
 try_files
 access_log
-include
 deny
 return
 allow_methods
