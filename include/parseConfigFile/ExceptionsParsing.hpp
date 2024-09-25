@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/25 12:16:41 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/25 12:58:48 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,10 @@ class MissingSymbol : public ExceptionsParsing {
 
 class EmptyVectorOfTokens : public ExceptionsParsing {
  public:
-  EmptyVectorOfTokens() : ExceptionsParsing("Can't get empty tokens") {}
+  EmptyVectorOfTokens()
+      : ExceptionsParsing(
+            "No token found. Can't call the get function on an empty token "
+            "structure.") {}
 };
 
 class DirectiveValueNotTerminatedWithSemicolon : public ExceptionsParsing {
