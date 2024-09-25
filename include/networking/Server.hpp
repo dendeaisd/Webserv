@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <csignal>
 
 #include "Client.hpp"
 #include "PollManager.hpp"
@@ -36,6 +37,7 @@ class Server {
   void cleanupClient(Client* client);
   bool isServerSocket(int fd);
   int cleanupStaleClients();
+  void shutdown();
 };
 
 #endif

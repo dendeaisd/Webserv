@@ -10,10 +10,21 @@
 #include <sys/resource.h>
 #include <memory>
 
+
 #include "../../include/Event.hpp"
 #include "../../include/log/Log.hpp"
 #include "../../include/parseConfigFile/semanticAnalysis/ConfigFile.hpp"
 #include "../../include/parseConfigFile/semanticAnalysis/ServerContext.hpp"
+
+static volatile bool running = true;
+
+void handleSignal(int signal)
+{
+  if (signal == SIGINT) {
+    running = false;
+    Log::getInstance().warning("SIGINT caught. Shutting down the server...");
+  }
+}
 
 Server::Server(std::unique_ptr<ConfigFile>&& config) {
   _config = std::move(config);
@@ -55,7 +66,10 @@ Server::~Server() {
   }
 }
 
+
 void Server::run() {
+  std::signal(SIGINT, handleSignal);
+
   while (true) {
     if (std::chrono::system_clock::now() - _lastCleanup >
         std::chrono::seconds(5)) {
@@ -66,10 +80,17 @@ void Server::run() {
       std::cout << "Cleaned up " << std::to_string(count) << " stale clients"
                 << std::endl;
       _lastCleanup = std::chrono::system_clock::now();
+    }  
+    
+    if (!running) {
+      break;
     }
+
     _pollManager.pollSockets();
     handleEvents();
   }
+
+  shutdown();
 }
 
 void Server::handleEvents() {
@@ -205,6 +226,20 @@ void Server::cleanupClient(Client* client) {
   }
 }
 
+void Server::shutdown() {
+  Log::getInstance().info("Shutting down the server...");
+
+  for (Client* client : _clients) {
+    cleanupClient(client);
+  }
+
+  for (auto& socket : _serverSockets) {
+    _pollManager.removeSocket(socket->getSocketFd());
+    close(socket->getSocketFd());
+  }
+
+  Log::getInstance().info("Server shutdown complete.");
+}
 void Server::buildPortToServer() {
   auto servers = _config->_httpContext._serverContext;
   for (auto server : servers) {
