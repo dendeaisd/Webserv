@@ -78,11 +78,20 @@ void Client::sendErrorPage(int status) {
   _response.setStatusCode(status);
   if (HttpMaps::getInstance().errorHasDefaultPage(status)) {
     // move to a redirect
-    _response.setStatusCode(301);
+    _response.setStatusCode(302);
     _response.setHeader("Location", getErrorPagePath(status));
   }
   std::string responseString = _response.getResponse();
   send(_fd, responseString.c_str(), responseString.length(), 0);
+}
+
+std::string getFirstValidIndexPage(std::vector<std::string> indexPages) {
+  for (auto page : indexPages) {
+    if (std::filesystem::exists("." + page)) {
+      return "." + page;
+    }
+  }
+  return "";
 }
 
 bool Client::sendWebDocument() {
@@ -97,8 +106,16 @@ bool Client::sendWebDocument() {
     send(_fd, responseString.c_str(), responseString.length(), 0);
     return true;
   }
+  std::cout << "URL: " << url << std::endl;
   if (url == "./" || url == "./index.html") {
-    url = "./default/index.html";
+	url = getFirstValidIndexPage(_context->_indexValue);
+	std::cout << "Index page: " << url << std::endl;
+	if (url == "") {
+		if (_context->_indexValue.size() == 0)
+    		url = "./default/index.html";
+		else
+			sendErrorPage(403);
+	}
     _response.setFile(url, "text/html", "inline");
     std::string responseString = _response.getResponse();
     send(_fd, responseString.c_str(), responseString.length(), 0);
