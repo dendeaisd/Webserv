@@ -1,3 +1,4 @@
 server_name
 index
 listen
+error_page

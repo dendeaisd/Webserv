@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/24 19:29:45 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/26 00:24:55 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,16 @@ ServerContext::ServerContext() {
 
 void ServerContext::printServerContent() const noexcept {
   std::cout << "-Server-\n";
-  std::cout << "client_max_body_size: [" << _clientMaxBodySizeValue << "]\n";
+  printTypeFormat("client_max_body_size", _clientMaxBodySizeValue);
   printTypeFormat("ssl_certificate", _sslCertificateValue);
   printTypeFormat("ssl_certificate_key", _sslCertificateKeyValue);
   printTypeFormat("root", _rootValue);
-  std::cout << "request_timeout [" << _requestTimeoutValue << "]\n";
+  printTypeFormat("request_timeout", _requestTimeoutValue);
   printTypeFormat("upload_dir", _uploadDirValue);
   vectorPrint(_indexValue, "index");
   vectorPrint(_serverNameValue, "server_name");
   listenPrint();
+  errorPagePrint();
 
   auto it_location = _locationContext.begin();
 
@@ -49,11 +50,6 @@ void ServerContext::printServerContent() const noexcept {
     (*it_location)->printLocation();
     it_location++;
   }
-}
-
-void ServerContext::printTypeFormat(const std::string &type,
-                                    const std::string &value) const noexcept {
-  std::cout << type << ": [" << value << "]\n";
 }
 
 void ServerContext::vectorPrint(
@@ -80,3 +76,11 @@ void ServerContext::listenPrint() const noexcept {
               << (*it).second << "]\n";
   }
 }
+
+void ServerContext::errorPagePrint() const noexcept {
+  int i = 0;
+  for (auto it = _errorPageValue.begin(); it != _errorPageValue.end(); it++) {
+      std::cout << "[" << i << "] Error page status code and file: ["
+                << (*it).first << "] [" << (*it).second << "]\n";
+    }
+  }
