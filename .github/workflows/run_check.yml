@@ -13,19 +13,26 @@ jobs:
     - name: Install Siege
       run: |
         sudo apt-get update
-        sudo apt-get install -y procps net-tools siege
+        sudo apt-get install -y procps net-tools siege ulimit
 
     - name: Build with make
       run: |
         make re
 
+    - name: Increase file descriptor limit
+      run: |
+        ulimit -n 65536
+
     - name: Run our webserver
       run: |
         ./webserv&
 
-    - name: Wait for the server to start
+    - name: Wait until server is ready
       run: |
-        sleep 15  # Give time for the server to start
+        for i in {1..10}; do
+          curl -s localhost:8080 && break
+          sleep 2
+        done
 
     - name: curl localhost
       run: |
