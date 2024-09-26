@@ -83,7 +83,7 @@ std::string HttpMaps::getMimeType(const std::string &path) {
       {"jpeg", "image/jpeg"},       {"png", "image/png"},
       {"gif", "image/gif"},         {"ico", "image/x-icon"},
       {"pdf", "application/pdf"},   {"zip", "application/zip"},
-      {"txt", "text/plain"}};
+      {"txt", "text/plain"},        {"log", "text/plain"}};
 
   auto it = mimeMap.find(extension);
   if (it != mimeMap.end()) {

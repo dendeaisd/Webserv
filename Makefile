@@ -1,6 +1,6 @@
 NAME			:=  webserv
 CC          	:=  c++
-CFLAGS      	:=  -std=c++17 -g -Wall -Wextra -Werror
+CFLAGS      	:=  -std=c++17 -g -Wall -Wextra -Werror -fsanitize=address
 INCLUDE_DIRS	:=	-I./include -I./tester                                  		\
 					-I./include/parseConfigFile/semanticAnalysis               		\
 					-I./include/parseConfigFile/tokenizing							\
@@ -16,7 +16,7 @@ SRC         	:=  $(wildcard src/*.cpp) $(wildcard src/networking/*.cpp) 			\
 					$(wildcard src/cgi/*.cpp) $(wildcard src/log/*.cpp)             \
 					$(wildcard src/response/*.cpp)                                  \
 					$(wildcard src/parseConfigFile/*.cpp)                			\
-					$(wildcard src/parseConfigFile/semanticAnalysis/*.cpp)          \
+					$(wildcard src/parseConfigFile/SemanticAnalysis/*.cpp)          \
 					$(wildcard src/parseConfigFile/tokenizing/*.cpp)
 
 OBJ         	:=  $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRC))

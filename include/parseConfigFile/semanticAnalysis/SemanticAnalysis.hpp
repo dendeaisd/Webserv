@@ -34,7 +34,7 @@ class SemanticAnalysis {
   SemanticAnalysis(const SemanticAnalysis &) = delete;
   SemanticAnalysis &operator=(const SemanticAnalysis &other) = delete;
   SemanticAnalysis(TokenStructure &token);
-  ~SemanticAnalysis();
+  ~SemanticAnalysis() {}
 
   std::unique_ptr<ConfigFile> getConfigFile();
 
@@ -73,7 +73,6 @@ class SemanticAnalysis {
 
   template <typename T>
   void saveMultipleDirectiveValue(std::vector<T> &) noexcept;
-  void listenSave();
 
   bool isDirectiveInLine(std::set<std::string> &) noexcept;
   bool isValidMainDirective() noexcept;
@@ -99,6 +98,18 @@ class SemanticAnalysis {
   size_t getMaxBodySizeMultiplier(char c) const;
   bool canClientMaxBodySetBeSet() const noexcept;
   bool isClientMaxBodySizeSet() const noexcept;
+
+  bool locationReturned() const noexcept;
+  void saveReturnValue();
+  int convertStatusCode(std::string &) const;
+  bool isWithInStatusCodeRange(int statusCode) const noexcept;
+  bool isValidThreeHundredStatusRange(int statusCode) const noexcept;
+  bool isValidReturnURL() const noexcept;
+  std::string getReturnMessage() const noexcept;
+
+  void saveRequestTimeOut();
+
+  void errorPageSave();
 
   std::string getThrowMessage() noexcept;
   std::string getThrowMessage() const noexcept;

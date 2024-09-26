@@ -27,86 +27,96 @@
 <div class="spinner" id="spinner"></div>
 <h1>Upload a file</h1>
 
-<input type="file" name="file">
-<button type="submit">Upload</button>
+<input type="file" name="file" />
+<button type="submit" id="submit">Upload</button>
+
+<div>
+	<input type="text" name="filename" placeholder="Filename to delete" />
+	<button type="submit" id="delete">Delete</button>
+</div>
+
 <script>
 	function showSpinner() {
-		document.getElementById('spinner').style.display = 'block';
+		document.getElementById("spinner").style.display = "block";
 	}
 	function hideSpinner() {
-		document.getElementById('spinner').style.display = 'none';
+		document.getElementById("spinner").style.display = "none";
 	}
-
-	function handleFileStream(file) {
-		const filename = file.name;
-		fetch('/uploads', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/octet-stream',
-				'Content-Disposition': 'attachment; filename="' + filename + '"',
-			},
-			body: file.stream(),
-			duplex: 'half'
-		}).then(function (response) {
-			if (response.redirected) {
-				window.location.href = '/uploads';
-			} else {
-				return response.text().then(function (text) {
-					hideSpinner();
-					throw new Error(text);
-				});
-			}
-		}).then(function (text) {
-			hideSpinner();
-			console.log(text);
-		});
-	}
-	document.querySelector('button').addEventListener('click', function (event) {
+	document.getElementById("submit").addEventListener("click", function (event) {
+		event.preventDefault();
 		showSpinner();
-		var file = document.querySelector('input[type=file]').files[0];
+		var file = document.querySelector("input[type=file]").files[0];
 		if (!file) {
-			console.error('No file selected');
+			console.error("No file selected");
+			hideSpinner();
 			return;
 		}
 		const size = file.size;
-		const maxSize = 1024 * 1024 * 500; // 500 MB
+		const maxSize = 1024 * 1024 * 1024; // 1GB
 		if (size > maxSize) {
-			console.error('File too large (max 500 MB)');
-			console.log('File size:', size);
+			console.error("File too large (max 1GB)");
 			hideSpinner();
 			console.log("Switching to file.stream() mode");
-			handleFileStream(file);
+			showSpinner();
 			return;
 		}
 		console.log(file);
 		var reader = new FileReader();
-		console.log(reader);
 		reader.onload = function (event) {
-			console.log(event.target.result);
 			var arrayBuffer = event.target.result;
-			var blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+			var blob = new Blob([arrayBuffer], { type: "application/octet-stream" });
 			const filename = file.name;
-			fetch('/uploads', {
-				method: 'POST',
+			fetch("/uploads", {
+				method: "POST",
 				headers: {
-					'Content-Type': 'application/octet-stream',
-					'Content-Disposition': 'attachment; filename="' + filename + '"',
+					"Content-Type": "application/octet-stream",
+					"Content-Disposition": 'attachment; filename="' + filename + '"',
 				},
-				body: blob
-			}).then(function (response) {
-				if (response.redirected) {
-					window.location.href = '/uploads';
-				} else {
-					return response.text().then(function (text) {
+				body: blob,
+			})
+				.then(function (response) {
+					if (response.status == 201) {
+						console.log("Redirecting to", response.url);
+						window.location.href = "/uploads";
+					} else {
+						// return response.text().then(function (html) {
+						// 	hideSpinner();
+						// 	console.log("File uploaded successfully");
+						// 	// displayUploadedFilesFromHTML(html);
+						// });
 						hideSpinner();
-						throw new Error(text);
-					});
-				}
-			}).then(function (text) {
-				hideSpinner();
-				console.log(text);
-			});
+						console.log(response);
+					}
+				})
+				.catch(function (error) {
+					hideSpinner();
+					console.error("Upload failed:", error);
+				});
 		};
 		reader.readAsArrayBuffer(file);
+	});
+	document.getElementById("delete").addEventListener("click", function (event) {
+		event.preventDefault();
+		showSpinner();
+		const filename = document.querySelector("input[name=filename]").value;
+		fetch("/uploads/" + filename, {
+			method: "DELETE",
+		})
+			.then(function (response) {
+				if (response.status == 204) {
+					console.log("Redirecting to", response.url);
+					window.location.href = "/uploads";
+				} else {
+					return response.text().then(function (html) {
+						hideSpinner();
+						console.log(response);
+						alert("YOU SHALL NOT DELETE THIS FILE!! I GUESS, ALSO CHECK CONSOLE FOR MORE INFO")
+					});
+				}
+			})
+			.catch(function (error) {
+				hideSpinner();
+				console.error("Delete failed:", error);
+			});
 	});
 </script>

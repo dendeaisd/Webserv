@@ -49,6 +49,16 @@ CGI::CGI(int fd, HttpRequest &request) : _fd(fd), _request(request) {
 
 CGI::~CGI() {}
 
+bool sendToCGI(int fd, std::string response) {
+  int result = send(fd, response.c_str(), response.length(), 0);
+  if (result == -1) {
+    Log::getInstance().error("Failed to send directory listing");
+    return false;
+  }
+  if (result == 0) return true;
+  return true;
+}
+
 void CGI::sendTimeoutResponse() {
   _response = HttpResponse(408);
   _response.setBody(
@@ -134,17 +144,19 @@ bool CGI::tunnelData() {
     } else {
       close(_pipeOutFd[0]);
     }
+    if (sent == 0) {
+      return true;
+    }
     return true;
   } else {
-    if (bytes_read < 0) {
+    if (bytes_read == -1) {
       Log::getInstance().error("Failed to read from pipe with error: " +
                                std::string(std::strerror(errno)));
     }
+    if (bytes_read == 0) Log::getInstance().debug("Read 0 bytes");
     close(_pipeOutFd[0]);
     sendInternalErrorResponse();
-    send(_fd, _response.getResponse().c_str(), _response.getResponse().length(),
-         0);
-    return true;
+    return sendToCGI(_fd, _response.getResponse());
   }
 }
 
@@ -220,7 +232,5 @@ void CGI::executeCGI() {
 
 bool CGI::handleResponse() {
   if (_response.getStatusCode() == -1) return tunnelData();
-  send(_fd, _response.getResponse().c_str(), _response.getResponse().length(),
-       0);
-  return true;
+  return sendToCGI(_fd, _response.getResponse());
 }

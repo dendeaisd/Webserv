@@ -79,22 +79,22 @@ int Socket::acceptConnection(struct sockaddr_in *address, socklen_t *addrlen) {
   return new_socket;
 }
 
-int Socket::readData(int _sockFd, char *buffer, size_t size) {
-  int bytes_read = read(_sockFd, buffer, size);
-  if (bytes_read < 0) {
-    Log::getInstance().error("Failed to read from socket");
-    throw readFailed(std::strerror(errno));
-  }
-  return bytes_read;
-}
+// int Socket::readData(int _sockFd, char *buffer, size_t size) {
+//   int bytes_read = read(_sockFd, buffer, size);
+//   if (bytes_read < 0) {
+//     Log::getInstance().error("Failed to read from socket");
+//     throw readFailed(std::strerror(errno));
+//   }
+//   return bytes_read;
+// }
 
-int Socket::sendData(int _sockFd, const char *buffer, size_t size) {
-  int bytes_sent = send(_sockFd, buffer, size, 0);
-  if (bytes_sent < 0) {
-    throw sendFailed(std::strerror(errno));
-  }
-  return bytes_sent;
-}
+// int Socket::sendData(int _sockFd, const char *buffer, size_t size) {
+//   int bytes_sent = send(_sockFd, buffer, size, 0);
+//   if (bytes_sent < 0) {
+//     throw sendFailed(std::strerror(errno));
+//   }
+//   return bytes_sent;
+// }
 
 void Socket::setNonBlocking() {
   int flags = fcntl(_sockFd, F_GETFL, 0);

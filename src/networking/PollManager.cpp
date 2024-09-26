@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <sys/resource.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -13,6 +14,7 @@
 
 PollManager::PollManager() {}
 
+bool PollManager::canAccept() { return _fds.size() < RLIMIT_NOFILE; }
 void PollManager::addSocket(int fd, int events, int port) {
   struct pollfd pfd;
   pfd.fd = fd;
@@ -39,6 +41,9 @@ void PollManager::removeSocket(int fd) {
 void PollManager::pollSockets() {
   int poll_count = poll(&_fds[0], _fds.size(), 0);
   if (poll_count < 0) {
+    if (errno == EINTR) {
+      return;
+    }
     throw pollFailed(std::strerror(errno));
   }
 }

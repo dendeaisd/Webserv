@@ -13,10 +13,9 @@
 #include "../../include/request/HttpRequestEnums.hpp"
 #include "../../include/response/HttpResponse.hpp"
 #define MAX_BUFFER_SIZE 4096
-#define UPLOAD_DIR "uploads/"
 #define MAX_HEADER_SIZE 4096
 
-using namespace std::filesystem;
+namespace fs = std::filesystem;
 HttpRequestParser::HttpRequestParser()
     : status(HttpRequestParseStatus::NOT_PARSED) {}
 
@@ -27,13 +26,15 @@ HttpRequestParser::HttpRequestParser(
       hasFile(false),
       _clientFd(clientFd),
       _raw(raw) {
+  _serverContext = serverContext;
   _request = HttpRequest();
+  _request.setTimeoutSeconds(serverContext->_requestTimeoutValue);
   _boundary = "";
   total_read = 0;
   currentFileUploadStatus = HttpFileUploadStatus::NOT_STARTED;
   currentFileUploadName = "";
   _statusCode = 0;
-  _serverContext = serverContext;
+  setupUploadDir();
 }
 
 HttpRequestParser::~HttpRequestParser() {}
@@ -63,9 +64,29 @@ std::shared_ptr<Location> HttpRequestParser::getMostRelevantLocation() {
   return nullptr;
 }
 
+void HttpRequestParser::setupUploadDir() {
+  if (_serverContext->_uploadDirValue.empty())
+    _uploadDir = "uploads/";
+  else
+    _uploadDir = "." + _serverContext->_uploadDirValue;
+  if (_uploadDir.back() != '/') {
+    _uploadDir += "/";
+  }
+  if (!fs::exists(_uploadDir)) {
+    fs::create_directories(_uploadDir);
+  }
+  //   if (fs::exists(".gitignore"))
+  //   {
+  // 	// append the upload directory to the gitignore file
+  // 	std::ofstream gitignore(".gitignore", std::ios::app);
+  // 	gitignore << _uploadDir << std::endl;
+  //   }
+}
+
 bool HttpRequestParser::isFileRequest() {
   return (_request.getUri().substr(0, 9) == "/uploads/" &&
-          _request.getMethodEnum() == HttpRequestMethod::GET);
+          (_request.getMethodEnum() == HttpRequestMethod::GET ||
+           _request.getMethodEnum() == HttpRequestMethod::DELETE));
 }
 
 /**
@@ -89,6 +110,24 @@ bool HttpRequestParser::electHandler() {
     }
   }
   if (isCgiRequest()) {
+    bool valid = true;
+    std::string script = "";
+    std::string uri = _request.getUri();
+    size_t dotPos = uri.find(".");
+    if (dotPos == std::string::npos) {
+      valid = false;
+    }
+    size_t slashPos = uri.find("/", dotPos);
+    if (slashPos != std::string::npos) {
+      script = "." + uri.substr(0, slashPos);
+    } else {
+      script = "." + uri;
+    }
+    if (!valid || !fs::exists(script)) {
+      _request.setHandler(HttpRequestHandler::ERROR);
+      setStatusCode(404);
+      return false;
+    }
     _request.setHandler(HttpRequestHandler::CGI);
   } else if (isFaviconRequest()) {
     _request.setHandler(HttpRequestHandler::FAVICON);
@@ -100,8 +139,11 @@ bool HttpRequestParser::electHandler() {
              _request.getMethodEnum() == HttpRequestMethod::GET) {
     _request.setHandler(HttpRequestHandler::LIST_UPLOADS);
   } else if (isFileRequest()) {
-    if (is_regular_file(_request.getUri().substr(1)))
-      _request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
+    if (fs::is_regular_file(_request.getUri().substr(1)))
+      if (_request.getMethodEnum() == HttpRequestMethod::GET)
+        _request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
+      else
+        _request.setHandler(HttpRequestHandler::DELETE_UPLOADED_FILE);
     else {
       _request.setHandler(HttpRequestHandler::ERROR);
       setStatusCode(404);
@@ -130,8 +172,12 @@ bool HttpRequestParser::isFaviconRequest() {
 
 bool HttpRequestParser::isDirectoryRequest() {
   bool dirListOn = _locationConfig->_autoIndexValue == "on" ? true : false;
-  std::string path = _request.getUri();
-  return is_directory(path) && dirListOn;
+  std::string root = _serverContext->_rootValue;
+  if (root.back() == '/') {
+    root.pop_back();
+  }
+  std::string path = "." + _serverContext->_rootValue + _request.getUri();
+  return fs::is_directory(path) && dirListOn;
 }
 
 std::string getLineSanitized(std::stringstream &ss) {
@@ -159,9 +205,6 @@ bool HttpRequestParser::isAllowedMethod(const std::string &method) {
 }
 
 bool HttpRequestParser::isAllowedContentLength(size_t contentLength) {
-  Log::getInstance().debug(
-      "Max content length: " +
-      std::to_string(_serverContext->_clientMaxBodySizeValue));
   return contentLength <= _serverContext->_clientMaxBodySizeValue;
 }
 
@@ -172,7 +215,11 @@ bool HttpRequestParser::isUploadAllowed() {
 }
 
 void HttpRequestParser::injectUploadFormIfNeeded() {
-  if (_request.getUri() == "/uploads" &&
+  std::string path = _request.getUri();
+  if (path.back() == '/') {
+    path.pop_back();
+  }
+  if (path == "/uploads" &&
       _request.getMethodEnum() == HttpRequestMethod::GET) {
     _request.addInjection("./default/upload/index.html");
   }
@@ -479,7 +526,7 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
   int contentLength = _request.getContentLength();
   int bytesWritten = 0;
   std::string filename = _request.getHeader("filename");
-  std::ofstream file(UPLOAD_DIR + filename, std::ios::binary);
+  std::ofstream file(_uploadDir + filename, std::ios::binary);
   if (!file.is_open()) {
     Log::getInstance().error("Failed to open file for writing");
     return false;
@@ -508,6 +555,11 @@ bool HttpRequestParser::handleOctetStream(std::stringstream &ss) {
       break;
     }
     bytes_read = read(_clientFd, buffer, MAX_BUFFER_SIZE);
+    if (bytes_read == -1) {
+      Log::getInstance().error("Failed to read from client with error: " +
+                               std::string(std::strerror(errno)));
+    }
+    if (bytes_read == 0) Log::getInstance().debug("Read 0 bytes");
   }
   file.close();
   status = HttpRequestParseStatus::PARSED;
@@ -526,11 +578,13 @@ bool HttpRequestParser::askForContinue() {
     response.setHeader("Connection", "keep-alive");
     std::string responseString = response.getResponse();
     status = HttpRequestParseStatus::EXPECT_CONTINUE;
-    if (send(_clientFd, responseString.c_str(), responseString.length(), 0) <
-        0) {
+    int sent =
+        send(_clientFd, responseString.c_str(), responseString.length(), 0);
+    if (sent == -1) {
       Log::getInstance().error("Failed to send 100 Continue response");
       return false;
     }
+    if (sent == 0) Log::getInstance().debug("Sent 0 bytes");
     return true;
   }
   status = HttpRequestParseStatus::PARSED;
@@ -545,9 +599,12 @@ int readMore(std::stringstream &ss, int _clientFd) {
     buffer[bytes_read] = '\0';
     ss << buffer;
   } else {
-    if (bytes_read < 0) {
+    if (bytes_read == -1) {
       Log::getInstance().error("Readmore failed with error: " +
                                std::string(std::strerror(errno)));
+    }
+    if (bytes_read == 0) {
+      Log::getInstance().debug("Read 0 bytes");
     }
   }
   return bytes_read;
@@ -609,7 +666,7 @@ bool HttpRequestParser::handleMultipartFormData(std::stringstream &ss) {
             "key");
         return false;
       }
-      std::ofstream file(UPLOAD_DIR + filename, std::ios::binary);
+      std::ofstream file(_uploadDir + filename, std::ios::binary);
       if (!file.is_open()) {
         Log::getInstance().error("Failed to open file for writing");
         return false;

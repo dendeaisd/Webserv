@@ -1,7 +1,6 @@
 try_files
-error_page
 access_log
-include
 deny
 return
 allow_methods
+cgi

@@ -33,7 +33,7 @@ class HttpResponse {
   std::string _file;
 
   std::string loadFile();
-  void sendHeaders(int fd);
+  bool sendHeaders(int fd);
 };
 
 #endif  // HTTPRESPONSE_HPP

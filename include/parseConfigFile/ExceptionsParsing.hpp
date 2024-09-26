@@ -6,7 +6,7 @@
 /*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 10:41:40 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 18:58:21 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/26 00:05:02 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,10 @@ class MissingSymbol : public ExceptionsParsing {
 
 class EmptyVectorOfTokens : public ExceptionsParsing {
  public:
-  EmptyVectorOfTokens() : ExceptionsParsing("Can't get empty tokens") {}
+  EmptyVectorOfTokens()
+      : ExceptionsParsing(
+            "No token found. Can't call the get function on an empty token "
+            "structure.") {}
 };
 
 class DirectiveValueNotTerminatedWithSemicolon : public ExceptionsParsing {
@@ -148,4 +151,32 @@ class MaxBodySizeInvalidSetting : public ExceptionsParsing {
  public:
   MaxBodySizeInvalidSetting(const std::string &message)
       : ExceptionsParsing("Invalid client_max_body_size. Line " + message) {}
+};
+
+class DirectiveSetAfterReturnInLocation : public ExceptionsParsing {
+ public:
+  DirectiveSetAfterReturnInLocation(const std::string &message)
+      : ExceptionsParsing("Directive after return in location context. Line " +
+                          message) {}
+};
+
+class InvalidStatusCode : public ExceptionsParsing {
+ public:
+  InvalidStatusCode(const std::string &message)
+      : ExceptionsParsing("Invalid status code. Line " + message) {}
+};
+
+class InvalidRequestTimeout : public ExceptionsParsing {
+ public:
+  InvalidRequestTimeout(const std::string &message)
+      : ExceptionsParsing("Invalid request timeout. Line " + message) {}
+};
+
+class InvalidErrorPage : public ExceptionsParsing {
+ public:
+  InvalidErrorPage(const std::string &message)
+      : ExceptionsParsing(
+            "Invalid error message setting. Error page need's to be set with "
+            "one status code and one file path. Line " +
+            message) {}
 };

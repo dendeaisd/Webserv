@@ -1,10 +1,9 @@
-include
 proxy_pass
 alias
 try_files
-error_page
 access_log
 deny
 return
 autoindex
 allow_methods
+cgi

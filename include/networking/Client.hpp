@@ -24,6 +24,7 @@ class Client {
   bool isReadyForResponse();
   bool isReadyForRequest();
   bool shouldSendContinue();
+  bool shouldCloseConnection(bool force);
   void setReadyForResponse(bool ready);
   bool execute();
 
@@ -36,15 +37,20 @@ class Client {
   bool _shouldSendContinue;
   bool _isReadyForResponse;
   bool _isReadyForRequest;
+  bool _shouldCloseConnection;
+  std::chrono::system_clock::time_point _lastRequestTime;
 
   bool sendDefaultFavicon();
   bool sendWebDocument();
   bool sendDirectoryListings(const std::string& path);
+  bool sendErrorPage(int status);
+  std::string getErrorPagePath(int status);
+  int getStatusCodeForErrorPage(const std::string& path);
 
   std::string generateDirectoryListing(const std::string& path,
                                        const std::string& requestUri,
                                        const std::string& inject);
-  bool handleContinue();
+  //   bool handleContinue();
   bool handleRedirect();
   void reset();
 };

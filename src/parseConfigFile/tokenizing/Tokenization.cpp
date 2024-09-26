@@ -219,6 +219,10 @@ void Tokenization::directiveIdentification() {
       (*it)->_type = TypeToken::ALLOW_METHODS;
     else if ((*it)->_tokenStr == "return")
       (*it)->_type = TypeToken::RETURN;
+    else if ((*it)->_tokenStr == "upload_dir")
+      (*it)->_type = TypeToken::UPLOAD_DIR;
+    else if ((*it)->_tokenStr == "request_timeout")
+      (*it)->_type = TypeToken::REQUEST_TIMEOUT;
   }
 }
 
@@ -315,6 +319,6 @@ void Tokenization::leftBracketsCheck() {
 void Tokenization::undefinedTokenCheck() {
   for (auto it = _tokensFromLine.begin(); it != _tokensFromLine.end(); it++) {
     if ((*it)->_type == TypeToken::DEFAULT)
-      throw CantIdentifySetting((*it)->_foundLine + ": " + (*it)->_tokenStr);
+      throw CantIdentifySetting((*it)->_foundLine + ": " + _line);
   }
 }

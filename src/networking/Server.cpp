@@ -2,6 +2,7 @@
 #include "../../include/networking/Server.hpp"
 
 #include <fcntl.h>
+#include <sys/resource.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -11,8 +12,17 @@
 
 #include "../../include/Event.hpp"
 #include "../../include/log/Log.hpp"
-#include "ConfigFile.hpp"
-#include "ServerContext.hpp"
+#include "../../include/parseConfigFile/semanticAnalysis/ConfigFile.hpp"
+#include "../../include/parseConfigFile/semanticAnalysis/ServerContext.hpp"
+
+static volatile bool running = true;
+
+void handleSignal(int signal) {
+  if (signal == SIGINT) {
+    running = false;
+    Log::getInstance().warning("SIGINT caught. Shutting down the server...");
+  }
+}
 
 Server::Server(std::unique_ptr<ConfigFile>&& config) {
   _config = std::move(config);
@@ -44,20 +54,33 @@ Server::Server(std::unique_ptr<ConfigFile>&& config) {
     _pollManager.addSocket(newSocket->getSocketFd(), POLLIN, port);
     _serverSockets.push_back(newSocket);
   }
+  _lastCleanup = std::chrono::system_clock::now();
+  _processedRequests = 0;
+  _requestCount = 0;
 }
 
-Server::~Server() {
-  for (std::vector<Client*>::iterator it = _clients.begin();
-       it != _clients.end(); ++it) {
-    delete *it;
-  }
-}
+Server::~Server() { shutdown(); }
 
 void Server::run() {
-  while (true) {
+  std::signal(SIGINT, handleSignal);
+
+  while (running) {
+    if (std::chrono::system_clock::now() - _lastCleanup >
+        std::chrono::seconds(5)) {
+      std::cout << "Concurrent clients count: " << _fdToClientMap.size()
+                << std::endl;
+      std::cout << "Total requests processed: " << _processedRequests
+                << std::endl;
+      std::cout << "Total requests received: " << _requestCount << std::endl;
+      int count = cleanupStaleClients();
+      std::cout << "Cleaned up " << std::to_string(count) << " stale clients"
+                << std::endl;
+      _lastCleanup = std::chrono::system_clock::now();
+    }
     _pollManager.pollSockets();
     handleEvents();
   }
+  shutdown();
 }
 
 void Server::handleEvents() {
@@ -66,9 +89,9 @@ void Server::handleEvents() {
   for (size_t i = 0; i < fds.size(); ++i) {
     int fd = fds[i].fd;
     short revents = fds[i].revents;
+    auto client = _fdToClientMap.find(fd);
     if (Event::getInstance().hasEvent(fd)) {
       if (Event::getInstance().getEvent(fd)->wait()) {
-        auto client = _fdToClientMap.find(fd);
         if (client != _fdToClientMap.end()) {
           client->second->setReadyForResponse(true);
           fds[i].events = POLLOUT;
@@ -87,25 +110,40 @@ void Server::handleEvents() {
   }
 }
 
-void Server::handleClientRequest(int fd) {
-  for (std::vector<Client*>::iterator it = _clients.begin();
-       it != _clients.end(); ++it) {
-    if ((*it)->getFd() == fd) {
-      processClientRequest(it);
-      break;
+int Server::cleanupStaleClients() {
+  int count = 0;
+  bool force = false;
+  if (_fdToClientMap.size() == 0) return 0;
+  if (_fdToClientMap.size() > RLIMIT_NOFILE / 2) force = true;
+  std::vector<struct pollfd>& fds = _pollManager.getFds();
+  for (size_t i = 0; i < fds.size(); ++i) {
+    int fd = fds[i].fd;
+    auto client = _fdToClientMap.find(fd);
+    if (client != _fdToClientMap.end() &&
+        client->second->shouldCloseConnection(force)) {
+      cleanupClient(client->second);
+      count++;
     }
+  }
+  return count;
+}
+
+void Server::handleClientRequest(int fd) {
+  auto client = _fdToClientMap.find(fd);
+  if (client != _fdToClientMap.end()) {
+    processClientRequest(client->second);
   }
 }
 
-void Server::processClientRequest(std::vector<Client*>::iterator& it) {
+void Server::processClientRequest(std::shared_ptr<Client> client) {
   try {
-    if (!(*it)->handleRequest()) {
-      cleanupClient(it);
+    if (!client->handleRequest()) {
+      cleanupClient(client);
     }
   } catch (const std::exception& e) {
     std::cerr << "Exception caught while handling request: " << e.what()
               << std::endl;
-    cleanupClient(it);
+    cleanupClient(client);
   }
 }
 
@@ -128,6 +166,7 @@ void Server::handlePollInEvent(int fd, short& events) {
     // If client is ready for response, set events to POLLOUT
     if (client != _fdToClientMap.end() &&
         client->second->isReadyForResponse()) {
+      _requestCount++;
       events = POLLOUT;
     }
   }
@@ -135,47 +174,70 @@ void Server::handlePollInEvent(int fd, short& events) {
 
 void Server::handlePollOutEvent(int fd, short& events) {
   auto client = _fdToClientMap.find(fd);
-  auto it =
-      std::find_if(_clients.begin(), _clients.end(),
-                   [fd](Client* client) { return client->getFd() == fd; });
   if (client != _fdToClientMap.end() && client->second->isReadyForResponse()) {
     if (!client->second->execute()) {
-      cleanupClient(it);
+      cleanupClient(client->second);
       return;
     }
+    if (client->second->shouldCloseConnection(false)) {
+      events = POLLHUP;
+      return;
+    }
+    _processedRequests++;
     events = POLLIN;
   }
 }
 
 void Server::handlePollHupEvent(int fd) {
   Log::getInstance().debug("Connection closed by client");
-  auto it =
-      std::find_if(_clients.begin(), _clients.end(),
-                   [fd](Client* client) { return client->getFd() == fd; });
-  if (it != _clients.end()) {
-    cleanupClient(it);
+  auto client = _fdToClientMap.find(fd);
+  if (client != _fdToClientMap.end()) {
+    cleanupClient(client->second);
   }
 }
 
 void Server::handlePollErrEvent(int fd) {
   Log::getInstance().error("Error on socket " + std::to_string(fd) + ": " +
                            std::strerror(errno));
-  auto it =
-      std::find_if(_clients.begin(), _clients.end(),
-                   [fd](Client* client) { return client->getFd() == fd; });
-  if (it != _clients.end()) {
-    cleanupClient(it);
+  auto client = _fdToClientMap.find(fd);
+  if (client != _fdToClientMap.end()) {
+    cleanupClient(client->second);
   }
 }
 
-void Server::cleanupClient(std::vector<Client*>::iterator& it) {
-  _fdToClientMap.erase((*it)->getFd());
-  _pollManager.removeSocket((*it)->getFd());
-  close((*it)->getFd());
-  delete *it;
-  _clients.erase(it);
+void Server::cleanupClient(std::shared_ptr<Client> client) {
+  try {
+    _fdToClientMap.erase(client->getFd());
+    _pollManager.removeSocket(client->getFd());
+    close(client->getFd());
+    _clients.erase(std::remove(_clients.begin(), _clients.end(), client),
+                   _clients.end());
+    // if (client) delete client;
+  } catch (const std::exception& e) {
+    Log::getInstance().error("Exception caught while cleaning up client: " +
+                             std::string(e.what()));
+  }
 }
 
+void Server::shutdown() {
+  Log::getInstance().info("Shutting down the server...");
+
+  for (auto client : _clients) {
+    close(client->getFd());
+  }
+
+  for (auto& socket : _serverSockets) {
+    _pollManager.removeSocket(socket->getSocketFd());
+    close(socket->getSocketFd());
+  }
+
+  _clients.clear();
+  _serverSockets.clear();
+  _fdToClientMap.clear();
+  _portToServerContextMap.clear();
+
+  Log::getInstance().info("Server shutdown complete.");
+}
 void Server::buildPortToServer() {
   auto servers = _config->_httpContext._serverContext;
   for (auto server : servers) {
@@ -207,17 +269,21 @@ void Server::handleNewConnection(int serverFd) {
               << std::endl;
     return;
   }
-  int new_socket = (*it)->acceptConnection(&address, &addrlen);
-  if (new_socket >= 0) {
-    Log::getInstance().debug("New connection on port " +
-                             std::to_string(serverPort));
-    std::shared_ptr<ServerContext> serverContext =
-        _portToServerContextMap.find(serverPort)->second;
-    Log::getInstance().debug("Server context: " +
-                             serverContext->_serverNameValue.at(0));
-    Client* new_client = new Client(new_socket, serverContext);
-    _clients.push_back(new_client);
-    _pollManager.addSocket(new_socket, POLLIN, serverPort);
-    _fdToClientMap[new_socket] = new_client;
+  try {
+    int new_socket = (*it)->acceptConnection(&address, &addrlen);
+    if (new_socket >= 0) {
+      Log::getInstance().debug("New connection on port " +
+                               std::to_string(serverPort));
+      std::shared_ptr<ServerContext> serverContext =
+          _portToServerContextMap.find(serverPort)->second;
+      std::shared_ptr<Client> new_client =
+          std::make_shared<Client>(new_socket, serverContext);
+      _clients.push_back(new_client);
+      _pollManager.addSocket(new_socket, POLLIN, serverPort);
+      _fdToClientMap[new_socket] = new_client;
+    }
+  } catch (const std::exception& e) {
+    Log::getInstance().error("Exception caught while accepting connection: " +
+                             std::string(e.what()));
   }
 }

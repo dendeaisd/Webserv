@@ -6,7 +6,7 @@
 /*   By: ramymoussa <ramymoussa@student.42.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/10 12:06:57 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/23 22:43:27 by ramymoussa       ###   ########.fr       */
+/*   Updated: 2024/09/26 00:45:01 by fgabler          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,6 @@ void SemanticAnalysis::preSetup() {
   _config = std::make_unique<ConfigFile>();
   loadDirectives();
 }
-
-SemanticAnalysis::~SemanticAnalysis() {}
 
 void SemanticAnalysis::loadDirectives() {
   std::string path = "include/parseConfigFile/configContextAndDirectives/";
@@ -263,7 +261,6 @@ void SemanticAnalysis::possibleCreationOfNewContext() noexcept {
 void SemanticAnalysis::createServerContext() noexcept {
   _config->_httpContext._serverContext.push_back(
       std::make_shared<ServerContext>());
-  // std::cout << "NEW SERVER\n";
 }
 
 void SemanticAnalysis::createLocationContext() noexcept {
@@ -273,7 +270,6 @@ void SemanticAnalysis::createLocationContext() noexcept {
   _config->_httpContext._serverContext.back()
       ->_locationContext.back()
       ->_urlValue = _tokenLine[1]->_tokenStr;
-  // std::cout << "NEW LOCATION\n";
 }
 
 bool SemanticAnalysis::validServerLine() noexcept {
@@ -366,6 +362,13 @@ void SemanticAnalysis::serverSaveDirective() {
   else if (canDirectiveBeSaved(TypeToken::SERVER_NAME))
     saveMultipleDirectiveValue(
         _config->_httpContext._serverContext.back()->_serverNameValue);
+  else if (canDirectiveBeSaved(TypeToken::UPLOAD_DIR))
+    _config->_httpContext._serverContext.back()->_uploadDirValue = value;
+  else if (_tokenLine.front()->_type == TypeToken::ERROR_PAGE &&
+           _tokenLine.size() == 3)
+    errorPageSave();
+  else if (canDirectiveBeSaved(TypeToken::REQUEST_TIMEOUT))
+    saveRequestTimeOut();
   else if (validListen() == true)
     saveListenValue();
   else
@@ -376,7 +379,9 @@ void SemanticAnalysis::locationSaveDirective() {
   if (isDirectiveInLine(_locationValidDirective) == false) return;
 
   if (locationValidDirective() == false)
-    throw InvalidHttpDirective(getThrowMessage());
+    throw InvalidLocationDirective(getThrowMessage());
+  else if (locationReturned() == true)
+    throw DirectiveSetAfterReturnInLocation(getThrowMessage());
 
   std::string value = _tokenLine[1]->_tokenStr;
   if (canDirectiveBeSaved(TypeToken::PROXY_PASS))
@@ -425,16 +430,15 @@ void SemanticAnalysis::locationSaveDirective() {
     saveMultipleDirectiveValue(_config->_httpContext._serverContext.back()
                                    ->_locationContext.back()
                                    ->_allowMethods);
+  else if (canDirectiveBeSaved(TypeToken::RETURN))
+    saveReturnValue();
+  else if (_tokenLine.front()->_type == TypeToken::CGI &&
+           _tokenLine.size() == 3)
+    _config->_httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_cgi.insert({_tokenLine[1]->_tokenStr, _tokenLine[2]->_tokenStr});
   else
     throw InvalidLocationDirective(getThrowMessage());
-  /*
-   * return value implementation
-   */
-}
-
-void SemanticAnalysis::listenSave() {
-  if (_state != State::SERVER_CONTEXT)
-    throw DirectiveSetAtWrongPosition(getThrowMessage());
 }
 
 bool SemanticAnalysis::isDirectiveInLine(
@@ -516,116 +520,155 @@ bool SemanticAnalysis::locationValidDirective() const noexcept {
 
 bool SemanticAnalysis::isValueEmpty(TypeToken token) const noexcept {
   switch (token) {
+    break;
     case TypeToken::WORKER_PROCESS:
       if (_config->_workerProcessesValue.empty() == true) return (true);
+      break;
     case TypeToken::PID:
       if (_config->_pidValue.empty() == true) return (true);
+      break;
     case TypeToken::ERROR_LOG:
       if (_config->_errorLogValue.empty() == true) return (true);
+      break;
     case TypeToken::GEO_IP_COUNTRY:
       if (_config->_httpContext._geoipCountryValue.empty() == true)
         return (true);
+      break;
     case TypeToken::PROXY_CACHE:
       if (_config->_httpContext._proxyCacheValue.empty() == true) return (true);
+      break;
     case TypeToken::PROXY_CACHE_USE_STALE:
       if (_config->_httpContext._proxyCacheUseStaleValue.empty() == true)
         return (true);
+      break;
     case TypeToken::GZIP:
       if (_config->_httpContext._gzipValue.empty() == true) return (true);
+      break;
     case TypeToken::GZIP_TYPES:
       if (_config->_httpContext._gzipTypesValue.empty() == true) return (true);
+      break;
     case TypeToken::LIMIT_RED_ZONE:
       if (_config->_httpContext._limitReqZoneValue.empty() == true)
         return (true);
+      break;
     case TypeToken::PROXY_SET_HEADER:
       if (_config->_httpContext._proxySetHeaderValue.empty() == true)
         return (true);
+      break;
     case TypeToken::PROXY_CACHE_VALID:
       if (_config->_httpContext._proxyCacheValidValue.empty() == true)
         return (true);
+      break;
     case TypeToken::PROXY_CACHE_PATH:
       if (_config->_httpContext._proxyCachePathValue.empty() == true)
         return (true);
+      break;
     case TypeToken::SERVER_NAME:
       if (_config->_httpContext._serverContext.back()
               ->_serverNameValue.empty() == true)
         return (true);
+      break;
     case TypeToken::SSL_CERTIFICATE:
       if (_config->_httpContext._serverContext.back()
               ->_sslCertificateValue.empty() == true)
         return (true);
+      break;
     case TypeToken::SSL_CERTIFICATE_KEY:
       if (_config->_httpContext._serverContext.back()
               ->_sslCertificateKeyValue.empty() == true)
         return (true);
+      break;
     case TypeToken::LISTEN:
       if (_config->_httpContext._serverContext.back()->_listenValue.empty() ==
           true)
-      case TypeToken::INDEX:
-        if (_config->_httpContext._serverContext.back()->_indexValue.empty() ==
-            true)
-          return (true);
+        return (true);
+      break;
+    case TypeToken::INDEX:
+      if (_config->_httpContext._serverContext.back()->_indexValue.empty() ==
+          true)
+        return (true);
+      break;
     case TypeToken::ROOT:
       if (_config->_httpContext._serverContext.back()->_rootValue.empty() ==
           true)
         return (true);
+      break;
+    case TypeToken::UPLOAD_DIR:
+      if (_config->_httpContext._serverContext.back()
+              ->_uploadDirValue.empty() == true)
+        return (true);
+      break;
+    case TypeToken::REQUEST_TIMEOUT:
+      if (_config->_httpContext._serverContext.back()->_requestTimeoutValue ==
+          60)
+        return (true);
+      break;
     case TypeToken::PROXY_PASS:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_proxyPassValue.empty() == true)
         return (true);
+      break;
     case TypeToken::ALIAS:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_aliasValue.empty() == true)
         return (true);
+      break;
     case TypeToken::TRY_FILES:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_tryFilesValue.empty() == true)
         return (true);
+      break;
     case TypeToken::ERROR_PAGE:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_errorPageValue.empty() == true)
         return (true);
+      break;
     case TypeToken::ACCESS_LOG:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_accessLogValue.empty() == true)
         return (true);
+      break;
     case TypeToken::DENY:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_denyValue.empty() == true)
         return (true);
+      break;
     case TypeToken::CGI:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_cgi.empty() == true)
         return (true);
+      break;
     case TypeToken::REWRITE:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_rewriteValue.empty() == true)
         return (true);
+      break;
     case TypeToken::AUTO_INDEX:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_autoIndexValue.empty() == true)
         return (true);
+      break;
     case TypeToken::ALLOW_METHODS:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
               ->_allowMethods.empty() == true)
         return (true);
-      /*
+      break;
     case TypeToken::RETURN:
       if (_config->_httpContext._serverContext.back()
               ->_locationContext.back()
-              ->_returnValue.empty() == true)
+              ->_returnSet == false)
         return (true);
-        */
+      break;
     default:
       break;
   }
@@ -721,7 +764,10 @@ size_t SemanticAnalysis::convertMaxBodySize(const std::string &value) const {
   size_t multiplicator = getMaxBodySizeMultiplier(c);
   tmpValue.erase((value.size() - 1), 1);
 
-  std::istringstream stream(value);
+  if (tmpValue.find_first_not_of("0123456789") != std::string::npos)
+    throw MaxBodySizeInvalidSetting(getThrowMessage());
+
+  std::istringstream stream(tmpValue);
   size_t maxBoySizeValue;
 
   stream >> maxBoySizeValue;
@@ -736,6 +782,7 @@ size_t SemanticAnalysis::convertMaxBodySize(const std::string &value) const {
 size_t SemanticAnalysis::getMaxBodySizeMultiplier(char c) const {
   size_t multiplicator = 0;
   switch (c) {
+    break;
     case 'k':
       multiplicator = 1024;
       break;
@@ -763,6 +810,133 @@ bool SemanticAnalysis::isClientMaxBodySizeSet() const noexcept {
           ->_isSetClientMaxBodySizeValue == true)
     return (true);
   return (false);
+}
+
+bool SemanticAnalysis::locationReturned() const noexcept {
+  if (_config->_httpContext._serverContext.back()
+          ->_locationContext.back()
+          ->_returnSet == true)
+    return (true);
+  return (false);
+}
+
+void SemanticAnalysis::saveReturnValue() {
+  int statusCode = convertStatusCode(_tokenLine[1]->_tokenStr);
+
+  if (_tokenLine.size() == 2 &&
+      isValidThreeHundredStatusRange(statusCode) == false)
+    _config->_httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_returnValues = std::make_pair(statusCode, "");
+  else if (_tokenLine.size() == 3 &&
+           isValidThreeHundredStatusRange(statusCode) == true &&
+           isValidReturnURL() == true)
+    _config->_httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_returnValues = std::make_pair(statusCode, _tokenLine[2]->_tokenStr);
+  else if (_tokenLine.size() > 3 && isValidReturnURL() == false) {
+    std::string returnMessage = getReturnMessage();
+    _config->_httpContext._serverContext.back()
+        ->_locationContext.back()
+        ->_returnValues = std::make_pair(statusCode, returnMessage);
+  } else
+    throw InvalidLocationDirective(getThrowMessage());
+
+  _config->_httpContext._serverContext.back()
+      ->_locationContext.back()
+      ->_returnSet = true;
+}
+
+int SemanticAnalysis::convertStatusCode(std::string &statusCodeStr) const {
+  if (statusCodeStr.find_first_not_of("0123456789") != std::string::npos)
+    throw InvalidStatusCode(getThrowMessage());
+
+  int statusCode;
+  std::stringstream stream(statusCodeStr);
+
+  stream >> statusCode;
+
+  if (stream.fail() == true || isWithInStatusCodeRange(statusCode) == false)
+    throw InvalidStatusCode(getThrowMessage());
+  return (statusCode);
+}
+
+bool SemanticAnalysis::isWithInStatusCodeRange(int statusCode) const noexcept {
+  if ((statusCode >= 100 && statusCode <= 103) ||
+      (statusCode >= 200 && statusCode <= 208) || statusCode == 226 ||
+      (statusCode >= 300 && statusCode <= 308) ||
+      (statusCode >= 400 && statusCode <= 418) ||
+      (statusCode >= 421 && statusCode <= 429) || statusCode == 431 ||
+      statusCode == 451 || (statusCode >= 500 && statusCode <= 511))
+    return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::isValidThreeHundredStatusRange(
+    int statusCode) const noexcept {
+  if (statusCode >= 300 && statusCode <= 308) return (true);
+  return (false);
+}
+
+bool SemanticAnalysis::isValidReturnURL() const noexcept {
+  if (_tokenLine.size() == 3 &&
+      (_tokenLine[2]->_tokenStr.compare(0, 7, "http://") == 0 ||
+       _tokenLine[2]->_tokenStr.compare(0, 8, "https://") == 0))
+    return (true);
+  return (false);
+}
+
+std::string SemanticAnalysis::getReturnMessage() const noexcept {
+  if (_tokenLine.size() < 3 && _tokenLine.front()->_type != TypeToken::RETURN)
+    return ("");
+
+  std::string returnMesse;
+  for (auto it = _tokenLine.begin() + 2; it != _tokenLine.end(); it++) {
+    if (it != _tokenLine.end() - 1)
+      returnMesse += (*it)->_tokenStr + " ";
+    else
+      returnMesse += (*it)->_tokenStr;
+  }
+  return (returnMesse);
+}
+
+void SemanticAnalysis::saveRequestTimeOut() {
+  if (_tokenLine.size() != 2 ||
+      _tokenLine.front()->_type != TypeToken::REQUEST_TIMEOUT ||
+      _state != State::SERVER_CONTEXT)
+    throw InvalidRequestTimeout(getThrowMessage());
+
+  size_t valueSize = _tokenLine.back()->_tokenStr.size() - 1;
+  if (_tokenLine.back()->_tokenStr[valueSize] != 's')
+    throw InvalidRequestTimeout(getThrowMessage());
+  _tokenLine.back()->_tokenStr.erase(valueSize, 1);
+
+  if (_tokenLine.back()->_tokenStr.find_first_not_of("0123456789") !=
+      std::string::npos)
+    throw InvalidRequestTimeout(getThrowMessage());
+
+  std::istringstream stream(_tokenLine.back()->_tokenStr);
+  int timeoutValue;
+
+  stream >> timeoutValue;
+
+  if (stream.fail() == true || timeoutValue < 1)
+    throw InvalidRequestTimeout(getThrowMessage());
+  _config->_httpContext._serverContext.back()->_requestTimeoutValue =
+      timeoutValue;
+}
+
+void SemanticAnalysis::errorPageSave() {
+  if (_tokenLine.size() != 3 ||
+      _tokenLine.front()->_type != TypeToken::ERROR_PAGE ||
+      _state != State::SERVER_CONTEXT)
+    throw InvalidErrorPage(getThrowMessage());
+
+  int statusCode = convertStatusCode(_tokenLine[1]->_tokenStr);
+  std::string file = _tokenLine.back()->_tokenStr;
+
+  _config->_httpContext._serverContext.back()->_errorPageValue.insert(
+      {statusCode, file});
 }
 
 std::unique_ptr<ConfigFile> SemanticAnalysis::getConfigFile() {

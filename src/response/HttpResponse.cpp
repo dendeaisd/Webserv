@@ -88,7 +88,7 @@ std::string HttpResponse::getResponse() {
   return response;
 }
 
-void HttpResponse::sendHeaders(int fd) {
+bool HttpResponse::sendHeaders(int fd) {
   std::string response = _version + " " + std::to_string(_statusCode) + " " +
                          _reasonPhrase + "\r\n";
   _headers["Content-Type"] = _contentType;
@@ -99,24 +99,33 @@ void HttpResponse::sendHeaders(int fd) {
   file.seekg(0, std::ios::beg);
 
   _headers["Content-Length"] = std::to_string(fileSize);
-  _headers["Content-Disposition"] =
-      "attachment; filename=" + Helpers::getFilenameFromPath(_file);
+  if (_contentType.find("octet-stream") != std::string::npos)
+    _headers["Content-Disposition"] =
+        "attachment; filename=" + Helpers::getFilenameFromPath(_file);
+  else
+    _headers["Content-Disposition"] = "inline";
   _headers["Connection"] = "keep-alive";
   for (auto const &header : _headers) {
     response += header.first + ": " + header.second + "\r\n";
   }
   response += "\r\n";
-  send(fd, response.c_str(), response.length(), 0);
+  int sent = send(fd, response.c_str(), response.length(), 0);
+  if (sent == -1) {
+    Log::getInstance().error("Failed to send headers");
+    return false;
+  }
+  if (sent == 0) return true;
+  return true;
 }
 
 bool HttpResponse::sendResponse(int fd) {
-  sendHeaders(fd);
+  bool headerSent = sendHeaders(fd);
+  if (!headerSent) return false;
   std::ifstream file(_file, std::ios::binary);
   if (!file.is_open()) {
     Log::getInstance().error("Failed to open file: " + _file);
     return false;
   }
-
   const std::size_t bufferSize = 8192;  // 8 KB buffer
   char buffer[bufferSize];
   while (file.read(buffer, bufferSize) || file.gcount() > 0) {
