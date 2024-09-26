@@ -34,7 +34,7 @@ class SemanticAnalysis {
   SemanticAnalysis(const SemanticAnalysis &) = delete;
   SemanticAnalysis &operator=(const SemanticAnalysis &other) = delete;
   SemanticAnalysis(TokenStructure &token);
-  ~SemanticAnalysis() {};
+  ~SemanticAnalysis() {}
 
   std::unique_ptr<ConfigFile> getConfigFile();
 
