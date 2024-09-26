@@ -305,9 +305,30 @@ bool Client::execute() {
       couldSendToClient = _response.sendResponse(_fd);
       break;
     }
+    case HttpRequestHandler::DELETE_UPLOADED_FILE: {
+      Log::getInstance().debug("Successful request. Delete Uploaded File");
+      std::string path = "." + request.getUri();
+      std::filesystem::path fsPath(path);
+      if (std::filesystem::exists(fsPath)) {
+        auto parentPath = fsPath.parent_path();
+        std::error_code ec;
+        auto perms = std::filesystem::status(parentPath, ec).permissions();
+        if (ec) {
+          couldSendToClient = sendErrorPage(500);
+        } else if ((perms & std::filesystem::perms::owner_write) !=
+                   std::filesystem::perms::none) {
+          std::filesystem::remove(path);
+          couldSendToClient = sendErrorPage(204);
+        } else {
+          couldSendToClient = sendErrorPage(403);
+        }
+      } else {
+        couldSendToClient = sendErrorPage(404);
+      }
+      break;
+    }
     case HttpRequestHandler::FILE_UPLOAD: {
-      _response.setStatusCode(302);
-      _response.setHeader("Location", "/uploads");
+      _response.setStatusCode(201);
       std::string responseString = _response.getResponse();
       Log::getInstance().debug(responseString);
       couldSendToClient = sendToClient(_fd, responseString);

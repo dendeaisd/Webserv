@@ -28,8 +28,12 @@
 <h1>Upload a file</h1>
 
 <input type="file" name="file" />
-<button type="submit">Upload</button>
+<button type="submit" id="submit">Upload</button>
 
+<div>
+	<input type="text" name="filename" placeholder="Filename to delete" />
+	<button type="submit" id="delete">Delete</button>
+</div>
 
 <script>
 	function showSpinner() {
@@ -38,8 +42,8 @@
 	function hideSpinner() {
 		document.getElementById("spinner").style.display = "none";
 	}
-
-	document.querySelector("button").addEventListener("click", function (event) {
+	document.getElementById("submit").addEventListener("click", function (event) {
+		event.preventDefault();
 		showSpinner();
 		var file = document.querySelector("input[type=file]").files[0];
 		if (!file) {
@@ -71,9 +75,9 @@
 				body: blob,
 			})
 				.then(function (response) {
-					if (response.redirected) {
+					if (response.status == 201) {
 						console.log("Redirecting to", response.url);
-						window.location.href = response.url;
+						window.location.href = "/uploads";
 					} else {
 						// return response.text().then(function (html) {
 						// 	hideSpinner();
@@ -90,5 +94,29 @@
 				});
 		};
 		reader.readAsArrayBuffer(file);
+	});
+	document.getElementById("delete").addEventListener("click", function (event) {
+		event.preventDefault();
+		showSpinner();
+		const filename = document.querySelector("input[name=filename]").value;
+		fetch("/uploads/" + filename, {
+			method: "DELETE",
+		})
+			.then(function (response) {
+				if (response.status == 204) {
+					console.log("Redirecting to", response.url);
+					window.location.href = "/uploads";
+				} else {
+					return response.text().then(function (html) {
+						hideSpinner();
+						console.log(response);
+						alert("YOU SHALL NOT DELETE THIS FILE!! I GUESS, ALSO CHECK CONSOLE FOR MORE INFO")
+					});
+				}
+			})
+			.catch(function (error) {
+				hideSpinner();
+				console.error("Delete failed:", error);
+			});
 	});
 </script>

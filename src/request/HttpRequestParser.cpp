@@ -85,7 +85,8 @@ void HttpRequestParser::setupUploadDir() {
 
 bool HttpRequestParser::isFileRequest() {
   return (_request.getUri().substr(0, 9) == "/uploads/" &&
-          _request.getMethodEnum() == HttpRequestMethod::GET);
+          (_request.getMethodEnum() == HttpRequestMethod::GET ||
+           _request.getMethodEnum() == HttpRequestMethod::DELETE));
 }
 
 /**
@@ -139,7 +140,9 @@ bool HttpRequestParser::electHandler() {
     _request.setHandler(HttpRequestHandler::LIST_UPLOADS);
   } else if (isFileRequest()) {
     if (fs::is_regular_file(_request.getUri().substr(1)))
-      _request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
+		if (_request.getMethodEnum() == HttpRequestMethod::GET)
+      		_request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
+		else _request.setHandler(HttpRequestHandler::DELETE_UPLOADED_FILE);
     else {
       _request.setHandler(HttpRequestHandler::ERROR);
       setStatusCode(404);
@@ -170,7 +173,7 @@ bool HttpRequestParser::isDirectoryRequest() {
   bool dirListOn = _locationConfig->_autoIndexValue == "on" ? true : false;
   std::string root = _serverContext->_rootValue;
   if (root.back() == '/') {
-	root.pop_back();
+    root.pop_back();
   }
   std::string path = "." + _serverContext->_rootValue + _request.getUri();
   return fs::is_directory(path) && dirListOn;
