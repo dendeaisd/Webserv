@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <sys/resource.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -10,7 +11,6 @@
 #include <cstddef>
 #include <cstring>
 #include <vector>
-#include <sys/resource.h>
 
 PollManager::PollManager() {}
 
