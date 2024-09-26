@@ -110,10 +110,9 @@ bool HttpResponse::sendHeaders(int fd) {
   }
   response += "\r\n";
   int sent = send(fd, response.c_str(), response.length(), 0);
-  if (sent == -1)
-  {
+  if (sent == -1) {
     Log::getInstance().error("Failed to send headers");
-	return false;
+    return false;
   }
   if (sent == 0) return true;
   return true;

@@ -144,20 +144,19 @@ bool CGI::tunnelData() {
     } else {
       close(_pipeOutFd[0]);
     }
-	if (sent == 0) {
-	  return true;
-	}
+    if (sent == 0) {
+      return true;
+    }
     return true;
   } else {
     if (bytes_read == -1) {
       Log::getInstance().error("Failed to read from pipe with error: " +
                                std::string(std::strerror(errno)));
     }
-	if (bytes_read == 0)
-	  Log::getInstance().debug("Read 0 bytes");
+    if (bytes_read == 0) Log::getInstance().debug("Read 0 bytes");
     close(_pipeOutFd[0]);
     sendInternalErrorResponse();
-	return sendToCGI(_fd, _response.getResponse());
+    return sendToCGI(_fd, _response.getResponse());
   }
 }
 

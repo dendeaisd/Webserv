@@ -140,9 +140,10 @@ bool HttpRequestParser::electHandler() {
     _request.setHandler(HttpRequestHandler::LIST_UPLOADS);
   } else if (isFileRequest()) {
     if (fs::is_regular_file(_request.getUri().substr(1)))
-		if (_request.getMethodEnum() == HttpRequestMethod::GET)
-      		_request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
-		else _request.setHandler(HttpRequestHandler::DELETE_UPLOADED_FILE);
+      if (_request.getMethodEnum() == HttpRequestMethod::GET)
+        _request.setHandler(HttpRequestHandler::SEND_UPLOADED_FILE);
+      else
+        _request.setHandler(HttpRequestHandler::DELETE_UPLOADED_FILE);
     else {
       _request.setHandler(HttpRequestHandler::ERROR);
       setStatusCode(404);

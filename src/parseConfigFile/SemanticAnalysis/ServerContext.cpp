@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerContext.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fgabler <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 10:17:31 by fgabler           #+#    #+#             */
-/*   Updated: 2024/09/26 00:24:55 by fgabler          ###   ########.fr       */
+/*   Updated: 2024/09/26 03:08:55 by ramoussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void ServerContext::listenPrint() const noexcept {
 void ServerContext::errorPagePrint() const noexcept {
   int i = 0;
   for (auto it = _errorPageValue.begin(); it != _errorPageValue.end(); it++) {
-      std::cout << "[" << i << "] Error page status code and file: ["
-                << (*it).first << "] [" << (*it).second << "]\n";
-    }
+    std::cout << "[" << i << "] Error page status code and file: ["
+              << (*it).first << "] [" << (*it).second << "]\n";
   }
+}
