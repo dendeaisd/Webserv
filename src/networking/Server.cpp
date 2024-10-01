@@ -128,23 +128,27 @@ int Server::cleanupStaleClients() {
   return count;
 }
 
-void Server::handleClientRequest(int fd) {
+bool Server::handleClientRequest(int fd) {
   auto client = _fdToClientMap.find(fd);
   if (client != _fdToClientMap.end()) {
-    processClientRequest(client->second);
+    return processClientRequest(client->second);
   }
+  return false;
 }
 
-void Server::processClientRequest(std::shared_ptr<Client> client) {
+bool Server::processClientRequest(std::shared_ptr<Client> client) {
   try {
     if (!client->handleRequest()) {
       cleanupClient(client);
+	  return false;
     }
   } catch (const std::exception& e) {
     std::cerr << "Exception caught while handling request: " << e.what()
               << std::endl;
     cleanupClient(client);
+	return false;
   }
+  return true;
 }
 
 bool Server::isServerSocket(int fd) {
@@ -158,13 +162,14 @@ void Server::handlePollInEvent(int fd, short& events) {
   if (isServerSocket(fd)) {
     handleNewConnection(fd);
   } else {
+	bool success = false;
     auto client = _fdToClientMap.find(fd);
     if (client != _fdToClientMap.end() && client->second->isReadyForRequest()) {
-      handleClientRequest(fd);
+      success = handleClientRequest(fd);
     }
 
     // If client is ready for response, set events to POLLOUT
-    if (client != _fdToClientMap.end() &&
+    if (success && client != _fdToClientMap.end() &&
         client->second->isReadyForResponse()) {
       _requestCount++;
       events = POLLOUT;

@@ -1,6 +1,6 @@
 # Webserv
 
-![](img/Webserv%20Lifecycle%20Overview.png)
+![](default/img/Webserv%20Lifecycle%20Overview.png)
 
 
 # To pypass chrome CORS policy

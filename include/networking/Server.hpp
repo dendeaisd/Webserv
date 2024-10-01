@@ -33,8 +33,8 @@ class Server {
   void handlePollHupEvent(int fd);
   void handlePollErrEvent(int fd);
   void handleNewConnection(int serverFd);
-  void handleClientRequest(int fd);
-  void processClientRequest(std::shared_ptr<Client> client);
+  bool handleClientRequest(int fd);
+  bool processClientRequest(std::shared_ptr<Client> client);
   void buildPortToServer();
   void cleanupClient(std::shared_ptr<Client> client);
   bool isServerSocket(int fd);
