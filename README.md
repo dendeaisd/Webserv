@@ -2,9 +2,17 @@
 
 ## Description
 
-**Webserv** is a fully custom HTTP server written in **C++17**, designed to provide a deep understanding of the Hypertext Transfer Protocol (HTTP). This project was built from scratch to handle HTTP requests and responses, implement core web server functionality, and include features like file uploads, CGI execution, and serving static websites.
+**Webserv** is a fully custom HTTP server written in **C++17**, designed to provide a deep understanding of the Hypertext Transfer Protocol (HTTP). Inspired by the principles and architecture of industry-standard servers like **NGINX**, this project was built from scratch to handle HTTP requests and responses, implement core web server functionality, and include advanced features such as file uploads, CGI execution, and serving static websites.
 
-Our implementation includes all mandatory requirements and a comprehensive suite of bonus features for an enhanced user experience. Designed to be resilient, non-blocking, and efficient, **Webserv** complies with HTTP 1.1 standards and has been tested extensively against browsers and benchmarking tools like Siege.
+Much like **NGINX**, **Webserv** is designed to be:
+- **Resilient**: Built to handle stress tests and high traffic without crashing.
+- **Efficient**: Implements non-blocking I/O using `poll()` for scalable performance.
+- **Flexible**: Supports multiple ports, virtual hosts, and customizable configurations.
+
+Our implementation covers all mandatory requirements and extends functionality with bonus features for an enhanced user experience. Designed to be robust and fully compliant with HTTP 1.1 standards, **Webserv** has been rigorously tested against browsers and benchmarking tools like **Siege**, offering a solid foundation for anyone looking to explore or build modern web servers.
+
+In essence, **Webserv** provides a simplified yet powerful approach to understanding and replicating the core functionalities of a web server like **NGINX**, bridging the gap between theory and practice.
+
 
 ## Table of Contents
 1. [Description](#description)
