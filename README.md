@@ -9,23 +9,25 @@ Our implementation includes all mandatory requirements and a comprehensive suite
 ## Table of Contents
 1. [Description](#description)
 2. [Lifecycle](#lifecycle)
-3. [Features](#features)
-5. [Configuration](#configuration)
-6. [Technical Details](#technical-details)
-7. [Testing and Benchmarking](#benchmarking-with-siege)
-8. [Curl Examples](#curl-with-detailed-reporting)
+3. [Prerequisites](#prerequisites)
+4. [Installation](#installation)
+5. [Features](#features)
+6. [Configuration](#configuration)
+7. [Technical Details](#technical-details)
+8. [Testing and Benchmarking](#benchmarking-with-siege)
+9. [Curl Examples](#curl-with-detailed-reporting)
 
 
 # Lifecycle
 ![](default/img/Webserv%20Lifecycle%20Overview.png)
 
-### Prerequisites
+## Prerequisites
 
 - **C++17 Compiler**: Ensure a compatible compiler is installed.
 - **Make**: Required for building the project.
 - **Docker**: Optional, for containerized deployment.
 
-### Installation
+## Installation
 
 1. **Clone the Repository**:
 
